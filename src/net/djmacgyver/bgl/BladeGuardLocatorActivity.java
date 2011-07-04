@@ -51,7 +51,7 @@ public class BladeGuardLocatorActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				if (((ToggleButton) v).isChecked()) {
-					m.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, l);
+					m.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, l);
 				} else {
 					m.removeUpdates(l);
 				}
