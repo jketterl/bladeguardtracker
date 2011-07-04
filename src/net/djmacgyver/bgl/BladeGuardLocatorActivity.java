@@ -1,5 +1,12 @@
 package net.djmacgyver.bgl;
 
+import java.io.IOException;
+
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
@@ -43,6 +50,17 @@ public class BladeGuardLocatorActivity extends Activity {
 			@Override
 			public void onLocationChanged(Location location) {
 				Toast.makeText(getApplicationContext(), "Location changed: " + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+				HttpClient c = new DefaultHttpClient();
+				HttpGet req = new HttpGet("http://jketterl-nb.tech/log.php?lat=" + location.getLatitude() + "&lon=" + location.getLongitude());
+				try {
+					c.execute(req);
+				} catch (ClientProtocolException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		};
         
