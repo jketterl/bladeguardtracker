@@ -2,6 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" android:orientation="vertical">
-<Button android:id="@+id/button1" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="bottom" android:layout_weight="0" android:text="@string/locate"></Button>
-<ToggleButton android:layout_width="wrap_content" android:text="ToggleButton" android:layout_height="wrap_content" android:id="@+id/toggleButton1"></ToggleButton>
+<LinearLayout android:layout_width="match_parent" android:id="@+id/linearLayout1" android:layout_height="wrap_content">
+    <ToggleButton android:id="@+id/toggleButton1" android:layout_height="wrap_content" android:text="ToggleButton" android:layout_width="wrap_content"></ToggleButton>
+    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:id="@+id/textView1" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/locate"></TextView>
+</LinearLayout>
 </LinearLayout>
