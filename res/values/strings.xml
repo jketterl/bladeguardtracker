@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, BladeGuardLocatorActivity!</string>
-    <string name="app_name">BladeGuardLocator</string>
+    <string name="app_name">BladeGuardTracker</string>
     <string name="locate">Enable GPS Tracking</string>
 </resources>
