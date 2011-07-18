@@ -1,9 +1,7 @@
 package net.djmacgyver.bgt;
 
-import net.djmacgyver.bgt.R;
 import android.app.Activity;
 import android.content.Context;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
@@ -23,7 +21,8 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 		        LocationManager m = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		        LocationListener l = GPSListener.getSharedInstance();
+		        GPSListener l = GPSListener.getSharedInstance();
+		        l.setContext(getApplicationContext());
 				if (((ToggleButton) v).isChecked()) {
 					m.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, l);
 				} else {
