@@ -1,4 +1,4 @@
-package net.djmacgyver.bgl;
+package net.djmacgyver.bgt;
 
 import java.io.IOException;
 

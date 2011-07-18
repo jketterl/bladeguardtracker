@@ -1,5 +1,6 @@
-package net.djmacgyver.bgl;
+package net.djmacgyver.bgt;
 
+import net.djmacgyver.bgl.R;
 import android.app.Activity;
 import android.content.Context;
 import android.location.LocationListener;
