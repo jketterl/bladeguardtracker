@@ -25,16 +25,17 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.google.android.maps.GeoPoint;
+import com.google.android.maps.OverlayItem;
 
 import android.content.Context;
 
 public class MapClient extends Thread {
-	private Map map;
+	private UserOverlay users;
 	private HttpClient client;
 	private Context context;
 	
-	public MapClient(Map map, Context context) {
-		this.map = map;
+	public MapClient(UserOverlay users, Context context) {
+		this.users = users;
 		this.context = context;
 	}
 	
@@ -94,6 +95,7 @@ public class MapClient extends Thread {
 					}
 					GeoPoint point = new GeoPoint(lat, lon);
 					System.out.println("user id: " + users.item(i).getAttributes().getNamedItem("id").getNodeValue() + " moved to " + point);
+					this.users.addOverlay(new OverlayItem(point, "", ""));
 				}
 			} while (read >= 0);
 		} catch (ClientProtocolException e) {
