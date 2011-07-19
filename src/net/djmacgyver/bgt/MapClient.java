@@ -79,22 +79,21 @@ public class MapClient extends Thread {
 			int read = 0;
 			do {
 				read = is.read(buf);
-				System.out.println("read " + read + " bytes!");
+				//System.out.println("read " + read + " bytes!");
 				in.setByteStream(new ByteArrayInputStream(buf));
 				Document dom = builder.parse(in);
 				NodeList users = (NodeList) userExpr.evaluate(dom, XPathConstants.NODESET);
 				for (int i = 0; i < users.getLength(); i++) {
-					System.out.println("user id: " + users.item(i).getAttributes().getNamedItem("id").getNodeValue());
 					Node location = (Node) locationExpr.evaluate(users.item(i), XPathConstants.NODE);
 					int lat = 0, lon = 0;
 					for (int k = 0; k < location.getChildNodes().getLength(); k++) {
 						Node coord = location.getChildNodes().item(k);
-						int value = Math.round(Float.parseFloat(coord.getTextContent()) * 1000000);
+						int value = (int) (Float.parseFloat(coord.getTextContent()) * 1E6);
 						if (coord.getNodeName().equals("lat")) lat = value;
 						if (coord.getNodeName().equals("lon")) lon = value;
 					}
 					GeoPoint point = new GeoPoint(lat, lon);
-					System.out.println(point);
+					System.out.println("user id: " + users.item(i).getAttributes().getNamedItem("id").getNodeValue() + " moved to " + point);
 				}
 			} while (read >= 0);
 		} catch (ClientProtocolException e) {
