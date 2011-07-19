@@ -12,6 +12,9 @@ public class Map extends MapActivity {
     	
     	MapView v = (MapView) findViewById(R.id.mapview);
     	v.setBuiltInZoomControls(true);
+    	
+    	MapClient c = new MapClient(this, getApplicationContext());
+    	c.start();
     }
 
 	@Override
