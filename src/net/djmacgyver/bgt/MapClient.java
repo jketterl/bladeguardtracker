@@ -94,7 +94,6 @@ public class MapClient extends Thread {
 					}
 					GeoPoint point = new GeoPoint(lat, lon);
 					int userId = Integer.parseInt(users.item(i).getAttributes().getNamedItem("id").getNodeValue());
-					System.out.println("user id: " + userId + " moved to " + point);
 					this.users.updateUser(userId, point);
 				}
 			} while (read >= 0);
