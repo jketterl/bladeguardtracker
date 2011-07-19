@@ -48,7 +48,7 @@ public class MapClient extends Thread {
 
 	@Override
 	public void run() {
-		HttpGet req = new HttpGet("http://jketterl-nb.tech/bgt/query.php");
+		HttpGet req = new HttpGet("https://djmacgyver.homelinux.org/bgt/stream");
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
 		DocumentBuilder builder;
@@ -106,5 +106,6 @@ public class MapClient extends Thread {
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();
 		}
+		System.out.println("MapClient Thread ended");
 	}
 }
