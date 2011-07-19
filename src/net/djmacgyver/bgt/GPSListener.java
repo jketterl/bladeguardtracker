@@ -1,6 +1,7 @@
 package net.djmacgyver.bgt;
 
 import java.io.IOException;
+import java.util.Random;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -13,15 +14,21 @@ import android.location.LocationListener;
 import android.os.Bundle;
 
 public class GPSListener implements LocationListener {
-	final static String baseUrl = "http://jketterl-nb.tech/bgt/";
+	final static String baseUrl = "https://djmacgyver.homelinux.org/bgt/";
 	
 	private static GPSListener sharedInstance;
+	private int userId;
 	
 	public static GPSListener getSharedInstance() {
 		if (sharedInstance == null) {
 			sharedInstance = new GPSListener();
 		}
 		return sharedInstance;
+	}
+	
+	public GPSListener() {
+		Random r = new Random();
+		this.userId = r.nextInt(100);
 	}
 	
 	private Context context;
@@ -41,7 +48,7 @@ public class GPSListener implements LocationListener {
 	
 	@Override
 	public void onLocationChanged(Location location) {
-		HttpGet req = new HttpGet(GPSListener.baseUrl + "log.php?lat=" + location.getLatitude() + "&lon=" + location.getLongitude());
+		HttpGet req = new HttpGet(GPSListener.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude());
 		try {
 			HttpResponse res = getClient().execute(req);
 			res.getEntity().consumeContent();
