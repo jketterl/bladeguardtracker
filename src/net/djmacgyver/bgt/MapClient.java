@@ -24,10 +24,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.OverlayItem;
-
 import android.content.Context;
+
+import com.google.android.maps.GeoPoint;
 
 public class MapClient extends Thread {
 	private UserOverlay users;
@@ -94,8 +93,9 @@ public class MapClient extends Thread {
 						if (coord.getNodeName().equals("lon")) lon = value;
 					}
 					GeoPoint point = new GeoPoint(lat, lon);
-					System.out.println("user id: " + users.item(i).getAttributes().getNamedItem("id").getNodeValue() + " moved to " + point);
-					this.users.addOverlay(new OverlayItem(point, "", ""));
+					int userId = Integer.parseInt(users.item(i).getAttributes().getNamedItem("id").getNodeValue());
+					System.out.println("user id: " + userId + " moved to " + point);
+					this.users.updateUser(userId, point);
 				}
 			} while (read >= 0);
 		} catch (ClientProtocolException e) {
