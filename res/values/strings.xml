@@ -3,5 +3,8 @@
     <string name="app_name">BladeGuardTracker</string>
     <string name="locate">Enable GPS Tracking</string>
     <string name="map_name">Map View</string>
+    <!-- debug @ work -->
     <string name="maps_api_key">0sV9DhmcIBklu64CzNzfQ5cjgwIcA3cdvJVM9lg</string>
+    <!-- debut @ home -->
+    <!-- <string name="maps_api_key">08cvEnK6frIUm2eoWIjal7KyBmUhpszplHN9mkg</string> -->
 </resources>
