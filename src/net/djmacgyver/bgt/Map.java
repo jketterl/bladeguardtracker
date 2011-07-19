@@ -18,7 +18,7 @@ public class Map extends MapActivity {
     	view = (MapView) findViewById(R.id.mapview);
     	view.setBuiltInZoomControls(true);
     	
-    	drawable = this.getResources().getDrawable(R.drawable.icon);
+    	drawable = this.getResources().getDrawable(R.drawable.map_pin);
     	users = new UserOverlay(drawable);
     	
     	MapClient c = new MapClient(users, getApplicationContext());
