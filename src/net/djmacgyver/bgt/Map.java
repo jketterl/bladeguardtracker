@@ -9,13 +9,14 @@ import com.google.android.maps.MapView;
 public class Map extends MapActivity {
 	private UserOverlay users;
 	private Drawable drawable;
+	private MapView view;
 	
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.map);
     	
-    	MapView v = (MapView) findViewById(R.id.mapview);
-    	v.setBuiltInZoomControls(true);
+    	view = (MapView) findViewById(R.id.mapview);
+    	view.setBuiltInZoomControls(true);
     	
     	drawable = this.getResources().getDrawable(R.drawable.icon);
     	users = new UserOverlay(drawable);
@@ -23,11 +24,21 @@ public class Map extends MapActivity {
     	MapClient c = new MapClient(users, getApplicationContext());
     	c.start();
     	
-    	v.getOverlays().add(users);
+    	view.getOverlays().add(users);
+    	
+    	(new MapUpdater(this, 10)).start();
     }
 
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
+	}
+
+	public void refresh() {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				view.invalidate();
+			}
+		});
 	}
 }
