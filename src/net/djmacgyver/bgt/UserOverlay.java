@@ -14,6 +14,7 @@ public class UserOverlay extends ItemizedOverlay<OverlayItem> {
 
 	public UserOverlay(Drawable defaultMarker) {
 		super(boundCenter(defaultMarker));
+		populate();
 	}
 	
 	public void updateUser(int userId, GeoPoint point) {
