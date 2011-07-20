@@ -60,7 +60,7 @@ public class GPSListener implements LocationListener {
 	}
 	
 	private void sendLocation(Location location) {
-		HttpGet req = new HttpGet(GPSListener.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude());
+		HttpGet req = new HttpGet(GPSListener.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude() + "&speed=" + location.getSpeed());
 		sendRequest(req);
 	}
 	
