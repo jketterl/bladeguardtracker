@@ -60,6 +60,7 @@ public class GPSListener implements LocationListener {
 	}
 
 	public void disable() {
-		conn.disconnect();
+		getConnection().disconnect();
+		conn = null;
 	}
 }
