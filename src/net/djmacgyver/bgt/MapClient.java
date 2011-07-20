@@ -16,7 +16,6 @@ import javax.xml.xpath.XPathFactory;
 import net.djmacgyver.bgt.http.HttpClient;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.w3c.dom.Document;
@@ -34,7 +33,6 @@ public class MapClient extends Thread {
 	private HttpClient client;
 	private Context context;
 	private boolean terminate = false;
-	private HttpEntity currentEntity;
 	
 	public MapClient(UserOverlay users, Context context) {
 		this.users = users;
@@ -73,16 +71,20 @@ public class MapClient extends Thread {
 			return;
 		}
 		while (!terminate) try {
+			System.out.println("connecting to server");
 			HttpGet req = new HttpGet("https://djmacgyver.homelinux.org/bgt/stream");
-			currentEntity = getClient().execute(req).getEntity();
-			if (!currentEntity.isStreaming()) return;
+			HttpEntity entity = getClient().execute(req).getEntity();
+			if (!entity.isStreaming()) return;
 			
-			InputStream is = currentEntity.getContent();
+			InputStream is = entity.getContent();
 			byte[] buf = new byte[4096];
 			int read = 0;
 			do {
 				read = is.read(buf);
-				if (terminate) break;
+				if (terminate) {
+					entity.consumeContent();
+					break;
+				}
 				//System.out.println("read " + read + " bytes!");
 				in.setByteStream(new ByteArrayInputStream(buf, 0, read));
 				Document dom = builder.parse(in);
@@ -118,8 +120,5 @@ public class MapClient extends Thread {
 	public void terminate() {
 		terminate = true;
 		interrupt();
-		try {
-			currentEntity.consumeContent();
-		} catch (IOException e) {}
 	}
 }
