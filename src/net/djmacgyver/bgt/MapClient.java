@@ -73,7 +73,7 @@ public class MapClient extends Thread {
 			return;
 		}
 		while (!terminate) try {
-			HttpGet req = new HttpGet("https://djmacgyver.homelinux.org/bgt/stream");
+			HttpGet req = new HttpGet(Config.baseUrl + "stream");
 			HttpEntity entity = getClient().execute(req).getEntity();
 			if (!entity.isStreaming()) return;
 			

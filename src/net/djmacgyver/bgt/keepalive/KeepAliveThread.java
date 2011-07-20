@@ -1,20 +1,19 @@
-package net.djmacgyver.bgt;
+package net.djmacgyver.bgt.keepalive;
 
-
-public class MapRefresher extends Thread {
-	private Map map;
+public class KeepAliveThread extends Thread {
+	private KeepAliveTarget target;
 	private int interval;
 	private boolean terminate = false;
 	
-	public MapRefresher(Map map, int interval) {
-		this.map = map;
+	public KeepAliveThread(KeepAliveTarget target, int interval) {
+		this.target = target;
 		this.interval = interval;
 	}
 	
 	@Override
 	public void run() {
 		while (!terminate) {
-			this.map.refresh();
+			target.keepAlive(this);
 			try {
 				sleep(interval * 1000);
 			} catch (InterruptedException e) {}

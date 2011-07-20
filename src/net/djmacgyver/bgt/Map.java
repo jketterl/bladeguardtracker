@@ -1,16 +1,18 @@
 package net.djmacgyver.bgt;
 
+import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
+import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 
-public class Map extends MapActivity {
+public class Map extends MapActivity implements KeepAliveTarget {
 	private UserOverlay users;
 	private MapView view;
 	private MapClient updater;
-	private MapRefresher refresher;
+	private KeepAliveThread refresher;
 	
 	private UserOverlay getUserOverlay()
 	{
@@ -29,10 +31,10 @@ public class Map extends MapActivity {
 		return updater;
 	}
 	
-	private MapRefresher getRefresher()
+	private KeepAliveThread getRefresher()
 	{
 		if (refresher == null) {
-			refresher = new MapRefresher(this, 5);
+			refresher = new KeepAliveThread(this, 5);
 		}
 		return refresher;
 	}
@@ -52,14 +54,6 @@ public class Map extends MapActivity {
 		return false;
 	}
 
-	public void refresh() {
-		runOnUiThread(new Runnable() {
-			public void run() {
-				view.invalidate();
-			}
-		});
-	}
-
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -74,5 +68,15 @@ public class Map extends MapActivity {
 		this.updater = null;
 		getRefresher().terminate();
 		this.refresher = null;
+	}
+
+	@Override
+	public void keepAlive(KeepAliveThread source) {
+		if (source != getRefresher()) return;
+		runOnUiThread(new Runnable() {
+			public void run() {
+				view.invalidate();
+			}
+		});
 	}
 }

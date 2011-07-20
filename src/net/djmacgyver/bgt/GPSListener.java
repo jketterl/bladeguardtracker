@@ -1,13 +1,6 @@
 package net.djmacgyver.bgt;
 
-import java.io.IOException;
-import java.util.Random;
-
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-
+import net.djmacgyver.bgt.upstream.HttpConnection;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -15,10 +8,8 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 
 public class GPSListener implements LocationListener {
-	final static String baseUrl = "https://djmacgyver.homelinux.org/bgt/";
-	
 	private static GPSListener sharedInstance;
-	private int userId;
+	private HttpConnection conn;
 	
 	public static GPSListener getSharedInstance() {
 		if (sharedInstance == null) {
@@ -27,58 +18,28 @@ public class GPSListener implements LocationListener {
 		return sharedInstance;
 	}
 	
-	public GPSListener() {
-		Random r = new Random();
-		this.userId = r.nextInt(100);
-	}
-	
-	private Context context;
-	
 	public void setContext(Context context) {
-		this.context = context;
+		getConnection().setContext(context);
 	}
 	
-	private HttpClient client;
-	
-	private HttpClient getClient() {
-		if (client == null) {
-			client = new net.djmacgyver.bgt.http.HttpClient(context);
+	private HttpConnection getConnection() {
+		if (conn == null) {
+			conn = new HttpConnection();
+			conn.connect();
 		}
-		return client;
-	}
-	
-	private void sendRequest(HttpUriRequest req) {
-		try {
-			getClient().execute(req).getEntity().consumeContent();
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	private void sendLocation(Location location) {
-		HttpGet req = new HttpGet(GPSListener.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude() + "&speed=" + location.getSpeed());
-		sendRequest(req);
-	}
-	
-	private void sendQuit() {
-		HttpGet req = new HttpGet(GPSListener.baseUrl + "quit?uid=" + this.userId);
-		sendRequest(req);
+		return conn;
 	}
 	
 	@Override
 	public void onLocationChanged(Location location) {
-		sendLocation(location);
+		getConnection().sendLocation(location);
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
 		System.out.println("onProviderDisabled: " + provider);
 		if (!provider.equals("gps")) return;
-		sendQuit();
+		getConnection().sendQuit();
 	}
 
 	@Override
@@ -92,12 +53,12 @@ public class GPSListener implements LocationListener {
 		if (!provider.equals("gps")) return;
 		switch (status) {
 			case LocationProvider.OUT_OF_SERVICE:
-				this.sendQuit();
+				getConnection().sendQuit();
 				break;
 		}
 	}
 
 	public void disable() {
-		sendQuit();
+		conn.disconnect();
 	}
 }
