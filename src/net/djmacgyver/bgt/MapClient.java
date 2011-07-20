@@ -77,6 +77,8 @@ public class MapClient extends Thread {
 			HttpEntity entity = getClient().execute(req).getEntity();
 			if (!entity.isStreaming()) return;
 			
+			this.users.reset();
+			
 			InputStream is = entity.getContent();
 			byte[] buf = new byte[4096];
 			int read = 0;
