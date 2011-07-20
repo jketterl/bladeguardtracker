@@ -57,9 +57,11 @@ public class MapClient extends Thread {
 		XPath x = xfactory.newXPath();
 		XPathExpression userExpr;
 		XPathExpression locationExpr;
+		XPathExpression quitExpr;
 		try {
 			userExpr = x.compile("/movements/user");
 			locationExpr = x.compile("location[1]");
+			quitExpr = x.compile("/quit/user");
 		} catch (XPathExpressionException e2) {
 			e2.printStackTrace();
 			return;
@@ -84,6 +86,8 @@ public class MapClient extends Thread {
 				//System.out.println("read " + read + " bytes!");
 				in.setByteStream(new ByteArrayInputStream(buf, 0, read));
 				Document dom = builder.parse(in);
+				
+				// get location updates
 				NodeList users = (NodeList) userExpr.evaluate(dom, XPathConstants.NODESET);
 				for (int i = 0; i < users.getLength(); i++) {
 					Node location = (Node) locationExpr.evaluate(users.item(i), XPathConstants.NODE);
@@ -97,6 +101,13 @@ public class MapClient extends Thread {
 					GeoPoint point = new GeoPoint(lat, lon);
 					int userId = Integer.parseInt(users.item(i).getAttributes().getNamedItem("id").getNodeValue());
 					this.users.updateUser(userId, point);
+				}
+				
+				// get removals
+				users = (NodeList) quitExpr.evaluate(dom, XPathConstants.NODESET);
+				for (int i = 0; i < users.getLength(); i++) {
+					int userId = Integer.parseInt(users.item(i).getAttributes().getNamedItem("id").getNodeValue());
+					this.users.removeUser(userId);
 				}
 			} while (read >= 0);
 		} catch (ClientProtocolException e) {

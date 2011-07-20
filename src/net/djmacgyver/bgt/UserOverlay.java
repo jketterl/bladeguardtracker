@@ -23,6 +23,11 @@ public class UserOverlay extends ItemizedOverlay<OverlayItem> {
 		mOverlays.put(userId, new OverlayItem(point, "", ""));
 		populate();
 	}
+	
+	public void removeUser(int userId) {
+		mOverlays.remove(userId);
+		populate();
+	}
 
 	@Override
 	protected OverlayItem createItem(int i) {
