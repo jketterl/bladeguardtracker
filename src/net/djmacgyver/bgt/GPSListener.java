@@ -3,14 +3,15 @@ package net.djmacgyver.bgt;
 import java.io.IOException;
 import java.util.Random;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationProvider;
 import android.os.Bundle;
 
 public class GPSListener implements LocationListener {
@@ -46,12 +47,9 @@ public class GPSListener implements LocationListener {
 		return client;
 	}
 	
-	@Override
-	public void onLocationChanged(Location location) {
-		HttpGet req = new HttpGet(GPSListener.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude());
+	private void sendRequest(HttpUriRequest req) {
 		try {
-			HttpResponse res = getClient().execute(req);
-			res.getEntity().consumeContent();
+			getClient().execute(req).getEntity().consumeContent();
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -60,10 +58,27 @@ public class GPSListener implements LocationListener {
 			e.printStackTrace();
 		}
 	}
+	
+	private void sendLocation(Location location) {
+		HttpGet req = new HttpGet(GPSListener.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude());
+		sendRequest(req);
+	}
+	
+	private void sendQuit() {
+		HttpGet req = new HttpGet(GPSListener.baseUrl + "quit?uid=" + this.userId);
+		sendRequest(req);
+	}
+	
+	@Override
+	public void onLocationChanged(Location location) {
+		sendLocation(location);
+	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
 		System.out.println("onProviderDisabled: " + provider);
+		if (!provider.equals("gps")) return;
+		sendQuit();
 	}
 
 	@Override
@@ -74,6 +89,15 @@ public class GPSListener implements LocationListener {
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		System.out.println("onStatusChanged: " + provider + "; " + status);
+		if (!provider.equals("gps")) return;
+		switch (status) {
+			case LocationProvider.OUT_OF_SERVICE:
+				this.sendQuit();
+				break;
+		}
 	}
 
+	public void disable() {
+		sendQuit();
+	}
 }

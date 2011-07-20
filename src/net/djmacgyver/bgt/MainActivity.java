@@ -25,9 +25,10 @@ public class MainActivity extends Activity {
 		        GPSListener l = GPSListener.getSharedInstance();
 		        l.setContext(getApplicationContext());
 				if (((ToggleButton) v).isChecked()) {
-					m.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, l);
+					m.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, l);
 				} else {
 					m.removeUpdates(l);
+					l.disable();
 				}
 			}
 		});
