@@ -32,7 +32,7 @@ public class Map extends MapActivity {
 	private MapRefresher getRefresher()
 	{
 		if (refresher == null) {
-			refresher = new MapRefresher(this, 10);
+			refresher = new MapRefresher(this, 5);
 		}
 		return refresher;
 	}
@@ -61,15 +61,15 @@ public class Map extends MapActivity {
 	}
 
 	@Override
-	protected void onStart() {
-		super.onStart();
+	protected void onResume() {
+		super.onResume();
     	getUpdater().start();
     	getRefresher().start();
 	}
 
 	@Override
-	protected void onStop() {
-		super.onStop();
+	protected void onPause() {
+		super.onPause();
 		getUpdater().terminate();
 		this.updater = null;
 		getRefresher().terminate();
