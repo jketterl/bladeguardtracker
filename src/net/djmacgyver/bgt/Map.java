@@ -38,7 +38,6 @@ public class Map extends MapActivity {
 	}
 	
     public void onCreate(Bundle savedInstanceState) {
-    	System.out.println("onCreate()");
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.map);
     	
