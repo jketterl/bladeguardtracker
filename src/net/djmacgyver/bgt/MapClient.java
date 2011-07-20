@@ -71,7 +71,6 @@ public class MapClient extends Thread {
 			return;
 		}
 		while (!terminate) try {
-			System.out.println("connecting to server");
 			HttpGet req = new HttpGet("https://djmacgyver.homelinux.org/bgt/stream");
 			HttpEntity entity = getClient().execute(req).getEntity();
 			if (!entity.isStreaming()) return;
@@ -79,12 +78,9 @@ public class MapClient extends Thread {
 			InputStream is = entity.getContent();
 			byte[] buf = new byte[4096];
 			int read = 0;
-			do {
+			while (!terminate) do {
 				read = is.read(buf);
-				if (terminate) {
-					entity.consumeContent();
-					break;
-				}
+				if (terminate) break;
 				//System.out.println("read " + read + " bytes!");
 				in.setByteStream(new ByteArrayInputStream(buf, 0, read));
 				Document dom = builder.parse(in);
@@ -114,6 +110,7 @@ public class MapClient extends Thread {
 			e.printStackTrace();
 			terminate();
 		}
+		getClient().getConnectionManager().shutdown();
 		System.out.println("MapClient Thread ended");
 	}
 	
