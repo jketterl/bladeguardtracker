@@ -13,9 +13,9 @@ public class KeepAliveThread extends Thread {
 	@Override
 	public void run() {
 		while (!terminate) {
-			target.keepAlive(this);
 			try {
 				sleep(interval * 1000);
+				target.keepAlive(this);
 			} catch (InterruptedException e) {}
 		}
 	}

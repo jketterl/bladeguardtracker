@@ -52,6 +52,7 @@ public class GPSListener implements LocationListener {
 		System.out.println("onStatusChanged: " + provider + "; " + status);
 		if (!provider.equals("gps")) return;
 		switch (status) {
+			case LocationProvider.TEMPORARILY_UNAVAILABLE:
 			case LocationProvider.OUT_OF_SERVICE:
 				getConnection().sendQuit();
 				break;

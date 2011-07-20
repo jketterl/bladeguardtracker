@@ -21,6 +21,8 @@ public class HttpConnection implements KeepAliveTarget {
 	private int userId;
 	private Context context;
 	private HttpClient client;
+	private boolean updateBlocked = false;
+	private Location myLocation;
 	
 	public HttpConnection() {
 		Random r = new Random();
@@ -30,9 +32,10 @@ public class HttpConnection implements KeepAliveTarget {
 	@Override
 	public void keepAlive(KeepAliveThread source) {
 		if (source == getGpsReminder()) {
-			
+			updateBlocked = false;
+			sendLocation();
 		} else if (source == getTimeoutReminder()) {
-			
+			sendKeepAlive();
 		}
 	}
 
@@ -45,7 +48,7 @@ public class HttpConnection implements KeepAliveTarget {
 
 	private KeepAliveThread getTimeoutReminder() {
 		if (timeoutReminder == null) {
-			timeoutReminder = new KeepAliveThread(this, 30);
+			timeoutReminder = new KeepAliveThread(this, 50);
 		}
 		return timeoutReminder;
 	}
@@ -71,6 +74,7 @@ public class HttpConnection implements KeepAliveTarget {
 	private void sendRequest(HttpUriRequest req) {
 		try {
 			getClient().execute(req).getEntity().consumeContent();
+			getTimeoutReminder().interrupt();
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -80,13 +84,31 @@ public class HttpConnection implements KeepAliveTarget {
 		}
 	}
 	
+	public void sendLocation() {
+		if (myLocation == null) return;
+		Location l = myLocation;
+		myLocation = null;
+		sendLocation(l);
+	}
+	
 	public void sendLocation(Location location) {
+		if (updateBlocked) {
+			myLocation = location;
+			return;
+		}
 		HttpGet req = new HttpGet(Config.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude() + "&speed=" + location.getSpeed());
 		sendRequest(req);
+		getGpsReminder().interrupt();
+		updateBlocked = true;
 	}
 	
 	public void sendQuit() {
 		HttpGet req = new HttpGet(Config.baseUrl + "quit?uid=" + this.userId);
+		sendRequest(req);
+	}
+	
+	public void sendKeepAlive() {
+		HttpGet req = new HttpGet(Config.baseUrl + "keepalive?uid=" + this.userId);
 		sendRequest(req);
 	}
 
