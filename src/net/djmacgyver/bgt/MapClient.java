@@ -32,6 +32,7 @@ public class MapClient extends Thread {
 	private UserOverlay users;
 	private HttpClient client;
 	private Context context;
+	private boolean terminate = false;
 	
 	public MapClient(UserOverlay users, Context context) {
 		this.users = users;
@@ -48,7 +49,6 @@ public class MapClient extends Thread {
 
 	@Override
 	public void run() {
-		HttpGet req = new HttpGet("https://djmacgyver.homelinux.org/bgt/stream");
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
 		DocumentBuilder builder;
@@ -70,7 +70,8 @@ public class MapClient extends Thread {
 			e1.printStackTrace();
 			return;
 		}
-		try {
+		while (!terminate) try {
+			HttpGet req = new HttpGet("https://djmacgyver.homelinux.org/bgt/stream");
 			HttpResponse res = getClient().execute(req);
 			if (!res.getEntity().isStreaming()) return;
 			
@@ -80,7 +81,7 @@ public class MapClient extends Thread {
 			do {
 				read = is.read(buf);
 				//System.out.println("read " + read + " bytes!");
-				in.setByteStream(new ByteArrayInputStream(buf));
+				in.setByteStream(new ByteArrayInputStream(buf, 0, read));
 				Document dom = builder.parse(in);
 				NodeList users = (NodeList) userExpr.evaluate(dom, XPathConstants.NODESET);
 				for (int i = 0; i < users.getLength(); i++) {
@@ -103,9 +104,16 @@ public class MapClient extends Thread {
 			e.printStackTrace();
 		} catch (SAXException e) {
 			e.printStackTrace();
+			terminate();
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();
+			terminate();
 		}
 		System.out.println("MapClient Thread ended");
+	}
+	
+	public void terminate() {
+		terminate = true;
+		interrupt();
 	}
 }
