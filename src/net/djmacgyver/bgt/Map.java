@@ -10,6 +10,7 @@ public class Map extends MapActivity {
 	private UserOverlay users;
 	private MapView view;
 	private MapClient updater;
+	private MapRefresher refresher;
 	
 	private UserOverlay getUserOverlay()
 	{
@@ -28,18 +29,23 @@ public class Map extends MapActivity {
 		return updater;
 	}
 	
+	private MapRefresher getRefresher()
+	{
+		if (refresher == null) {
+			refresher = new MapRefresher(this, 10);
+		}
+		return refresher;
+	}
+	
     public void onCreate(Bundle savedInstanceState) {
+    	System.out.println("onCreate()");
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.map);
-    	
-    	getUpdater().start();
     	
     	view = (MapView) findViewById(R.id.mapview);
     	view.setBuiltInZoomControls(true);
     	
     	view.getOverlays().add(getUserOverlay());
-    	
-    	(new MapUpdater(this, 10)).start();
     }
 
 	@Override
@@ -53,5 +59,21 @@ public class Map extends MapActivity {
 				view.invalidate();
 			}
 		});
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+    	getUpdater().start();
+    	getRefresher().start();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		getUpdater().terminate();
+		this.updater = null;
+		getRefresher().terminate();
+		this.refresher = null;
 	}
 }
