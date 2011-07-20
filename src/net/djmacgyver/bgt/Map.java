@@ -8,23 +8,36 @@ import com.google.android.maps.MapView;
 
 public class Map extends MapActivity {
 	private UserOverlay users;
-	private Drawable drawable;
 	private MapView view;
+	private MapClient updater;
+	
+	private UserOverlay getUserOverlay()
+	{
+		if (users == null) {
+	    	Drawable d = this.getResources().getDrawable(R.drawable.map_pin);
+	    	users = new UserOverlay(d);
+		}
+		return users;
+	}
+	
+	private MapClient getUpdater()
+	{
+		if (updater == null) {
+			updater = new MapClient(getUserOverlay(), getApplicationContext());
+		}
+		return updater;
+	}
 	
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.map);
     	
+    	getUpdater().start();
+    	
     	view = (MapView) findViewById(R.id.mapview);
     	view.setBuiltInZoomControls(true);
     	
-    	drawable = this.getResources().getDrawable(R.drawable.map_pin);
-    	users = new UserOverlay(drawable);
-    	
-    	MapClient c = new MapClient(users, getApplicationContext());
-    	c.start();
-    	
-    	view.getOverlays().add(users);
+    	view.getOverlays().add(getUserOverlay());
     	
     	(new MapUpdater(this, 10)).start();
     }
