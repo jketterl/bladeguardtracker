@@ -22,7 +22,8 @@ public class HttpConnection implements KeepAliveTarget {
 	private Context context;
 	private HttpClient client;
 	private boolean updateBlocked = false;
-	private Location myLocation;
+	private Location queuedLocation;
+	private Location lastLocation;
 	
 	public HttpConnection() {
 		Random r = new Random();
@@ -85,20 +86,24 @@ public class HttpConnection implements KeepAliveTarget {
 	}
 	
 	public void sendLocation() {
-		if (myLocation == null) return;
-		Location l = myLocation;
-		myLocation = null;
+		if (queuedLocation == null) return;
+		Location l = queuedLocation;
+		queuedLocation = null;
 		sendLocation(l);
 	}
 	
 	public void sendLocation(Location location) {
+		if (location.equals(lastLocation)) return;
 		if (updateBlocked) {
-			myLocation = location;
+			queuedLocation = location;
 			return;
 		}
-		HttpGet req = new HttpGet(Config.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude() + "&speed=" + location.getSpeed());
+		String url = Config.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude();
+		if (location.hasSpeed()) url += "&speed=" + location.getSpeed();
+		HttpGet req = new HttpGet(url);
 		sendRequest(req);
 		getGpsReminder().interrupt();
+		lastLocation = location;
 		updateBlocked = true;
 	}
 	
