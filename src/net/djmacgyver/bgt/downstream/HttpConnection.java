@@ -1,4 +1,4 @@
-package net.djmacgyver.bgt;
+package net.djmacgyver.bgt.downstream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -13,6 +13,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import net.djmacgyver.bgt.Config;
+import net.djmacgyver.bgt.UserOverlay;
 import net.djmacgyver.bgt.http.HttpClient;
 
 import org.apache.http.HttpEntity;
@@ -28,13 +30,13 @@ import android.content.Context;
 
 import com.google.android.maps.GeoPoint;
 
-public class MapClient extends Thread {
+public class HttpConnection extends Thread {
 	private UserOverlay users;
 	private HttpClient client;
 	private Context context;
 	private boolean terminate = false;
 	
-	public MapClient(UserOverlay users, Context context) {
+	public HttpConnection(UserOverlay users, Context context) {
 		this.users = users;
 		this.context = context;
 	}

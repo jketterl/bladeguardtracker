@@ -1,5 +1,6 @@
 package net.djmacgyver.bgt;
 
+import net.djmacgyver.bgt.downstream.HttpConnection;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import android.graphics.drawable.Drawable;
@@ -11,7 +12,7 @@ import com.google.android.maps.MapView;
 public class Map extends MapActivity implements KeepAliveTarget {
 	private UserOverlay users;
 	private MapView view;
-	private MapClient updater;
+	private HttpConnection updater;
 	private KeepAliveThread refresher;
 	
 	private UserOverlay getUserOverlay()
@@ -23,10 +24,10 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		return users;
 	}
 	
-	private MapClient getUpdater()
+	private HttpConnection getUpdater()
 	{
 		if (updater == null) {
-			updater = new MapClient(getUserOverlay(), getApplicationContext());
+			updater = new HttpConnection(getUserOverlay(), getApplicationContext());
 		}
 		return updater;
 	}
