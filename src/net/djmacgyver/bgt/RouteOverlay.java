@@ -12,6 +12,7 @@ import com.google.android.maps.Overlay;
 public class RouteOverlay extends Overlay {
 	private GeoPoint[] points;
 	private MapDownloaderThread downloader;
+	private Paint paint;
 	
 	public RouteOverlay(Context context) {
 		downloader = new MapDownloaderThread(context, this);
@@ -22,20 +23,25 @@ public class RouteOverlay extends Overlay {
 		this.points = points;
 	}
 	
+	public Paint getPaint() {
+		if (paint == null) {
+			paint = new Paint();
+		}
+		return paint;
+	}
+	
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
 		super.draw(canvas, mapView, shadow);
 		if (points == null) return;
 
-		Paint p = new Paint();
-		p.setAntiAlias(true);
 		Point previousPoint = null;
 		
 		for (int i = 0; i < points.length; i++) {
 			Point point = new Point();
 			mapView.getProjection().toPixels(points[i], point);
 			if (previousPoint != null) {
-				canvas.drawLine(previousPoint.x, previousPoint.y, point.x, point.y, p);
+				canvas.drawLine(previousPoint.x, previousPoint.y, point.x, point.y, getPaint());
 			}
 			previousPoint = point;
 		}
