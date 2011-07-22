@@ -16,6 +16,14 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	private MapView view;
 	private HttpConnection updater;
 	private KeepAliveThread refresher;
+	private RouteOverlay route;
+	
+	private RouteOverlay getRoute() {
+		if (route == null) {
+			route = new RouteOverlay(getApplicationContext());
+		}
+		return route;
+	}
 	
 	private UserOverlay getUserOverlay()
 	{
@@ -58,6 +66,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
     	
     	view.getOverlays().add(getUserOverlay());
     	view.getOverlays().add(getMyLocationOverlay());
+    	view.getOverlays().add(getRoute());
     }
 
 	@Override
