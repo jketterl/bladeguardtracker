@@ -10,12 +10,10 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
 public class RouteOverlay extends Overlay {
-	private Context context;
 	private GeoPoint[] points;
 	private MapDownloaderThread downloader;
 	
 	public RouteOverlay(Context context) {
-		this.context = context;
 		downloader = new MapDownloaderThread(context, this);
 		downloader.start();
 	}
