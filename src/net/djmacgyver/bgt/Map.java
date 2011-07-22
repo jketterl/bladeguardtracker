@@ -8,9 +8,11 @@ import android.os.Bundle;
 
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
+import com.google.android.maps.MyLocationOverlay;
 
 public class Map extends MapActivity implements KeepAliveTarget {
 	private UserOverlay users;
+	private MyLocationOverlay myLoc;
 	private MapView view;
 	private HttpConnection updater;
 	private KeepAliveThread refresher;
@@ -22,6 +24,13 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	    	users = new UserOverlay(d);
 		}
 		return users;
+	}
+	
+	private MyLocationOverlay getMyLocationOverlay() {
+		if (myLoc == null) {
+			myLoc = new MyLocationOverlay(getApplicationContext(), view);			
+		}
+		return myLoc;
 	}
 	
 	private HttpConnection getUpdater()
@@ -48,6 +57,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
     	view.setBuiltInZoomControls(true);
     	
     	view.getOverlays().add(getUserOverlay());
+    	view.getOverlays().add(getMyLocationOverlay());
     }
 
 	@Override
@@ -60,11 +70,15 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		super.onResume();
     	getUpdater().start();
     	getRefresher().start();
+    	getMyLocationOverlay().enableMyLocation();
+    	getMyLocationOverlay().enableCompass();
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		getMyLocationOverlay().disableCompass();
+		getMyLocationOverlay().disableMyLocation();
 		getUpdater().terminate();
 		this.updater = null;
 		getRefresher().terminate();
