@@ -62,7 +62,12 @@ public class Map extends MapActivity implements KeepAliveTarget {
 
 	@Override
 	protected boolean isRouteDisplayed() {
-		return false;
+		return true;
+	}
+	
+	@Override
+	protected boolean isLocationDisplayed() {
+		return true;
 	}
 
 	@Override
