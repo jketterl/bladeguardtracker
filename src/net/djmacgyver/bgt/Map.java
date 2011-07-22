@@ -64,9 +64,9 @@ public class Map extends MapActivity implements KeepAliveTarget {
     	view = (MapView) findViewById(R.id.mapview);
     	view.setBuiltInZoomControls(true);
     	
+    	view.getOverlays().add(getRoute());
     	view.getOverlays().add(getUserOverlay());
     	view.getOverlays().add(getMyLocationOverlay());
-    	view.getOverlays().add(getRoute());
     }
 
 	@Override
