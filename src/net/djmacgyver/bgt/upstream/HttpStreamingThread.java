@@ -19,12 +19,87 @@ import org.apache.http.message.BasicHeader;
 import android.content.Context;
 
 public class HttpStreamingThread extends Thread {
+	private class StreamingHttpEntity implements HttpEntity {
+		private boolean terminateEntity = false;
+		private OutputStream os;
+		
+		@Override
+		public void writeTo(OutputStream outstream) throws IOException {
+			os = outstream;
+			Iterator<byte[]> i = queue.iterator();
+			while (i.hasNext()) sendData(i.next());
+			queue = new Vector<byte[]>();
+			while (!terminate && !terminateEntity) try {
+				Thread.sleep(50000);
+				sendData("keepalive".getBytes());
+			} catch (InterruptedException e) {}
+			sendData("quit".getBytes());
+			os.close();
+			os = null;
+		}
+		
+		@Override
+		public boolean isStreaming() {
+			return true;
+		}
+		
+		@Override
+		public boolean isRepeatable() {
+			return false;
+		}
+		
+		@Override
+		public boolean isChunked() {
+			return true;
+		}
+		
+		@Override
+		public Header getContentType() {
+			return new BasicHeader("content-type", "text/xml");
+		}
+		
+		@Override
+		public long getContentLength() {
+			return -1;
+		}
+		
+		@Override
+		public Header getContentEncoding() {
+			return new BasicHeader("content-encoding", "utf-8");
+		}
+		
+		@Override
+		public InputStream getContent() throws IOException, IllegalStateException {
+			// dummy implementation
+			return null;
+		}
+		
+		@Override
+		public void consumeContent() throws IOException {
+			os.close();
+		}
+		
+		public void sendData(byte[] data) {
+			if (os == null) {
+				queue.add(data);
+				return;
+			}
+			try {
+				os.write(data);
+				os.flush();
+			} catch (IOException e) {
+				this.terminateEntity = true;
+			}
+			interrupt();
+		}
+	}
+	
 	private Context context;
 	private HttpClient client;
-	private OutputStream os;
 	private boolean terminate = false;
 	private Vector<byte[]> queue = new Vector<byte[]>();
 	private int userId;
+	private StreamingHttpEntity entity;
 	
 	public HttpStreamingThread() {
 		Random r = new Random();
@@ -42,70 +117,20 @@ public class HttpStreamingThread extends Thread {
 		return client;
 	}
 	
+	private StreamingHttpEntity getEntity() {
+		if (entity == null) {
+			entity = new StreamingHttpEntity();
+		}
+		return entity;
+	}
+	
 	@Override
 	public void run() {
-		HttpPost req = new HttpPost(Config.baseUrl + "log?uid=" + userId);
-		req.setEntity(new HttpEntity() {
-			@Override
-			public void writeTo(OutputStream outstream) throws IOException {
-				os = outstream;
-				Iterator<byte[]> i = queue.iterator();
-				while (i.hasNext()) {
-					os.write(i.next());
-					os.flush();
-				}
-				System.out.println("queue done");
-				while (!terminate) try {
-					Thread.sleep(30000);
-					os.write("keepalive".getBytes());
-					os.flush();
-				} catch (InterruptedException e) {}
-				os.write("quit".getBytes());
-				os.close();
-			}
-			
-			@Override
-			public boolean isStreaming() {
-				return true;
-			}
-			
-			@Override
-			public boolean isRepeatable() {
-				return false;
-			}
-			
-			@Override
-			public boolean isChunked() {
-				return true;
-			}
-			
-			@Override
-			public Header getContentType() {
-				return new BasicHeader("content-type", "text/xml");
-			}
-			
-			@Override
-			public long getContentLength() {
-				return -1;
-			}
-			
-			@Override
-			public Header getContentEncoding() {
-				return new BasicHeader("content-encoding", "utf-8");
-			}
-			
-			@Override
-			public InputStream getContent() throws IOException, IllegalStateException {
-				System.out.println("getContent()");
-				return null;
-			}
-			
-			@Override
-			public void consumeContent() throws IOException {
-			}
-		});
-		try {
-			getClient().execute(req);
+		while (!terminate) try {
+			HttpPost req = new HttpPost(Config.baseUrl + "log?uid=" + userId);
+			req.setEntity(getEntity());
+			getClient().execute(req).getEntity().consumeContent();
+			entity = null;
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -113,20 +138,11 @@ public class HttpStreamingThread extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		getClient().getConnectionManager().shutdown();
 	}
 	
 	public void sendData(byte[] data) {
-		if (os == null) {
-			queue.add(data);
-			return;
-		}
-		try {
-			os.write(data);
-			os.flush();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		getEntity().sendData(data);
 	}
 	
 	public void terminate() {
