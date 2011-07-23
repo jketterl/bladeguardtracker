@@ -3,6 +3,7 @@ package net.djmacgyver.bgt;
 import net.djmacgyver.bgt.downstream.HttpConnection;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
@@ -21,6 +22,10 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	private RouteOverlay getRoute() {
 		if (route == null) {
 			route = new RouteOverlay(getApplicationContext());
+			route.getPaint().setAntiAlias(true);
+			route.getPaint().setColor(Color.BLUE);
+			route.getPaint().setAlpha(64);
+			route.getPaint().setStrokeWidth(2);
 		}
 		return route;
 	}
