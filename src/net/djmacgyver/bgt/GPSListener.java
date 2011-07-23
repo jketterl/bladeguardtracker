@@ -1,6 +1,7 @@
 package net.djmacgyver.bgt;
 
-import net.djmacgyver.bgt.upstream.HttpConnection;
+import net.djmacgyver.bgt.upstream.Connection;
+import net.djmacgyver.bgt.upstream.HttpStreamingConnection;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -9,7 +10,7 @@ import android.os.Bundle;
 
 public class GPSListener implements LocationListener {
 	private static GPSListener sharedInstance;
-	private HttpConnection conn;
+	private Connection conn;
 	
 	public static GPSListener getSharedInstance() {
 		if (sharedInstance == null) {
@@ -22,9 +23,10 @@ public class GPSListener implements LocationListener {
 		getConnection().setContext(context);
 	}
 	
-	private HttpConnection getConnection() {
+	private Connection getConnection() {
 		if (conn == null) {
-			conn = new HttpConnection();
+			//conn = new HttpPollingConnection();
+			conn = new HttpStreamingConnection();
 			conn.connect();
 		}
 		return conn;

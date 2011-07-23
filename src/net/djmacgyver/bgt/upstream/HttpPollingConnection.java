@@ -15,7 +15,7 @@ import net.djmacgyver.bgt.Config;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 
-public class HttpConnection implements KeepAliveTarget {
+public class HttpPollingConnection implements KeepAliveTarget, Connection {
 	private KeepAliveThread gpsReminder;
 	private KeepAliveThread timeoutReminder;
 	private int userId;
@@ -25,7 +25,7 @@ public class HttpConnection implements KeepAliveTarget {
 	private Location queuedLocation;
 	private Location lastLocation;
 	
-	public HttpConnection() {
+	public HttpPollingConnection() {
 		Random r = new Random();
 		this.userId = r.nextInt(100);
 	}
@@ -54,11 +54,19 @@ public class HttpConnection implements KeepAliveTarget {
 		return timeoutReminder;
 	}
 	
+	/* (non-Javadoc)
+	 * @see net.djmacgyver.bgt.upstream.Connection#connect()
+	 */
+	@Override
 	public void connect() {
 		getGpsReminder().start();
 		getTimeoutReminder().start();
 	}
 	
+	/* (non-Javadoc)
+	 * @see net.djmacgyver.bgt.upstream.Connection#disconnect()
+	 */
+	@Override
 	public void disconnect() {
 		getGpsReminder().terminate();
 		getTimeoutReminder().terminate();
@@ -92,6 +100,10 @@ public class HttpConnection implements KeepAliveTarget {
 		sendLocation(l);
 	}
 	
+	/* (non-Javadoc)
+	 * @see net.djmacgyver.bgt.upstream.Connection#sendLocation(android.location.Location)
+	 */
+	@Override
 	public void sendLocation(Location location) {
 		if (location.equals(lastLocation)) return;
 		if (updateBlocked) {
