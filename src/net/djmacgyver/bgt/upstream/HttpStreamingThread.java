@@ -22,18 +22,24 @@ public class HttpStreamingThread extends Thread {
 	private class StreamingHttpEntity implements HttpEntity {
 		private boolean terminateEntity = false;
 		private OutputStream os;
+		private int userId;
+		
+		public StreamingHttpEntity(int userId) {
+			this.userId = userId;
+		}
 		
 		@Override
 		public void writeTo(OutputStream outstream) throws IOException {
 			os = outstream;
+			sendData("uid=" + this.userId);
 			Iterator<byte[]> i = queue.iterator();
 			while (i.hasNext()) sendData(i.next());
 			queue = new Vector<byte[]>();
 			while (!terminate && !terminateEntity) try {
 				Thread.sleep(50000);
-				sendData("keepalive".getBytes());
+				sendData("keepalive");
 			} catch (InterruptedException e) {}
-			sendData("quit".getBytes());
+			sendData("quit");
 			os.close();
 			os = null;
 		}
@@ -79,6 +85,10 @@ public class HttpStreamingThread extends Thread {
 			os.close();
 		}
 		
+		public void sendData(String data) {
+			sendData(data.getBytes());
+		}
+		
 		public void sendData(byte[] data) {
 			if (os == null) {
 				queue.add(data);
@@ -119,7 +129,7 @@ public class HttpStreamingThread extends Thread {
 	
 	private StreamingHttpEntity getEntity() {
 		if (entity == null) {
-			entity = new StreamingHttpEntity();
+			entity = new StreamingHttpEntity(userId);
 		}
 		return entity;
 	}
@@ -127,7 +137,7 @@ public class HttpStreamingThread extends Thread {
 	@Override
 	public void run() {
 		while (!terminate) try {
-			HttpPost req = new HttpPost(Config.baseUrl + "log?uid=" + userId);
+			HttpPost req = new HttpPost(Config.baseUrl + "log");
 			req.setEntity(getEntity());
 			getClient().execute(req).getEntity().consumeContent();
 			entity = null;
@@ -139,6 +149,10 @@ public class HttpStreamingThread extends Thread {
 			e.printStackTrace();
 		}
 		getClient().getConnectionManager().shutdown();
+	}
+	
+	public void sendData(String data) {
+		getEntity().sendData(data);
 	}
 	
 	public void sendData(byte[] data) {

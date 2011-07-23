@@ -27,7 +27,7 @@ public class HttpStreamingConnection implements Connection {
 	public void sendLocation(Location location) {
 		String data = "lat=" + location.getLatitude() + "&lon=" + location.getLongitude();
 		if (location.hasSpeed()) data += "&speed=" + location.getSpeed();
-		getThread().sendData(data.getBytes());
+		getThread().sendData(data);
 	}
 
 	@Override
@@ -37,6 +37,6 @@ public class HttpStreamingConnection implements Connection {
 
 	@Override
 	public void sendQuit() {
-		getThread().sendData("quit".getBytes());
+		getThread().sendData("quit");
 	}
 }
