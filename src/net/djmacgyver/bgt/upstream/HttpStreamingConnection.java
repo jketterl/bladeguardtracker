@@ -75,7 +75,7 @@ public class HttpStreamingConnection implements Connection, KeepAliveTarget {
 
 	private KeepAliveThread getGpsReminder() {
 		if (gpsReminder == null) {
-			gpsReminder = new KeepAliveThread(this, 10);
+			gpsReminder = new KeepAliveThread(this, 5);
 		}
 		return gpsReminder;
 	}
