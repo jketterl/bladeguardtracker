@@ -34,6 +34,7 @@ public class HttpStreamingConnection implements Connection, KeepAliveTarget {
 	@Override
 	public void sendLocation(Location location) {
 		if (location.equals(lastLocation)) return;
+		if (lastLocation != null && location.distanceTo(lastLocation) == 0) return;
 		if (updateBlocked) {
 			queuedLocation = location;
 			return;
