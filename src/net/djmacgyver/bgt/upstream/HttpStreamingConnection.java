@@ -14,15 +14,17 @@ public class HttpStreamingConnection extends Connection implements KeepAliveTarg
 	private Location queuedLocation;
 	private Location lastLocation;
 	private int userId;
+	private Context context;
 	
-	public HttpStreamingConnection() {
+	public HttpStreamingConnection(Context context) {
 		Random r = new Random();
 		this.userId = r.nextInt(100);
+		this.context = context;
 	}
 	
 	private HttpStreamingThread getThread() {
 		if (thread == null) {
-			thread = new HttpStreamingThread();
+			thread = new HttpStreamingThread(context);
 		}
 		return thread;
 	}
@@ -56,11 +58,6 @@ public class HttpStreamingConnection extends Connection implements KeepAliveTarg
 		getGpsReminder().interrupt();
 		lastLocation = location;
 		updateBlocked = true;
-	}
-
-	@Override
-	public void setContext(Context context) {
-		getThread().setContext(context);
 	}
 
 	@Override

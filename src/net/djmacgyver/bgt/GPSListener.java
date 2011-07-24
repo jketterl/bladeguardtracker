@@ -11,23 +11,23 @@ import android.os.Bundle;
 public class GPSListener implements LocationListener {
 	private static GPSListener sharedInstance;
 	private Connection conn;
+	private Context context;
 	
+	public GPSListener(Context context) {
+		this.context = context;
+	}
+
 	public static GPSListener getSharedInstance(Context context) {
 		if (sharedInstance == null) {
-			sharedInstance = new GPSListener();
+			sharedInstance = new GPSListener(context);
 		}
-		sharedInstance.setContext(context);
 		return sharedInstance;
-	}
-	
-	public void setContext(Context context) {
-		getConnection().setContext(context);
 	}
 	
 	private Connection getConnection() {
 		if (conn == null) {
-			//conn = new HttpPollingConnection();
-			conn = new HttpStreamingConnection();
+			//conn = new HttpPollingConnection(context);
+			conn = new HttpStreamingConnection(context);
 			conn.connect();
 		}
 		return conn;

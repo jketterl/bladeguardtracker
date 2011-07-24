@@ -16,10 +16,10 @@ public class HttpStreamingThread extends Thread {
 	private boolean terminate = false;
 	private StreamingHttpEntity entity;
 	
-	public void setContext(Context context) {
+	public HttpStreamingThread(Context context) {
 		this.context = context;
 	}
-	
+
 	private HttpClient getClient() {
 		if (client == null) {
 			client = new HttpClient(this.context);
