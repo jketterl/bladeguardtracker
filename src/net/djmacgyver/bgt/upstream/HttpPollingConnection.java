@@ -107,5 +107,6 @@ public class HttpPollingConnection extends Connection {
 	@Override
 	public void sendGpsUnavailable() {
 		sendQuit();
+		super.sendGpsUnavailable();
 	}
 }

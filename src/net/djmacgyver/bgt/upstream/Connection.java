@@ -55,5 +55,7 @@ public abstract class Connection implements KeepAliveTarget {
 		return gpsReminder;
 	}
 
-	abstract public void sendGpsUnavailable();
+	public void sendGpsUnavailable() {
+		lastLocation = null;
+	}
 }

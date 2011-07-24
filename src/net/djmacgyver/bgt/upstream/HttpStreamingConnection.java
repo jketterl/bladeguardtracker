@@ -51,5 +51,6 @@ public class HttpStreamingConnection extends Connection {
 	@Override
 	public void sendGpsUnavailable() {
 		getThread().sendData("gpsunavailable");
+		super.sendGpsUnavailable();
 	}
 }
