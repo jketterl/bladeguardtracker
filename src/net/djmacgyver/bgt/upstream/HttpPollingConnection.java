@@ -15,7 +15,7 @@ import net.djmacgyver.bgt.Config;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 
-public class HttpPollingConnection implements KeepAliveTarget, Connection {
+public class HttpPollingConnection extends Connection implements KeepAliveTarget {
 	private KeepAliveThread gpsReminder;
 	private KeepAliveThread timeoutReminder;
 	private int userId;

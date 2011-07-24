@@ -5,7 +5,7 @@ import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import android.content.Context;
 import android.location.Location;
 
-public class HttpStreamingConnection implements Connection, KeepAliveTarget {
+public class HttpStreamingConnection extends Connection implements KeepAliveTarget {
 	private HttpStreamingThread thread;
 	private KeepAliveThread gpsReminder;
 	private boolean updateBlocked = false;
