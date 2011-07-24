@@ -47,7 +47,7 @@ public class GPSListener implements LocationListener, KeepAliveTarget {
 	public void onProviderDisabled(String provider) {
 		System.out.println("onProviderDisabled: " + provider);
 		if (!provider.equals("gps")) return;
-		getConnection().sendQuit();
+		getConnection().sendGpsUnavailable();
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class GPSListener implements LocationListener, KeepAliveTarget {
 		switch (status) {
 			case LocationProvider.TEMPORARILY_UNAVAILABLE:
 			case LocationProvider.OUT_OF_SERVICE:
-				getConnection().sendQuit();
+				getConnection().sendGpsUnavailable();
 				break;
 		}
 	}
@@ -84,7 +84,7 @@ public class GPSListener implements LocationListener, KeepAliveTarget {
 	@Override
 	public void keepAlive(KeepAliveThread source) {
 		if (source != getGpsReminder()) return;
-		getConnection().sendQuit();
+		getConnection().sendGpsUnavailable();
 		getGpsReminder().terminate();
 		gpsReminder = null;
 	}

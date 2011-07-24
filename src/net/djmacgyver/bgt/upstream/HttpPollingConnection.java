@@ -103,4 +103,9 @@ public class HttpPollingConnection extends Connection {
 		}
 		return gpsReminder;
 	}
+
+	@Override
+	public void sendGpsUnavailable() {
+		sendQuit();
+	}
 }
