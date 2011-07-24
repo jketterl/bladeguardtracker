@@ -14,11 +14,11 @@ class StreamingHttpEntity implements HttpEntity {
 	private boolean terminate = false;
 	private OutputStream os;
 	private int userId;
-	private HttpStreamingThread stream;
+	private Thread thread;
 	Vector<byte[]> queue = new Vector<byte[]>();
 	
-	public StreamingHttpEntity(HttpStreamingThread stream, int userId) {
-		this.stream = stream;
+	public StreamingHttpEntity(Thread t, int userId) {
+		this.thread = t;
 		this.userId = userId;
 	}
 	
@@ -94,11 +94,11 @@ class StreamingHttpEntity implements HttpEntity {
 		} catch (IOException e) {
 			terminate = true;
 		}
-		stream.interrupt();
+		thread.interrupt();
 	}
 	
 	public void terminate() {
 		terminate = true;
-		stream.interrupt();
+		thread.interrupt();
 	}
 }
