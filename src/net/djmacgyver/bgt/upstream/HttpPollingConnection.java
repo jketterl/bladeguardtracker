@@ -3,6 +3,9 @@ package net.djmacgyver.bgt.upstream;
 import java.io.IOException;
 import java.util.Random;
 
+import net.djmacgyver.bgt.Config;
+import net.djmacgyver.bgt.keepalive.KeepAliveThread;
+
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -11,40 +14,23 @@ import org.apache.http.client.methods.HttpUriRequest;
 import android.content.Context;
 import android.location.Location;
 
-import net.djmacgyver.bgt.Config;
-import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
-import net.djmacgyver.bgt.keepalive.KeepAliveThread;
-
-public class HttpPollingConnection extends Connection implements KeepAliveTarget {
-	private KeepAliveThread gpsReminder;
+public class HttpPollingConnection extends Connection {
 	private KeepAliveThread timeoutReminder;
 	private int userId;
 	private Context context;
 	private HttpClient client;
-	private boolean updateBlocked = false;
-	private Location queuedLocation;
-	private Location lastLocation;
-	
-	public HttpPollingConnection() {
+	public HttpPollingConnection(Context context) {
 		Random r = new Random();
 		this.userId = r.nextInt(100);
-	}
-	
-	@Override
-	public void keepAlive(KeepAliveThread source) {
-		if (source == getGpsReminder()) {
-			updateBlocked = false;
-			sendLocation();
-		} else if (source == getTimeoutReminder()) {
-			sendKeepAlive();
-		}
+		this.context = context;
 	}
 
-	private KeepAliveThread getGpsReminder() {
-		if (gpsReminder == null) {
-			gpsReminder = new KeepAliveThread(this, 10);
+	@Override
+	public void keepAlive(KeepAliveThread source) {
+		if (source == getTimeoutReminder()) {
+			sendKeepAlive();
 		}
-		return gpsReminder;
+		super.keepAlive(source);
 	}
 
 	private KeepAliveThread getTimeoutReminder() {
@@ -93,30 +79,11 @@ public class HttpPollingConnection extends Connection implements KeepAliveTarget
 		}
 	}
 	
-	public void sendLocation() {
-		if (queuedLocation == null) return;
-		Location l = queuedLocation;
-		queuedLocation = null;
-		sendLocation(l);
-	}
-	
-	/* (non-Javadoc)
-	 * @see net.djmacgyver.bgt.upstream.Connection#sendLocation(android.location.Location)
-	 */
-	@Override
-	public void sendLocation(Location location) {
-		if (location.equals(lastLocation)) return;
-		if (updateBlocked) {
-			queuedLocation = location;
-			return;
-		}
+	protected void executeLocationSend(Location location) {
 		String url = Config.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude();
 		if (location.hasSpeed()) url += "&speed=" + location.getSpeed();
 		HttpGet req = new HttpGet(url);
 		sendRequest(req);
-		getGpsReminder().interrupt();
-		lastLocation = location;
-		updateBlocked = true;
 	}
 	
 	public void sendQuit() {
@@ -129,7 +96,11 @@ public class HttpPollingConnection extends Connection implements KeepAliveTarget
 		sendRequest(req);
 	}
 
-	public void setContext(Context context) {
-		this.context = context;
+	@Override
+	protected KeepAliveThread getGpsReminder() {
+		if (gpsReminder == null) {
+			gpsReminder = new KeepAliveThread(this, 10);
+		}
+		return gpsReminder;
 	}
 }
