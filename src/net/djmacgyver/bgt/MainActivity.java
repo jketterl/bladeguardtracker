@@ -22,8 +22,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 		        LocationManager m = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		        GPSListener l = GPSListener.getSharedInstance();
-		        l.setContext(getApplicationContext());
+		        GPSListener l = GPSListener.getSharedInstance(getApplicationContext());
 				if (((ToggleButton) v).isChecked()) {
 					m.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, l);
 				} else {

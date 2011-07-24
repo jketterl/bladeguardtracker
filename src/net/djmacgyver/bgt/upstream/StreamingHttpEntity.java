@@ -13,19 +13,16 @@ import org.apache.http.message.BasicHeader;
 class StreamingHttpEntity implements HttpEntity {
 	private boolean terminate = false;
 	private OutputStream os;
-	private int userId;
 	private Thread thread;
 	Vector<byte[]> queue = new Vector<byte[]>();
 	
-	public StreamingHttpEntity(Thread t, int userId) {
+	public StreamingHttpEntity(Thread t) {
 		this.thread = t;
-		this.userId = userId;
 	}
 	
 	@Override
 	public void writeTo(OutputStream outstream) throws IOException {
 		os = outstream;
-		sendData("uid=" + this.userId);
 		Iterator<byte[]> i = queue.iterator();
 		while (i.hasNext()) sendData(i.next());
 		queue = new Vector<byte[]>();

@@ -12,10 +12,11 @@ public class GPSListener implements LocationListener {
 	private static GPSListener sharedInstance;
 	private Connection conn;
 	
-	public static GPSListener getSharedInstance() {
+	public static GPSListener getSharedInstance(Context context) {
 		if (sharedInstance == null) {
 			sharedInstance = new GPSListener();
 		}
+		sharedInstance.setContext(context);
 		return sharedInstance;
 	}
 	

@@ -1,5 +1,7 @@
 package net.djmacgyver.bgt.upstream;
 
+import java.util.Random;
+
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import android.content.Context;
@@ -11,17 +13,24 @@ public class HttpStreamingConnection extends Connection implements KeepAliveTarg
 	private boolean updateBlocked = false;
 	private Location queuedLocation;
 	private Location lastLocation;
+	private int userId;
+	
+	public HttpStreamingConnection() {
+		Random r = new Random();
+		this.userId = r.nextInt(100);
+	}
 	
 	private HttpStreamingThread getThread() {
 		if (thread == null) {
 			thread = new HttpStreamingThread();
-			thread.start();
 		}
 		return thread;
 	}
 
 	@Override
 	public void connect() {
+		getThread().start();
+		getThread().sendData("uid=" + userId);
 		getGpsReminder().start();
 	}
 

@@ -1,7 +1,6 @@
 package net.djmacgyver.bgt.upstream;
 
 import java.io.IOException;
-import java.util.Random;
 
 import net.djmacgyver.bgt.Config;
 import net.djmacgyver.bgt.http.HttpClient;
@@ -15,13 +14,7 @@ public class HttpStreamingThread extends Thread {
 	private Context context;
 	private HttpClient client;
 	private boolean terminate = false;
-	private int userId;
 	private StreamingHttpEntity entity;
-	
-	public HttpStreamingThread() {
-		Random r = new Random();
-		this.userId = r.nextInt(100);
-	}
 	
 	public void setContext(Context context) {
 		this.context = context;
@@ -36,7 +29,7 @@ public class HttpStreamingThread extends Thread {
 	
 	private StreamingHttpEntity getEntity() {
 		if (entity == null) {
-			entity = new StreamingHttpEntity(this, userId);
+			entity = new StreamingHttpEntity(this);
 		}
 		return entity;
 	}
