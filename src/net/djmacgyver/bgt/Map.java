@@ -21,7 +21,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	
 	private RouteOverlay getRoute() {
 		if (route == null) {
-			route = new RouteOverlay(getApplicationContext());
+			route = new RouteOverlay();
 			route.getPaint().setAntiAlias(true);
 			route.getPaint().setColor(Color.BLUE);
 			route.getPaint().setAlpha(64);
@@ -72,6 +72,8 @@ public class Map extends MapActivity implements KeepAliveTarget {
     	view.getOverlays().add(getRoute());
     	view.getOverlays().add(getUserOverlay());
     	view.getOverlays().add(getMyLocationOverlay());
+
+    	new MapDownloaderThread(getApplicationContext(), getRoute(), view).start();
     }
 
 	@Override

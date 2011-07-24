@@ -24,12 +24,14 @@ import org.w3c.dom.NodeList;
 import android.content.Context;
 
 import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MapView;
 
 public class MapDownloaderThread extends Thread {
 	private Context context;
 	private RouteOverlay overlay;
 	private Document map;
 	private HttpClient client;
+	private MapView mapView;
 
 	private Document getMap() throws ClientProtocolException, IOException {
 		if (map == null) {
@@ -63,9 +65,10 @@ public class MapDownloaderThread extends Thread {
 		return client;
 	}
 
-	public MapDownloaderThread(Context context, RouteOverlay overlay) {
+	public MapDownloaderThread(Context context, RouteOverlay overlay, MapView mapView) {
 		this.context = context;
 		this.overlay = overlay;
+		this.mapView = mapView;
 	}
 	
 	@Override
@@ -105,6 +108,17 @@ public class MapDownloaderThread extends Thread {
 			}
 			
 			overlay.setPoints(geoPoints);
+
+			// zoom in to the route
+			int minLat = 360000000, maxLat = 0, minLon = 360000000, maxLon = 0;
+			for (int i = 0; i < geoPoints.length; i++) {
+				minLat = Math.min(minLat, geoPoints[i].getLatitudeE6());
+				maxLat = Math.max(maxLat, geoPoints[i].getLatitudeE6());
+				minLon = Math.min(minLon, geoPoints[i].getLongitudeE6());
+				maxLon = Math.max(maxLon, geoPoints[i].getLongitudeE6());
+			}
+			mapView.getController().zoomToSpan(maxLat - minLat, maxLon - minLon);
+			mapView.getController().setCenter(new GeoPoint((maxLat + minLat) / 2, (maxLon + minLon) / 2));
 		} catch (XPathExpressionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

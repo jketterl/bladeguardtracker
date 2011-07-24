@@ -1,6 +1,5 @@
 package net.djmacgyver.bgt;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
@@ -11,13 +10,7 @@ import com.google.android.maps.Overlay;
 
 public class RouteOverlay extends Overlay {
 	private GeoPoint[] points;
-	private MapDownloaderThread downloader;
 	private Paint paint;
-	
-	public RouteOverlay(Context context) {
-		downloader = new MapDownloaderThread(context, this);
-		downloader.start();
-	}
 	
 	public void setPoints(GeoPoint[] points) {
 		this.points = points;
