@@ -1,5 +1,7 @@
 package net.djmacgyver.bgt;
 
+import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
+import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.upstream.Connection;
 import net.djmacgyver.bgt.upstream.HttpStreamingConnection;
 import android.content.Context;
@@ -8,10 +10,11 @@ import android.location.LocationListener;
 import android.location.LocationProvider;
 import android.os.Bundle;
 
-public class GPSListener implements LocationListener {
+public class GPSListener implements LocationListener, KeepAliveTarget {
 	private static GPSListener sharedInstance;
 	private Connection conn;
 	private Context context;
+	private KeepAliveThread gpsReminder;
 	
 	public GPSListener(Context context) {
 		this.context = context;
@@ -35,6 +38,8 @@ public class GPSListener implements LocationListener {
 	
 	@Override
 	public void onLocationChanged(Location location) {
+		if (!getGpsReminder().isAlive()) getGpsReminder().start();
+		getGpsReminder().interrupt();
 		getConnection().sendLocation(location);
 	}
 
@@ -61,9 +66,26 @@ public class GPSListener implements LocationListener {
 				break;
 		}
 	}
-
+	
 	public void disable() {
 		getConnection().disconnect();
+		getGpsReminder().terminate();
+		gpsReminder = null;
 		conn = null;
+	}
+	
+	private KeepAliveThread getGpsReminder() {
+		if (gpsReminder == null) {
+			gpsReminder = new KeepAliveThread(this, 60);
+		}
+		return gpsReminder;
+	}
+
+	@Override
+	public void keepAlive(KeepAliveThread source) {
+		if (source != getGpsReminder()) return;
+		getConnection().sendQuit();
+		getGpsReminder().terminate();
+		gpsReminder = null;
 	}
 }
