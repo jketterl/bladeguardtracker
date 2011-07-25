@@ -18,7 +18,7 @@ public class HttpStreamingConnection extends Connection {
 	
 	private HttpStreamingThread getThread() {
 		if (thread == null) {
-			thread = new HttpStreamingThread(context);
+			thread = new HttpStreamingThread(context, userId);
 		}
 		return thread;
 	}
@@ -26,7 +26,6 @@ public class HttpStreamingConnection extends Connection {
 	@Override
 	public void connect() {
 		getThread().start();
-		getThread().sendData("uid=" + userId);
 		getGpsReminder().start();
 	}
 

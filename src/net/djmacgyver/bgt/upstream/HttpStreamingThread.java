@@ -15,9 +15,11 @@ public class HttpStreamingThread extends Thread {
 	private HttpClient client;
 	private boolean terminate = false;
 	private StreamingHttpEntity entity;
+	private int userId;
 	
-	public HttpStreamingThread(Context context) {
+	public HttpStreamingThread(Context context, int userId) {
 		this.context = context;
+		this.userId = userId;
 	}
 
 	private HttpClient getClient() {
@@ -36,17 +38,21 @@ public class HttpStreamingThread extends Thread {
 	
 	@Override
 	public void run() {
-		while (!terminate) try {
-			HttpPost req = new HttpPost(Config.baseUrl + "log");
-			req.setEntity(getEntity());
-			getClient().execute(req).getEntity().consumeContent();
+		while (!terminate) {
+			try {
+				HttpPost req = new HttpPost(Config.baseUrl + "log");
+				req.setEntity(getEntity());
+				getEntity().sendData("uid=" + userId);
+				getClient().execute(req).getEntity().consumeContent();
+				//entity = null;
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
 			entity = null;
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		getClient().getConnectionManager().shutdown();
 	}
