@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BladeGuardTracker</string>
+    <string name="app_name">Bladeguard Tracker</string>
     <string name="locate">Enable GPS Tracking</string>
     <string name="map_name">Map View</string>
     <!-- debug @ work -->
