@@ -45,19 +45,16 @@ public class GPSListener implements LocationListener, KeepAliveTarget {
 
 	@Override
 	public void onProviderDisabled(String provider) {
-		System.out.println("onProviderDisabled: " + provider);
 		if (!provider.equals("gps")) return;
 		getConnection().sendGpsUnavailable();
 	}
 
 	@Override
 	public void onProviderEnabled(String provider) {
-		System.out.println("onProviderEnabled: " + provider);
 	}
 
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
-		System.out.println("onStatusChanged: " + provider + "; " + status);
 		if (!provider.equals("gps")) return;
 		switch (status) {
 			case LocationProvider.TEMPORARILY_UNAVAILABLE:

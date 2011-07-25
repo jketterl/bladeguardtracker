@@ -87,7 +87,6 @@ public class HttpConnection extends Thread {
 			while (!terminate) do {
 				read = is.read(buf);
 				if (terminate) break;
-				//System.out.println("read " + read + " bytes!");
 				in.setByteStream(new ByteArrayInputStream(buf, 0, read));
 				Document dom = builder.parse(in);
 				
@@ -126,7 +125,6 @@ public class HttpConnection extends Thread {
 			terminate();
 		}
 		getClient().getConnectionManager().shutdown();
-		System.out.println("MapClient Thread ended");
 	}
 	
 	public void terminate() {
