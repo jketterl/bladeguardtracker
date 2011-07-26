@@ -8,5 +8,5 @@
     <string name="user_password">Passwort</string>
     <string name="anonymous">Anonymes Tracking</string>
     <string name="anonymous_summary">Deine Statistiken können anonym gesammelt werden, wenn du dich nicht anmelden willst. Setze diesen Haken, um anonym zu bleiben.</string>
-    
+    <string name="signup">Jetzt anmelden!</string>
 </resources>
