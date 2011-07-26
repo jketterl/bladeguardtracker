@@ -15,11 +15,17 @@ public class HttpStreamingThread extends Thread {
 	private HttpClient client;
 	private boolean terminate = false;
 	private StreamingHttpEntity entity;
-	private int userId;
+	private String userName;
+	private String password;
 	
-	public HttpStreamingThread(Context context, int userId) {
+	public HttpStreamingThread(Context context, String userName, String password) {
+		this(context);
+		this.userName = userName;
+		this.password = password;
+	}
+
+	public HttpStreamingThread(Context context) {
 		this.context = context;
-		this.userId = userId;
 	}
 
 	private HttpClient getClient() {
@@ -42,7 +48,9 @@ public class HttpStreamingThread extends Thread {
 			try {
 				HttpPost req = new HttpPost(Config.baseUrl + "log");
 				req.setEntity(getEntity());
-				getEntity().sendData("uid=" + userId);
+				if (this.userName != null && this.password != null) {
+					getEntity().sendData("uid=" + userName + "&pass=" + password);
+				}
 				getClient().execute(req).getEntity().consumeContent();
 				//entity = null;
 			} catch (ClientProtocolException e) {

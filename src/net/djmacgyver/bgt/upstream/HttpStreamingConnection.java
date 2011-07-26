@@ -1,8 +1,7 @@
 package net.djmacgyver.bgt.upstream;
 
-import java.util.Random;
-
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
 
@@ -16,15 +15,14 @@ public class HttpStreamingConnection extends Connection {
 	
 	private HttpStreamingThread getThread() {
 		if (thread == null) {
-			String userName = PreferenceManager.getDefaultSharedPreferences(context).getString("username", "0");
-			int userId = -1;
-			try {
-				userId = Integer.parseInt(userName);
-			} catch (Exception e) {
-				Random r = new Random();
-				userId = 9000 + r.nextInt(1000);
+			SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
+			if (p.getBoolean("anonymous", true)) {
+				thread = new HttpStreamingThread(context);
+			} else {
+				String userName = p.getString("username", "");
+				String password = p.getString("password", "");
+				thread = new HttpStreamingThread(context, userName, password);
 			}
-			thread = new HttpStreamingThread(context, userId);
 		}
 		return thread;
 	}
