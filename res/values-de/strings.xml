@@ -3,5 +3,7 @@
     <string name="locate">Zeige den anderen meine Position</string>
     <string name="map_name">Kartenansicht</string>
     <string name="settings">Einstellungen</string>
+    <string name="user_preferences">Benutzereinstellungen</string>
+    <string name="user_name">Benutzername</string>
     
 </resources>
