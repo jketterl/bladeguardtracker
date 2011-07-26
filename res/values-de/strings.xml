@@ -5,5 +5,6 @@
     <string name="settings">Einstellungen</string>
     <string name="user_preferences">Benutzereinstellungen</string>
     <string name="user_name">Benutzername</string>
+    <string name="user_password">Passwort</string>
     
 </resources>
