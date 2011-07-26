@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="net.djmacgyver.bgt.style" parent="@android:style/Theme.Light">
+        <item name="android:windowTitleSize">49dip</item>
+    	<item name="android:windowTitleBackgroundStyle">@style/net.djmacgyver.bgt.header.style</item>
+    </style>
+    <style name="net.djmacgyver.bgt.header.style" parent="@android:style/Theme.Light">
+    	<item name="android:background">@drawable/header_background</item>
+    </style>
+</resources>
