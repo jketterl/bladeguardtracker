@@ -97,8 +97,10 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		super.onResume();
     	getUpdater().start();
     	getRefresher().start();
-    	getMyLocationOverlay().enableMyLocation();
-    	getMyLocationOverlay().enableCompass();
+    	if (GPSListener.isActive()) {
+	    	getMyLocationOverlay().enableMyLocation();
+	    	getMyLocationOverlay().enableCompass();
+    	}
 	}
 
 	@Override

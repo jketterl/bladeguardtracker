@@ -31,6 +31,11 @@ public class GPSListener implements LocationListener, KeepAliveTarget {
 		return sharedInstance;
 	}
 	
+	public static boolean isActive() {
+		if (sharedInstance == null) return false;
+		return sharedInstance.isEnabled();
+	}
+	
 	private Connection getConnection() {
 		if (conn == null) {
 			//conn = new HttpPollingConnection(context);
