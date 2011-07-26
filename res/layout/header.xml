@@ -4,6 +4,6 @@
   android:layout_width="match_parent"
   android:layout_height="48dip" android:orientation="horizontal">
     <ImageView android:src="@drawable/icon" android:id="@+id/app_logo" android:paddingTop="1dip" android:layout_width="48dip" android:layout_height="48dip"></ImageView>
-    <TextView android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingLeft="5dip" android:textSize="12pt" android:paddingRight="5dip" android:paddingTop="5dip"></TextView>
+    <TextView android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingLeft="5dip" android:textSize="12pt" android:paddingRight="5dip" android:paddingTop="7dip"></TextView>
     
 </LinearLayout>
