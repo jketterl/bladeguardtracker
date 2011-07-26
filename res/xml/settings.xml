@@ -4,7 +4,7 @@
     
     <PreferenceCategory android:title="@string/user_preferences"><CheckBoxPreference android:disableDependentsState="true" android:title="@string/anonymous" android:key="anonymous" android:summaryOff="@string/anonymous_summary" android:defaultValue="true"></CheckBoxPreference><EditTextPreference android:dialogTitle="@string/user_name" android:title="@string/user_name" android:key="username" android:dependency="anonymous"></EditTextPreference>
     <EditTextPreference android:dialogTitle="@string/user_password" android:title="@string/user_password" android:key="password" android:password="true" android:dependency="anonymous"></EditTextPreference>
-    <Preference android:title="@string/signup" android:dependency="anonymous"></Preference>
+    <Preference android:title="@string/signup" android:dependency="anonymous" android:key="signup"></Preference>
     
 </PreferenceCategory>
     
