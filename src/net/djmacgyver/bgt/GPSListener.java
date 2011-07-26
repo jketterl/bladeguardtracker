@@ -7,6 +7,7 @@ import net.djmacgyver.bgt.upstream.HttpStreamingConnection;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 
@@ -15,14 +16,17 @@ public class GPSListener implements LocationListener, KeepAliveTarget {
 	private Connection conn;
 	private Context context;
 	private KeepAliveThread gpsReminder;
+	private boolean enabled = false;
+	private LocationManager locationManager;
 	
-	public GPSListener(Context context) {
+	public GPSListener(Context context, LocationManager locationManager) {
 		this.context = context;
+		this.locationManager = locationManager;
 	}
 
-	public static GPSListener getSharedInstance(Context context) {
+	public static GPSListener getSharedInstance(Context context, LocationManager m) {
 		if (sharedInstance == null) {
-			sharedInstance = new GPSListener(context);
+			sharedInstance = new GPSListener(context, m);
 		}
 		return sharedInstance;
 	}
@@ -65,10 +69,12 @@ public class GPSListener implements LocationListener, KeepAliveTarget {
 	}
 	
 	public void disable() {
+		locationManager.removeUpdates(this);
 		getConnection().disconnect();
 		getGpsReminder().terminate();
 		gpsReminder = null;
 		conn = null;
+		enabled = false;
 	}
 	
 	private KeepAliveThread getGpsReminder() {
@@ -84,5 +90,14 @@ public class GPSListener implements LocationListener, KeepAliveTarget {
 		getConnection().sendGpsUnavailable();
 		getGpsReminder().terminate();
 		gpsReminder = null;
+	}
+
+	public void enable() {
+		enabled = true;
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+	}
+	
+	public boolean isEnabled() {
+		return enabled;
 	}
 }

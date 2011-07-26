@@ -17,16 +17,19 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        LocationManager m = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        final GPSListener l = GPSListener.getSharedInstance(getApplicationContext(), m);
+        
         ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
+
+        b.setChecked(l.isEnabled());
+        
         b.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-		        LocationManager m = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		        GPSListener l = GPSListener.getSharedInstance(getApplicationContext());
 				if (((ToggleButton) v).isChecked()) {
-					m.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, l);
+					l.enable();
 				} else {
-					m.removeUpdates(l);
 					l.disable();
 				}
 			}
