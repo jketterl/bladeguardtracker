@@ -2,5 +2,6 @@
 <resources>
     <string name="locate">Zeige den anderen meine Position</string>
     <string name="map_name">Kartenansicht</string>
+    <string name="settings">Einstellungen</string>
     
 </resources>
