@@ -4,20 +4,26 @@ import java.util.Random;
 
 import android.content.Context;
 import android.location.Location;
+import android.preference.PreferenceManager;
 
 public class HttpStreamingConnection extends Connection {
 	private HttpStreamingThread thread;
-	private int userId;
 	private Context context;
 	
 	public HttpStreamingConnection(Context context) {
-		Random r = new Random();
-		this.userId = r.nextInt(100);
 		this.context = context;
 	}
 	
 	private HttpStreamingThread getThread() {
 		if (thread == null) {
+			String userName = PreferenceManager.getDefaultSharedPreferences(context).getString("username", "0");
+			int userId = -1;
+			try {
+				userId = Integer.parseInt(userName);
+			} catch (Exception e) {
+				Random r = new Random();
+				userId = 9000 + r.nextInt(1000);
+			}
 			thread = new HttpStreamingThread(context, userId);
 		}
 		return thread;
