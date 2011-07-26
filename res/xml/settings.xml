@@ -2,8 +2,8 @@
 <PreferenceScreen
   xmlns:android="http://schemas.android.com/apk/res/android">
     
-    <PreferenceCategory android:title="@string/user_preferences"><EditTextPreference android:dialogTitle="@string/user_name" android:title="@string/user_name"></EditTextPreference>
-    <EditTextPreference android:dialogTitle="@string/user_password" android:title="@string/user_password" android:password="true"></EditTextPreference>
+    <PreferenceCategory android:title="@string/user_preferences"><EditTextPreference android:dialogTitle="@string/user_name" android:title="@string/user_name" android:key="username"></EditTextPreference>
+    <EditTextPreference android:dialogTitle="@string/user_password" android:title="@string/user_password" android:password="true" android:key="password"></EditTextPreference>
 </PreferenceCategory>
     
 </PreferenceScreen>

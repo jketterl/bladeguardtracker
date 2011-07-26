@@ -6,7 +6,6 @@ import android.view.Window;
 import android.widget.TextView;
 
 public class Settings extends PreferenceActivity {
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
