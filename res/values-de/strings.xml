@@ -9,4 +9,9 @@
     <string name="anonymous">Anonymes Tracking</string>
     <string name="anonymous_summary">Deine Statistiken können anonym gesammelt werden, wenn du dich nicht anmelden willst. Setze diesen Haken, um anonym zu bleiben.</string>
     <string name="signup">Jetzt anmelden!</string>
+    <string name="new_user">Benutzer registrieren</string>
+    <string name="user_password_confirm">Passwort bestätigen</string>
+    <string name="start_signup">Benutzer registrieren!</string>
+    <string name="start_signup_summary">Diesen Benutzer jetzt am Server anlegen</string>
+    <string name="user_name_summary">Dein gewünschter Benutzername</string>
 </resources>

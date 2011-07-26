@@ -1,5 +1,6 @@
 package net.djmacgyver.bgt;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -17,12 +18,13 @@ public class Settings extends PreferenceActivity {
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.settings);
         addPreferencesFromResource(R.xml.settings);
-        
+
         Preference signup = findPreference("signup");
         signup.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				System.out.println("signup clicked");
+				Intent i = new Intent(getApplicationContext(), Signup.class);
+				startActivity(i);
 				return true;
 			}
 		});
