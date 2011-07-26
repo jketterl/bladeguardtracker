@@ -6,5 +6,5 @@
     <ToggleButton android:id="@+id/toggleButton1" android:layout_height="wrap_content" android:text="ToggleButton" android:layout_width="wrap_content"></ToggleButton>
     <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:id="@+id/textView1" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/locate"></TextView>
 </LinearLayout>
-<Button android:layout_height="wrap_content" android:text="@string/map_name" android:layout_width="wrap_content" android:id="@+id/mapButton"></Button>
+<Button android:layout_height="wrap_content" android:text="@string/map_name" android:id="@+id/mapButton" android:layout_width="match_parent"></Button>
 </LinearLayout>
