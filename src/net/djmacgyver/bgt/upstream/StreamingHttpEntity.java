@@ -22,9 +22,9 @@ class StreamingHttpEntity implements HttpEntity {
 	
 	@Override
 	public void writeTo(OutputStream outstream) throws IOException {
-		os = outstream;
 		Iterator<byte[]> i = queue.iterator();
-		while (i.hasNext()) sendData(i.next());
+		while (i.hasNext()) sendData(i.next(), outstream);
+		os = outstream;
 		queue = new Vector<byte[]>();
 		while (!terminate) try {
 			Thread.sleep(50000);
@@ -80,11 +80,7 @@ class StreamingHttpEntity implements HttpEntity {
 		sendData(data.getBytes());
 	}
 	
-	public void sendData(byte[] data) {
-		if (os == null) {
-			queue.add(data);
-			return;
-		}
+	public void sendData(byte[] data, OutputStream os) {
 		try {
 			os.write(data);
 			os.flush();
@@ -92,6 +88,14 @@ class StreamingHttpEntity implements HttpEntity {
 			terminate = true;
 		}
 		thread.interrupt();
+	}
+	
+	public void sendData(byte[] data) {
+		if (os == null) {
+			queue.add(data);
+			return;
+		}
+		sendData(data, os);
 	}
 	
 	public void terminate() {

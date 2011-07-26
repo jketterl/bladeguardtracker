@@ -35,9 +35,13 @@ public class HttpStreamingThread extends Thread {
 		return client;
 	}
 	
-	private StreamingHttpEntity getEntity() {
+	private synchronized StreamingHttpEntity getEntity() {
 		if (entity == null) {
 			entity = new StreamingHttpEntity(this);
+			// username & password should go in as the very first data
+			if (this.userName != null && this.password != null) {
+				entity.sendData("uid=" + userName + "&pass=" + password);
+			}
 		}
 		return entity;
 	}
@@ -48,9 +52,6 @@ public class HttpStreamingThread extends Thread {
 			try {
 				HttpPost req = new HttpPost(Config.baseUrl + "log");
 				req.setEntity(getEntity());
-				if (this.userName != null && this.password != null) {
-					getEntity().sendData("uid=" + userName + "&pass=" + password);
-				}
 				getClient().execute(req).getEntity().consumeContent();
 				//entity = null;
 			} catch (ClientProtocolException e) {
@@ -65,11 +66,11 @@ public class HttpStreamingThread extends Thread {
 		getClient().getConnectionManager().shutdown();
 	}
 	
-	public void sendData(String data) {
+	public synchronized void sendData(String data) {
 		getEntity().sendData(data);
 	}
 	
-	public void sendData(byte[] data) {
+	public synchronized void sendData(byte[] data) {
 		getEntity().sendData(data);
 	}
 	
