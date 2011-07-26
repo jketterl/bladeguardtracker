@@ -6,6 +6,8 @@ import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Window;
+import android.widget.TextView;
 
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
@@ -63,8 +65,12 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	}
 	
     public void onCreate(Bundle savedInstanceState) {
-    	super.onCreate(savedInstanceState);
-    	setContentView(R.layout.map);
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        setContentView(R.layout.map);
+        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
+        TextView t = (TextView) findViewById(R.id.title);
+        t.setText(R.string.map_name);
     	
     	view = (MapView) findViewById(R.id.mapview);
     	view.setBuiltInZoomControls(true);

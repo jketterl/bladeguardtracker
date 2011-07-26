@@ -7,7 +7,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
@@ -15,7 +17,11 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.main);
+        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
+        TextView t = (TextView) findViewById(R.id.title);
+        t.setText(R.string.app_name);
         
         LocationManager m = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         final GPSListener l = GPSListener.getSharedInstance(getApplicationContext(), m);
