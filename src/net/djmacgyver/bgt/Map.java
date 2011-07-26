@@ -65,6 +65,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.map);
+    	setTitle(R.string.map_name);
     	
     	view = (MapView) findViewById(R.id.mapview);
     	view.setBuiltInZoomControls(true);
