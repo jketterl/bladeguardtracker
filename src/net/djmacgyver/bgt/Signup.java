@@ -17,9 +17,9 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.PreferenceManager;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.view.Window;
 import android.widget.TextView;
 
@@ -110,6 +110,7 @@ public class Signup extends PreferenceActivity {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								dialog.dismiss();
+								finish();
 							}
 					   });
 				d = builder.create();
