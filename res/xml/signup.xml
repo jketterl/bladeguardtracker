@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
   xmlns:android="http://schemas.android.com/apk/res/android">
-    <EditTextPreference android:title="@string/user_name" android:dialogTitle="@string/user_name" android:key="username" android:summary="@string/user_name_summary"></EditTextPreference>
-    <EditTextPreference android:title="@string/user_password" android:dialogTitle="@string/user_password" android:key="password" android:password="true"></EditTextPreference>
-    <EditTextPreference android:title="@string/user_password_confirm" android:dialogTitle="@string/user_password_confirm" android:key="password_confirm" android:password="true"></EditTextPreference>
+    <EditTextPreference android:title="@string/user_name" android:dialogTitle="@string/user_name" android:key="username" android:summary="@string/user_name_summary" android:persistent="false"></EditTextPreference>
+    <EditTextPreference android:title="@string/user_password" android:dialogTitle="@string/user_password" android:key="password" android:persistent="false" android:password="true"></EditTextPreference>
+    <EditTextPreference android:title="@string/user_password_confirm" android:dialogTitle="@string/user_password_confirm" android:key="password_confirm" android:persistent="false" android:password="true"></EditTextPreference>
     <Preference android:title="@string/start_signup" android:key="signup" android:summary="@string/start_signup_summary"></Preference>
     
 </PreferenceScreen>
