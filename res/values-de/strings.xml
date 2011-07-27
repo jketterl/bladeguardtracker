@@ -16,5 +16,6 @@
     <string name="user_name_summary">Dein gewünschter Benutzername</string>
     <string name="signup_progress">Der Benutzer wird angelegt...""</string>
     <string name="signup_successful">Der Benutzer wurde erfolgreich angelegt</string>
-    <string name="signup_failed">Der Benutzer konnte nicht angelegt werden. Die Fehlermeldung des Servers lautete:</string>
+    <string name="signup_failed">Der Benutzer konnte nicht angelegt werden, da der folgende Fehler aufgetreten ist:</string>
+    <string name="signup_server_message">Der Server meldete den Fehler:</string>
 </resources>

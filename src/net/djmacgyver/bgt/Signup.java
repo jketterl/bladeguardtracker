@@ -61,7 +61,7 @@ public class Signup extends PreferenceActivity {
 						HttpEntity e = res.getEntity();
 						BufferedReader in = new BufferedReader(new InputStreamReader(e.getContent()));
 						String line = null;
-						String message = "";
+						String message = getResources().getString(R.string.signup_server_message) + "\n\n";
 						while ((line = in.readLine()) != null) message = message.concat(line);
 						Bundle b = new Bundle();
 						b.putString("message", message);
@@ -71,6 +71,11 @@ public class Signup extends PreferenceActivity {
 					}
 				} catch (Exception e) {
 					dismissDialog(DIALOG_SIGNUP_RUNNING);
+					
+					Bundle b = new Bundle();
+					b.putString("message", "Unable to communicate with the server");
+					showDialog(DIALOG_SIGNUP_FAILED, b);
+					
 					e.printStackTrace();
 				}
 				
