@@ -22,9 +22,9 @@
     <string name="start_signup_summary">Register this user with the server now</string>
     <string name="user_name_summary">Your desired username</string>
     <string name="signup_progress">User is being created...""</string>
-    <string name="signup_successful">User successfully created</string>
+    <string name="signup_successful">User successfully created.</string>
     <string name="signup_failed">The user could not be created. The following error occured:</string>
     <string name="signup_server_message">Server reported error:</string>
-    <string name="server_down">Unable to communicate with the server</string>
+    <string name="server_down">Unable to communicate with the server.</string>
     <string name="ok">OK</string>
 </resources>
