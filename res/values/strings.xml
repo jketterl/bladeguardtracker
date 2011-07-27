@@ -26,5 +26,8 @@
     <string name="signup_failed">The user could not be created. The following error occured:</string>
     <string name="signup_server_message">Server reported error:</string>
     <string name="server_down">Unable to communicate with the server.</string>
+    <string name="username_must_not_be_empty">Username must not be empty!</string>
+    <string name="password_must_not_be_empty">Password must not be empty!</string>
+    <string name="password_mismatch">Passwords do not match!</string>
     <string name="ok">OK</string>
 </resources>

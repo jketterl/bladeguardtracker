@@ -15,8 +15,11 @@
     <string name="start_signup_summary">Diesen Benutzer jetzt am Server anlegen</string>
     <string name="user_name_summary">Dein gewünschter Benutzername</string>
     <string name="signup_progress">Der Benutzer wird angelegt...""</string>
-    <string name="signup_successful">Der Benutzer wurde erfolgreich angelegt</string>
+    <string name="signup_successful">Der Benutzer wurde erfolgreich angelegt.</string>
     <string name="signup_failed">Der Benutzer konnte nicht angelegt werden, da der folgende Fehler aufgetreten ist:</string>
     <string name="signup_server_message">Der Server meldete den Fehler:</string>
-    <string name="server_down">Es konnte keine Verbindung zum Server hergestellt werden</string>
+    <string name="server_down">Es konnte keine Verbindung zum Server hergestellt werden.</string>
+    <string name="username_must_not_be_empty">Der Benutzername darf nicht leer sein!</string>
+    <string name="password_must_not_be_empty">Das Passwort darf nicht leer sein!</string>
+    <string name="password_mismatch">Die eingegebenen Passwörter stimmen nicht überein!</string>
 </resources>

@@ -45,9 +45,22 @@ public class Signup extends PreferenceActivity {
         signup.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				if (p.getString("username", "").equals("")) return false;
-				if (p.getString("password", "").equals("")) return false;
-				if (!p.getString("password", "a").equals(p.getString("password_confirm", "b"))) return false;
+				Bundle b = new Bundle();
+				if (p.getString("username", "").equals("")) {
+					b.putString("message", getResources().getString(R.string.username_must_not_be_empty));
+					showDialog(DIALOG_SIGNUP_FAILED, b);
+					return false;
+				}
+				if (p.getString("password", "").equals("")) {
+					b.putString("message", getResources().getString(R.string.password_must_not_be_empty));
+					showDialog(DIALOG_SIGNUP_FAILED, b);
+					return false;
+				}
+				if (!p.getString("password", "a").equals(p.getString("password_confirm", "b"))) {
+					b.putString("message", getResources().getString(R.string.password_mismatch));
+					showDialog(DIALOG_SIGNUP_FAILED, b);
+					return false;
+				}
 				
 				showDialog(DIALOG_SIGNUP_RUNNING);
 				
@@ -63,7 +76,6 @@ public class Signup extends PreferenceActivity {
 						String line = null;
 						String message = getResources().getString(R.string.signup_server_message) + "\n\n";
 						while ((line = in.readLine()) != null) message = message.concat(line);
-						Bundle b = new Bundle();
 						b.putString("message", message);
 						showDialog(DIALOG_SIGNUP_FAILED, b);
 					} else {
@@ -72,7 +84,6 @@ public class Signup extends PreferenceActivity {
 				} catch (Exception e) {
 					dismissDialog(DIALOG_SIGNUP_RUNNING);
 					
-					Bundle b = new Bundle();
 					b.putString("message", getResources().getString(R.string.server_down));
 					showDialog(DIALOG_SIGNUP_FAILED, b);
 					
