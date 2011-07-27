@@ -4,6 +4,9 @@ import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.upstream.Connection;
 import net.djmacgyver.bgt.upstream.HttpStreamingConnection;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +23,7 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	private KeepAliveThread gpsReminder;
 	private boolean enabled = false;
 	private LocationManager locationManager;
+	private static final int NOTIFICATION = 1;
 	
 	@Override
 	public void onCreate() {
@@ -67,6 +71,9 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	}
 	
 	public void disable() {
+		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.cancel(NOTIFICATION);
+
 		locationManager.removeUpdates(this);
 		getConnection().disconnect();
 		getGpsReminder().terminate();
@@ -93,6 +100,13 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	public void enable() {
 		enabled = true;
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+		
+		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		Notification notification = new Notification(R.drawable.notification, "Bladeguard Tracker activated", System.currentTimeMillis());
+		Intent intent = new Intent(this, MainActivity.class);
+		notification.setLatestEventInfo(getApplicationContext(), "Bladeguard Tracker", "GPS Transmission is ongoing", PendingIntent.getActivity(this, 0, intent, 0));
+		notification.flags = Notification.FLAG_ONGOING_EVENT;
+		nm.notify(NOTIFICATION, notification);
 	}
 	
 	public boolean isEnabled() {
