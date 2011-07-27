@@ -22,4 +22,6 @@
     <string name="username_must_not_be_empty">Der Benutzername darf nicht leer sein!</string>
     <string name="password_must_not_be_empty">Das Passwort darf nicht leer sein!</string>
     <string name="password_mismatch">Die eingegebenen Passwörter stimmen nicht überein!</string>
+    <string name="tracker_activated">Bladeguard Tracker aktiviert</string>
+    <string name="gps_ongoing">GPS-Übertragung ist aktiv</string>
 </resources>

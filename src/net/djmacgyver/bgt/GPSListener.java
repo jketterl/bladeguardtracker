@@ -102,9 +102,18 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
 		
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		Notification notification = new Notification(R.drawable.notification, "Bladeguard Tracker activated", System.currentTimeMillis());
+		Notification notification = new Notification(
+				R.drawable.notification,
+				getResources().getString(R.string.tracker_activated),
+				System.currentTimeMillis()
+		);
 		Intent intent = new Intent(this, MainActivity.class);
-		notification.setLatestEventInfo(getApplicationContext(), "Bladeguard Tracker", "GPS Transmission is ongoing", PendingIntent.getActivity(this, 0, intent, 0));
+		notification.setLatestEventInfo(
+				getApplicationContext(),
+				getResources().getString(R.string.app_name),
+				getResources().getString(R.string.gps_ongoing),
+				PendingIntent.getActivity(this, 0, intent, 0)
+		);
 		notification.flags = Notification.FLAG_ONGOING_EVENT;
 		nm.notify(NOTIFICATION, notification);
 	}

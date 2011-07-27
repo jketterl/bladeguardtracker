@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Bladeguard Tracker</string>
+    <string name="ok">OK</string>
     <string name="locate">Show my Position to others</string>
     <string name="map_name">Map View</string>
     <!-- debug @ work -->
@@ -29,5 +30,6 @@
     <string name="username_must_not_be_empty">Username must not be empty!</string>
     <string name="password_must_not_be_empty">Password must not be empty!</string>
     <string name="password_mismatch">Passwords do not match!</string>
-    <string name="ok">OK</string>
+    <string name="tracker_activated">Bladeguard Tracker activated</string>
+    <string name="gps_ongoing">GPS Transmission is ongoing</string>
 </resources>
