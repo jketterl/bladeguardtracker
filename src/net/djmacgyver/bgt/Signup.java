@@ -73,7 +73,7 @@ public class Signup extends PreferenceActivity {
 					dismissDialog(DIALOG_SIGNUP_RUNNING);
 					
 					Bundle b = new Bundle();
-					b.putString("message", "Unable to communicate with the server");
+					b.putString("message", getResources().getString(R.string.server_down));
 					showDialog(DIALOG_SIGNUP_FAILED, b);
 					
 					e.printStackTrace();
