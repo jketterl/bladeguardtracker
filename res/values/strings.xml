@@ -23,6 +23,6 @@
     <string name="user_name_summary">Your desired username</string>
     <string name="signup_progress">User is being created...""</string>
     <string name="signup_successful">User successfully created</string>
-    <string name="signup_failed">The user could not be created. The error essage returned from the server was:</string>
+    <string name="signup_failed">The user could not be created. The error message returned from the server was:</string>
     <string name="ok">OK</string>
 </resources>
