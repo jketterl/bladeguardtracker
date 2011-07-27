@@ -1,7 +1,12 @@
 package net.djmacgyver.bgt;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 import net.djmacgyver.bgt.http.HttpClient;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 
@@ -39,7 +44,13 @@ public class Signup extends PreferenceActivity {
 				HttpPost req = new HttpPost(Config.baseUrl + "signup");
 				try {
 					req.setEntity(new StringEntity("user=" + p.getString("username", null) + "&pass=" + p.getString("password", "")));
-					c.execute(req);
+					HttpResponse res = c.execute(req);
+					if (res.getStatusLine().getStatusCode() != 200) {
+						HttpEntity e = res.getEntity();
+						BufferedReader in = new BufferedReader(new InputStreamReader(e.getContent()));
+						String line = null;
+						while ((line = in.readLine()) != null) System.out.println(line);
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
