@@ -17,6 +17,7 @@
         <uses-library android:required="true" android:name="com.google.android.maps"></uses-library>
         <activity android:name="Settings" android:label="@string/settings"></activity>
         <activity android:name="Signup"></activity>
+        <service android:name="GPSListener"></service>
 
     </application>
 </manifest>

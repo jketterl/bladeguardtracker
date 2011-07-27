@@ -1,10 +1,12 @@
 package net.djmacgyver.bgt;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.location.LocationManager;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,7 +17,22 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
-    /** Called when the activity is first created. */
+	private GPSListener service;
+	private boolean bound = false;
+    ServiceConnection conn = new ServiceConnection() {
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			service = null;
+		}
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder binder) {
+			service = ((GPSListener.LocalBinder) binder).getService();
+	        ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
+	        b.setChecked(service.isEnabled());
+		}
+	};
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,20 +42,18 @@ public class MainActivity extends Activity {
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.app_name);
         
-        LocationManager m = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        final GPSListener l = GPSListener.getSharedInstance(getApplicationContext(), m);
+        startService(new Intent(this, GPSListener.class));
+        bindService(new Intent(this, GPSListener.class), conn, Context.BIND_AUTO_CREATE);
+        bound = true;
         
         ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
-
-        b.setChecked(l.isEnabled());
-        
         b.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (((ToggleButton) v).isChecked()) {
-					l.enable();
+					service.enable();
 				} else {
-					l.disable();
+					service.disable();
 				}
 			}
 		});
@@ -68,6 +83,16 @@ public class MainActivity extends Activity {
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (bound) {
+			if (!service.isEnabled()) stopService(new Intent(this, GPSListener.class));
+			unbindService(conn);
+			bound = false;
 		}
 	}
 }

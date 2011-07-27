@@ -4,42 +4,35 @@ import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.upstream.Connection;
 import net.djmacgyver.bgt.upstream.HttpStreamingConnection;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 
-public class GPSListener implements LocationListener, KeepAliveTarget {
-	private static GPSListener sharedInstance;
+public class GPSListener extends Service implements LocationListener, KeepAliveTarget {
 	private Connection conn;
-	private Context context;
 	private KeepAliveThread gpsReminder;
 	private boolean enabled = false;
 	private LocationManager locationManager;
 	
-	public GPSListener(Context context, LocationManager locationManager) {
-		this.context = context;
-		this.locationManager = locationManager;
-	}
-
-	public static GPSListener getSharedInstance(Context context, LocationManager m) {
-		if (sharedInstance == null) {
-			sharedInstance = new GPSListener(context, m);
-		}
-		return sharedInstance;
+	@Override
+	public void onCreate() {
+		this.locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 	}
 	
-	public static boolean isActive() {
-		if (sharedInstance == null) return false;
-		return sharedInstance.isEnabled();
+	public void onDestroy() {
+		this.disable();
 	}
 	
 	private Connection getConnection() {
 		if (conn == null) {
-			//conn = new HttpPollingConnection(context);
-			conn = new HttpStreamingConnection(context);
+			conn = new HttpStreamingConnection(getApplicationContext());
 			conn.connect();
 		}
 		return conn;
@@ -104,5 +97,23 @@ public class GPSListener implements LocationListener, KeepAliveTarget {
 	
 	public boolean isEnabled() {
 		return enabled;
+	}
+	
+	public class LocalBinder extends Binder {
+		public GPSListener getService() {
+			return GPSListener.this;
+		}
+	}
+	
+	private final Binder binder = new LocalBinder();
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return binder;
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		return START_STICKY;
 	}
 }
