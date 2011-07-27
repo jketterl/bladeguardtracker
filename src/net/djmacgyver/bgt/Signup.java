@@ -14,12 +14,11 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 import android.view.Window;
 import android.widget.TextView;
 
@@ -40,23 +39,26 @@ public class Signup extends PreferenceActivity {
 
         Preference signup = findPreference("signup");
 
-		final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        
         signup.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
+				String username = ((EditTextPreference) findPreference("username")).getEditText().getText().toString();
+				String password = ((EditTextPreference) findPreference("password")).getEditText().getText().toString();
+				String passwordConfirmation = ((EditTextPreference) findPreference("password_confirm")).getEditText().getText().toString();
+		        
 				Bundle b = new Bundle();
-				if (p.getString("username", "").equals("")) {
+				
+				if (username.equals("")) {
 					b.putString("message", getResources().getString(R.string.username_must_not_be_empty));
 					showDialog(DIALOG_SIGNUP_FAILED, b);
 					return false;
 				}
-				if (p.getString("password", "").equals("")) {
+				if (password.equals("")) {
 					b.putString("message", getResources().getString(R.string.password_must_not_be_empty));
 					showDialog(DIALOG_SIGNUP_FAILED, b);
 					return false;
 				}
-				if (!p.getString("password", "a").equals(p.getString("password_confirm", "b"))) {
+				if (!password.equals(passwordConfirmation)) {
 					b.putString("message", getResources().getString(R.string.password_mismatch));
 					showDialog(DIALOG_SIGNUP_FAILED, b);
 					return false;
@@ -67,7 +69,7 @@ public class Signup extends PreferenceActivity {
 				HttpClient c = new HttpClient(getApplicationContext());
 				HttpPost req = new HttpPost(Config.baseUrl + "signup");
 				try {
-					req.setEntity(new StringEntity("user=" + p.getString("username", null) + "&pass=" + p.getString("password", "")));
+					req.setEntity(new StringEntity("user=" + username + "&pass=" + password));
 					HttpResponse res = c.execute(req);
 					dismissDialog(DIALOG_SIGNUP_RUNNING);
 					if (res.getStatusLine().getStatusCode() != 200) {
@@ -89,7 +91,7 @@ public class Signup extends PreferenceActivity {
 					
 					e.printStackTrace();
 				}
-				
+
 				return true;
 			}
 		});
