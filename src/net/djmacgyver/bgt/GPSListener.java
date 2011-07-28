@@ -71,6 +71,7 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	}
 	
 	public void disable() {
+		if (!enabled) return;
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(NOTIFICATION);
 
