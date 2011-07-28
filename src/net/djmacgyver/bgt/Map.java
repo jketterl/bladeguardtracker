@@ -3,9 +3,14 @@ package net.djmacgyver.bgt;
 import net.djmacgyver.bgt.downstream.HttpConnection;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Window;
 import android.widget.TextView;
 
@@ -20,6 +25,29 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	private HttpConnection updater;
 	private KeepAliveThread refresher;
 	private RouteOverlay route;
+	private GPSListener service;
+	private boolean bound = false;
+    ServiceConnection conn = new ServiceConnection() {
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			service = null;
+			if (!hasLocationOverlay()) return;
+	    	view = (MapView) findViewById(R.id.mapview);
+	    	view.getOverlays().remove(getLocationOverlay());
+	    	getLocationOverlay().disableMyLocation();
+	    	setLocationOverlay(null);
+		}
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder binder) {
+			service = ((GPSListener.LocalBinder) binder).getService();
+			if (!service.isEnabled()) return;
+	    	view = (MapView) findViewById(R.id.mapview);
+			setLocationOverlay(new MyLocationOverlay(getApplicationContext(), view));
+			getLocationOverlay().enableMyLocation();
+	    	view.getOverlays().add(getLocationOverlay());
+		}
+	};
 	
 	private RouteOverlay getRoute() {
 		if (route == null) {
@@ -41,11 +69,16 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		return users;
 	}
 	
-	private MyLocationOverlay getMyLocationOverlay() {
-		if (myLoc == null) {
-			myLoc = new MyLocationOverlay(getApplicationContext(), view);			
-		}
+	private MyLocationOverlay getLocationOverlay() {
 		return myLoc;
+	}
+	
+	private void setLocationOverlay(MyLocationOverlay myLoc) {
+		this.myLoc = myLoc;
+	}
+	
+	private boolean hasLocationOverlay() {
+		return myLoc != null;
 	}
 	
 	private HttpConnection getUpdater()
@@ -77,10 +110,21 @@ public class Map extends MapActivity implements KeepAliveTarget {
     	
     	view.getOverlays().add(getRoute());
     	view.getOverlays().add(getUserOverlay());
-    	view.getOverlays().add(getMyLocationOverlay());
 
+        bindService(new Intent(this, GPSListener.class), conn, Context.BIND_AUTO_CREATE);
+        bound = true;
+    	
     	new MapDownloaderThread(getApplicationContext(), getRoute(), view).start();
     }
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (bound) {
+			unbindService(conn);
+			bound = false;
+		}
+	}
 
 	@Override
 	protected boolean isRouteDisplayed() {
@@ -97,17 +141,15 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		super.onResume();
     	getUpdater().start();
     	getRefresher().start();
-    	if (true/*GPSListener.isActive()*/) {
-	    	getMyLocationOverlay().enableMyLocation();
-	    	getMyLocationOverlay().enableCompass();
+    	if (service != null && hasLocationOverlay() && service.isEnabled()) {
+    		getLocationOverlay().enableMyLocation();
     	}
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		getMyLocationOverlay().disableCompass();
-		getMyLocationOverlay().disableMyLocation();
+		if (hasLocationOverlay()) getLocationOverlay().disableMyLocation();
 		getUpdater().terminate();
 		this.updater = null;
 		getRefresher().terminate();
