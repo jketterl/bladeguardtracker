@@ -51,7 +51,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	
 	private RouteOverlay getRoute() {
 		if (route == null) {
-			route = new RouteOverlay();
+			route = new RouteOverlay(view);
 			route.getPaint().setAntiAlias(true);
 			route.getPaint().setColor(Color.BLUE);
 			route.getPaint().setAlpha(64);
@@ -84,7 +84,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	private HttpConnection getUpdater()
 	{
 		if (updater == null) {
-			updater = new HttpConnection(getUserOverlay(), getApplicationContext());
+			updater = new HttpConnection(getUserOverlay(), getRoute(), getApplicationContext());
 		}
 		return updater;
 	}
@@ -114,7 +114,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
         bindService(new Intent(this, GPSListener.class), conn, Context.BIND_AUTO_CREATE);
         bound = true;
     	
-    	new MapDownloaderThread(getApplicationContext(), getRoute(), view).start();
+    	//new MapDownloaderThread(getApplicationContext(), getRoute(), view).start();
     }
 
 	@Override

@@ -1,9 +1,11 @@
 package net.djmacgyver.bgt.downstream;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.util.Iterator;
 
+import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -14,6 +16,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import net.djmacgyver.bgt.Config;
+import net.djmacgyver.bgt.RouteOverlay;
 import net.djmacgyver.bgt.UserOverlay;
 import net.djmacgyver.bgt.http.HttpClient;
 
@@ -32,13 +35,15 @@ import com.google.android.maps.GeoPoint;
 
 public class HttpConnection extends Thread {
 	private UserOverlay users;
+	private RouteOverlay route;
 	private HttpClient client;
 	private Context context;
 	private boolean terminate = false;
 	
-	public HttpConnection(UserOverlay users, Context context) {
+	public HttpConnection(UserOverlay users, RouteOverlay route, Context context) {
 		this.users = users;
 		this.context = context;
+		this.route = route;
 	}
 	
 	private HttpClient getClient()
@@ -57,13 +62,34 @@ public class HttpConnection extends Thread {
 		InputSource in = new InputSource();
 		XPathFactory xfactory = XPathFactory.newInstance();
 		XPath x = xfactory.newXPath();
+		x.setNamespaceContext(new NamespaceContext() {
+			@Override
+			public Iterator<String> getPrefixes(String namespaceURI) {
+				return null;
+			}
+			
+			@Override
+			public String getPrefix(String namespaceURI) {
+				return null;
+			}
+			
+			@Override
+			public String getNamespaceURI(String prefix) {
+				if (prefix.equals("gpx")) return "http://www.topografix.com/GPX/1/1";
+				return null;
+			}
+		});
+		XPathExpression pointExpr;
 		XPathExpression userExpr;
 		XPathExpression locationExpr;
 		XPathExpression quitExpr;
+		XPathExpression mapExpr;
 		try {
-			userExpr = x.compile("/movements/user");
+			userExpr = x.compile("/updates/movements/user");
 			locationExpr = x.compile("location[1]");
-			quitExpr = x.compile("/quit/user");
+			quitExpr = x.compile("/updates/quit/user");
+			mapExpr = x.compile("/updates/map[1]");
+			pointExpr = x.compile("gpx:gpx/gpx:rte/gpx:rtept");
 		} catch (XPathExpressionException e2) {
 			e2.printStackTrace();
 			return;
@@ -85,9 +111,14 @@ public class HttpConnection extends Thread {
 			byte[] buf = new byte[4096];
 			int read = 0;
 			while (!terminate) do {
-				read = is.read(buf);
+				String xml = "";
+				do {
+					read = is.read(buf);
+					xml = xml.concat(new String(buf, 0, read));
+				} while (read == 4096);
+
 				if (terminate) break;
-				in.setByteStream(new ByteArrayInputStream(buf, 0, read));
+				in.setCharacterStream(new StringReader(xml));
 				Document dom = builder.parse(in);
 				
 				// get location updates
@@ -111,6 +142,21 @@ public class HttpConnection extends Thread {
 				for (int i = 0; i < users.getLength(); i++) {
 					int userId = Integer.parseInt(users.item(i).getAttributes().getNamedItem("id").getNodeValue());
 					this.users.removeUser(userId);
+				}
+				
+				Node map = (Node) mapExpr.evaluate(dom, XPathConstants.NODE);
+				if (map != null) {
+					NodeList points = (NodeList) pointExpr.evaluate(map, XPathConstants.NODESET);
+					GeoPoint[] geoPoints = new GeoPoint[points.getLength()];
+					for (int i = 0; i < points.getLength(); i++) {
+						GeoPoint gPoint = new GeoPoint(
+								(int) (Float.parseFloat(points.item(i).getAttributes().getNamedItem("lat").getNodeValue()) * 1E6),
+								(int) (Float.parseFloat(points.item(i).getAttributes().getNamedItem("lon").getNodeValue()) * 1E6)
+						);
+						geoPoints[i] = gPoint;
+					}
+					
+					route.setPoints(geoPoints);
 				}
 			} while (read >= 0);
 		} catch (ClientProtocolException e) {
