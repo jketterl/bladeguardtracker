@@ -20,7 +20,8 @@ public class RouteOverlay extends Overlay {
 	public void setPoints(GeoPoint[] points) {
 		this.points = points;
 		// zoom in to the route
-		int minLat = 360000000, maxLat = 0, minLon = 360000000, maxLon = 0;
+		if (points.length == 0) return;
+		int minLat = 90000000, maxLat = -90000000, minLon = 180000000, maxLon = -180000000;
 		for (int i = 0; i < points.length; i++) {
 			minLat = Math.min(minLat, points[i].getLatitudeE6());
 			maxLat = Math.max(maxLat, points[i].getLatitudeE6());
