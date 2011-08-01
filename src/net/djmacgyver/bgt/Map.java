@@ -10,7 +10,9 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.view.Window;
 import android.widget.TextView;
 
@@ -84,7 +86,13 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	private HttpConnection getUpdater()
 	{
 		if (updater == null) {
-			updater = new HttpConnection(getUserOverlay(), getRoute(), getApplicationContext());
+			final TextView length = (TextView) findViewById(R.id.bladeNightLength);
+			Handler h = new Handler(){
+				public void handleMessage(Message msg) {
+					length.setText((String) msg.obj);
+				}
+			};
+			updater = new HttpConnection(getUserOverlay(), getRoute(), getApplicationContext(), h);
 		}
 		return updater;
 	}

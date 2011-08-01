@@ -11,5 +11,7 @@
     android:clickable="true"
     android:apiKey="@string/maps_api_key"
   android:id="@+id/mapview"/>
+  
+  <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/bladeNightLength"></TextView>
     
 </RelativeLayout>

@@ -3,6 +3,7 @@ package net.djmacgyver.bgt.downstream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.text.DecimalFormat;
 import java.util.Iterator;
 
 import javax.xml.namespace.NamespaceContext;
@@ -30,6 +31,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 
 import com.google.android.maps.GeoPoint;
 
@@ -39,11 +42,13 @@ public class HttpConnection extends Thread {
 	private HttpClient client;
 	private Context context;
 	private boolean terminate = false;
+	private Handler length;
 	
-	public HttpConnection(UserOverlay users, RouteOverlay route, Context context) {
+	public HttpConnection(UserOverlay users, RouteOverlay route, Context context, Handler h) {
 		this.users = users;
 		this.context = context;
 		this.route = route;
+		this.length = h;
 	}
 	
 	private HttpClient getClient()
@@ -84,12 +89,14 @@ public class HttpConnection extends Thread {
 		XPathExpression locationExpr;
 		XPathExpression quitExpr;
 		XPathExpression mapExpr;
+		XPathExpression statsExpr;
 		try {
 			userExpr = x.compile("/updates/movements/user");
 			locationExpr = x.compile("location[1]");
 			quitExpr = x.compile("/updates/quit/user");
 			mapExpr = x.compile("/updates/map[1]");
 			pointExpr = x.compile("gpx:gpx/gpx:rte/gpx:rtept");
+			statsExpr = x.compile("/updates/stats[1]");
 		} catch (XPathExpressionException e2) {
 			e2.printStackTrace();
 			return;
@@ -157,6 +164,21 @@ public class HttpConnection extends Thread {
 					}
 					
 					route.setPoints(geoPoints);
+				}
+				
+				Node stats = (Node) statsExpr.evaluate(dom, XPathConstants.NODE);
+				if (stats != null) {
+					String l = stats.getChildNodes().item(0).getTextContent();
+					Message msg = new Message();
+					try {
+						float le = Float.parseFloat(l);
+						DecimalFormat df = new DecimalFormat("0.###");
+						msg.obj = "Zuglänge: " + df.format(le) + " km";
+					} catch (Exception e) {
+						e.printStackTrace();
+						msg.obj = "Zuglänge derzeit unbekannt";
+					}
+					this.length.sendMessage(msg);
 				}
 			} while (read >= 0);
 		} catch (ClientProtocolException e) {
