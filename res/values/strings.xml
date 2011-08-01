@@ -5,11 +5,11 @@
     <string name="locate">Send my position to the tracking server</string>
     <string name="map_name">Map View</string>
     <!-- debug @ work -->
-    <string name="maps_api_key">0sV9DhmcIBklu64CzNzfQ5cjgwIcA3cdvJVM9lg</string>
+    <!-- <string name="maps_api_key">0sV9DhmcIBklu64CzNzfQ5cjgwIcA3cdvJVM9lg</string> -->
     <!-- debug @ home -->
     <!-- <string name="maps_api_key">08cvEnK6frIUm2eoWIjal7KyBmUhpszplHN9mkg</string> -->
     <!-- production -->
-    <!-- <string name="maps_api_key">0sV9DhmcIBkl5R6-R6LgceWTI7XbR4zOzmICc-w</string> -->
+    <string name="maps_api_key">0sV9DhmcIBkl5R6-R6LgceWTI7XbR4zOzmICc-w</string>
     <string name="settings">Settings</string>
     <string name="user_preferences">User Settings</string>
     <string name="user_name">Username</string>
