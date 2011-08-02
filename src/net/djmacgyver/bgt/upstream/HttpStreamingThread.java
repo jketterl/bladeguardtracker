@@ -5,8 +5,10 @@ import java.io.IOException;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.http.HttpClient;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 
 import android.content.Context;
 
@@ -38,10 +40,6 @@ public class HttpStreamingThread extends Thread {
 	private synchronized StreamingHttpEntity getEntity() {
 		if (entity == null) {
 			entity = new StreamingHttpEntity(this);
-			// username & password should go in as the very first data
-			if (this.userName != null && this.password != null) {
-				entity.sendData("uid=" + userName + "&pass=" + password);
-			}
 		}
 		return entity;
 	}
@@ -50,6 +48,18 @@ public class HttpStreamingThread extends Thread {
 	public void run() {
 		while (!terminate) {
 			try {
+				if (userName != null && password != null) {
+					HttpPost login = new HttpPost(context.getResources().getString(R.string.base_url) + "login");
+					login.setEntity(new StringEntity("user=" + userName + "&pass=" + password));
+					HttpResponse res = getClient().execute(login);
+					if (res.getStatusLine().getStatusCode() != 200) {
+						System.out.println("login failed");
+						terminate();
+						continue;
+					}
+					res.getEntity().consumeContent();
+				}
+				
 				HttpPost req = new HttpPost(context.getResources().getString(R.string.base_url) + "log");
 				req.setEntity(getEntity());
 				getClient().execute(req).getEntity().consumeContent();
