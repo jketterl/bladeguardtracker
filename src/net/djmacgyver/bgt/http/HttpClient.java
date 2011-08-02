@@ -17,6 +17,7 @@ import javax.net.ssl.X509TrustManager;
 
 import net.djmacgyver.bgt.R;
 
+import org.apache.http.client.CookieStore;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -32,6 +33,8 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 
 public class HttpClient extends DefaultHttpClient {
+	private static CookieStore cookieStore;
+	
 	private class EasySSLSocketFactory extends SSLSocketFactory {
 	    SSLContext sslContext = SSLContext.getInstance("TLS");
 
@@ -126,5 +129,13 @@ public class HttpClient extends DefaultHttpClient {
 			e.printStackTrace();
 		}
 		return params;
+	}
+
+	@Override
+	protected CookieStore createCookieStore() {
+		if (cookieStore == null) {
+			cookieStore = super.createCookieStore();
+		}
+		return cookieStore;
 	}
 }
