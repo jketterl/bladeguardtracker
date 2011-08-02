@@ -174,8 +174,7 @@ public class HttpConnection extends Thread {
 						float le = Float.parseFloat(l);
 						DecimalFormat df = new DecimalFormat("0.###");
 						msg.obj = "Zuglänge: " + df.format(le) + " km";
-					} catch (Exception e) {
-						e.printStackTrace();
+					} catch (NumberFormatException e) {
 						msg.obj = "Zuglänge derzeit unbekannt";
 					}
 					this.length.sendMessage(msg);
