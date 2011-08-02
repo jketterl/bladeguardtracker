@@ -5,7 +5,6 @@ import java.util.HashMap;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.Map;
 import android.graphics.Canvas;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,11 +15,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
-import com.google.android.maps.Projection;
 
 public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 	private HashMap<Integer, UserOverlayItem> overlays = new HashMap<Integer, UserOverlayItem>();
@@ -90,7 +87,7 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 	private void displayBubble(OverlayItem item) {
 		// Hide the bubble if it's already showing for another result
 		map.getMap().removeView(getBubble());
-		bubble.setVisibility(View.GONE);
+		getBubble().setVisibility(View.GONE);
 
 		// Set some view content
 		TextView username = (TextView) getBubble().findViewById(R.id.username);
@@ -111,38 +108,39 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 
 		getBubble().setLayoutParams(params);
 
-		map.getMap().addView(bubble);
+		map.getMap().addView(getBubble());
 		// Measure the bubble so it can be placed on the map
 		map.getMap().measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
 							 MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+		
+		getBubble().setVisibility(View.VISIBLE);
 
 		// Runnable to fade the bubble in when we've finished animatingTo our
 		// OverlayItem (below)
+		/*
 		Runnable r = new Runnable() {
 			public void run() {
-				/*
-				Animation fadeIn = AnimationUtils.loadAnimation(map,
-						R.anim.fadein);
-				*/
-				bubble.setVisibility(View.VISIBLE);
-				//bubble.startAnimation(fadeIn);
+				getBubble().setVisibility(View.VISIBLE);
 			}
 		};
+		*/
 
 		// This projection and offset finds us a new GeoPoint slightly below the
 		// actual OverlayItem,
 		// which means the bubble will end up being centered nicely when we tap
 		// on an Item.
+		/*
 		Projection projection = map.getMap().getProjection();
 		Point p = new Point();
 
 		projection.toPixels(item.getPoint(), p);
-		p.offset(0, -(bubble.getMeasuredHeight() / 2));
+		p.offset(0, -(getBubble().getMeasuredHeight() / 2));
 		GeoPoint target = projection.fromPixels(p.x, p.y);
+		*/
 
 		// Move the MapView to our point, and then call the Runnable that fades
 		// in the bubble.
-		map.getMap().getController().animateTo(target, r);
+		//map.getMap().getController().animateTo(target, r);
 	}
 
 	@Override
@@ -154,5 +152,11 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 	public void pop() {
 		setLastFocusedIndex(-1);
 		populate();
+	}
+
+	@Override
+	public boolean draw(Canvas canvas, MapView mapView, boolean shadow,
+			long when) {
+		return super.draw(canvas, mapView, false, when);
 	}
 }
