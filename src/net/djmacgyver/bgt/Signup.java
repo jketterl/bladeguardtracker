@@ -67,7 +67,7 @@ public class Signup extends PreferenceActivity {
 				showDialog(DIALOG_SIGNUP_RUNNING);
 				
 				HttpClient c = new HttpClient(getApplicationContext());
-				HttpPost req = new HttpPost(Config.baseUrl + "signup");
+				HttpPost req = new HttpPost(getResources().getString(R.string.base_url) + "signup");
 				try {
 					req.setEntity(new StringEntity("user=" + username + "&pass=" + password));
 					HttpResponse res = c.execute(req);

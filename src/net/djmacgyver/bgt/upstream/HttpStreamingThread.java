@@ -2,7 +2,7 @@ package net.djmacgyver.bgt.upstream;
 
 import java.io.IOException;
 
-import net.djmacgyver.bgt.Config;
+import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.http.HttpClient;
 
 import org.apache.http.client.ClientProtocolException;
@@ -50,7 +50,7 @@ public class HttpStreamingThread extends Thread {
 	public void run() {
 		while (!terminate) {
 			try {
-				HttpPost req = new HttpPost(Config.baseUrl + "log");
+				HttpPost req = new HttpPost(context.getResources().getString(R.string.base_url) + "log");
 				req.setEntity(getEntity());
 				getClient().execute(req).getEntity().consumeContent();
 				//entity = null;

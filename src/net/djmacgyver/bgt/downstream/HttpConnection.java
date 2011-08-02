@@ -16,7 +16,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import net.djmacgyver.bgt.Config;
+import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.RouteOverlay;
 import net.djmacgyver.bgt.UserOverlay;
 import net.djmacgyver.bgt.http.HttpClient;
@@ -108,7 +108,7 @@ public class HttpConnection extends Thread {
 			return;
 		}
 		while (!terminate) try {
-			HttpGet req = new HttpGet(Config.baseUrl + "stream");
+			HttpGet req = new HttpGet(context.getResources().getString(R.string.base_url) + "stream");
 			HttpEntity entity = getClient().execute(req).getEntity();
 			if (!entity.isStreaming()) return;
 			

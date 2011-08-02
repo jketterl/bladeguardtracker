@@ -3,7 +3,7 @@ package net.djmacgyver.bgt.upstream;
 import java.io.IOException;
 import java.util.Random;
 
-import net.djmacgyver.bgt.Config;
+import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 
 import org.apache.http.client.ClientProtocolException;
@@ -80,19 +80,19 @@ public class HttpPollingConnection extends Connection {
 	}
 	
 	protected void executeLocationSend(Location location) {
-		String url = Config.baseUrl + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude();
+		String url = context.getResources().getString(R.string.base_url) + "log?uid=" + this.userId + "&lat=" + location.getLatitude() + "&lon=" + location.getLongitude();
 		if (location.hasSpeed()) url += "&speed=" + location.getSpeed();
 		HttpGet req = new HttpGet(url);
 		sendRequest(req);
 	}
 	
 	public void sendQuit() {
-		HttpGet req = new HttpGet(Config.baseUrl + "quit?uid=" + this.userId);
+		HttpGet req = new HttpGet(context.getResources().getString(R.string.base_url) + "quit?uid=" + this.userId);
 		sendRequest(req);
 	}
 	
 	public void sendKeepAlive() {
-		HttpGet req = new HttpGet(Config.baseUrl + "keepalive?uid=" + this.userId);
+		HttpGet req = new HttpGet(context.getResources().getString(R.string.base_url) + "keepalive?uid=" + this.userId);
 		sendRequest(req);
 	}
 
