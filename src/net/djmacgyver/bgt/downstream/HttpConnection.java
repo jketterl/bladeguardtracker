@@ -151,7 +151,6 @@ public class HttpConnection extends Thread {
 						String team = user.getAttributes().getNamedItem("team").getNodeValue();
 						this.users.addUser(new UserOverlayItem(point, userId, userName, team));
 					}
-					this.users.pop();
 				}
 				
 				// get removals

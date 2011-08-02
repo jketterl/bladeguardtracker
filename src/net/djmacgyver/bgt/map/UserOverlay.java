@@ -15,11 +15,12 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 
-public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
+public class UserOverlay extends ItemizedOverlay<UserOverlayItem> implements UserOverlayItemListener {
 	private HashMap<Integer, UserOverlayItem> overlays = new HashMap<Integer, UserOverlayItem>();
 	private Map map;
 	private RelativeLayout bubble;
@@ -32,6 +33,7 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 	
 	public synchronized void addUser(UserOverlayItem user) {
 		overlays.put(user.getUserId(), user);
+		user.addListener(this);
 		populate();
 	}
 	
@@ -40,6 +42,8 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 	}
 	
 	public synchronized void removeUser(int userId) {
+		UserOverlayItem i = getUser(userId);
+		i.removeListener(this);
 		overlays.remove(userId);
 		setLastFocusedIndex(-1);
 		populate();
@@ -62,9 +66,13 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 	}
 
 	@Override
+	/**
+	 * overriding for two reasons:
+	 * 1: synchronized
+	 * 2: no shadow
+	 */
 	public synchronized void draw(Canvas canvas, MapView mapView, boolean shadow) {
-		// TODO Auto-generated method stub
-		super.draw(canvas, mapView, shadow);
+		super.draw(canvas, mapView, false);
 	}
 	
 	private RelativeLayout getBubble() {
@@ -149,14 +157,9 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 		return super.onTap(index);
 	}
 	
-	public void pop() {
+	@Override
+	public void pointUpdated(GeoPoint newPoint) {
 		setLastFocusedIndex(-1);
 		populate();
-	}
-
-	@Override
-	public boolean draw(Canvas canvas, MapView mapView, boolean shadow,
-			long when) {
-		return super.draw(canvas, mapView, false, when);
 	}
 }
