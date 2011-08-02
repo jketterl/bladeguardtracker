@@ -86,6 +86,7 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 		return bubble;
 	}
 
+	// bubble logic widely taken over from http://www.actionshrimp.com/2011/05/speech-bubble-popups-containing-a-view-for-android-mapview/
 	private void displayBubble(OverlayItem item) {
 		// Hide the bubble if it's already showing for another result
 		map.getMap().removeView(getBubble());
