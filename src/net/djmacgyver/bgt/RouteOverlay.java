@@ -17,7 +17,7 @@ public class RouteOverlay extends Overlay {
 		this.view = view;
 	}
 	
-	public void setPoints(GeoPoint[] points) {
+	public synchronized void setPoints(GeoPoint[] points) {
 		this.points = points;
 		// zoom in to the route
 		if (points.length == 0) return;
@@ -40,7 +40,7 @@ public class RouteOverlay extends Overlay {
 	}
 	
 	@Override
-	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
+	public synchronized void draw(Canvas canvas, MapView mapView, boolean shadow) {
 		super.draw(canvas, mapView, shadow);
 		if (points == null) return;
 
