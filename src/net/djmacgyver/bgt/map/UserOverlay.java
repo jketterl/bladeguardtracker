@@ -33,12 +33,20 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 		this.map = map;
 	}
 	
+	public synchronized void addUser(UserOverlayItem user) {
+		overlays.put(user.getUserId(), user);
+	}
+	
+	public UserOverlayItem getUser(int userId) {
+		return overlays.get(userId);
+	}
+	
 	public synchronized void updateUser(int userId, GeoPoint point) {
-		UserOverlayItem i = overlays.get(userId);
+		UserOverlayItem i = getUser(userId);
 		if (i != null) {
 			i.setPoint(point);
 		} else {
-			overlays.put(userId, new UserOverlayItem(point, Integer.toString(userId), "Bladeguard"));
+			this.addUser(new UserOverlayItem(point, userId, Integer.toString(userId), "Bladeguard"));
 		}
 		setLastFocusedIndex(-1);
 		populate();
