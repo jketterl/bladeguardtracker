@@ -1,8 +1,9 @@
-package net.djmacgyver.bgt;
+package net.djmacgyver.bgt.activity;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.http.HttpClient;
 
 import org.apache.http.HttpEntity;

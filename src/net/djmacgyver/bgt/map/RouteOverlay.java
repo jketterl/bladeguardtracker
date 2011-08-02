@@ -1,4 +1,4 @@
-package net.djmacgyver.bgt;
+package net.djmacgyver.bgt.map;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

@@ -1,8 +1,12 @@
-package net.djmacgyver.bgt;
+package net.djmacgyver.bgt.activity;
 
+import net.djmacgyver.bgt.GPSListener;
+import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.downstream.HttpConnection;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
+import net.djmacgyver.bgt.map.RouteOverlay;
+import net.djmacgyver.bgt.map.UserOverlay;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;

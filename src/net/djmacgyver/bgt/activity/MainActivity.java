@@ -1,5 +1,7 @@
-package net.djmacgyver.bgt;
+package net.djmacgyver.bgt.activity;
 
+import net.djmacgyver.bgt.GPSListener;
+import net.djmacgyver.bgt.R;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;

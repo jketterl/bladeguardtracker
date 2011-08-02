@@ -1,5 +1,6 @@
-package net.djmacgyver.bgt;
+package net.djmacgyver.bgt.activity;
 
+import net.djmacgyver.bgt.R;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;

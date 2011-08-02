@@ -1,7 +1,9 @@
-package net.djmacgyver.bgt;
+package net.djmacgyver.bgt.map;
 
 import java.util.HashMap;
 
+import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.activity.Map;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;

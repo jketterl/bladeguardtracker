@@ -17,9 +17,9 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.RouteOverlay;
-import net.djmacgyver.bgt.UserOverlay;
 import net.djmacgyver.bgt.http.HttpClient;
+import net.djmacgyver.bgt.map.RouteOverlay;
+import net.djmacgyver.bgt.map.UserOverlay;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;

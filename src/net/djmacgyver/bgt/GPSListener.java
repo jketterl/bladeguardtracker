@@ -1,5 +1,6 @@
 package net.djmacgyver.bgt;
 
+import net.djmacgyver.bgt.activity.MainActivity;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.upstream.Connection;

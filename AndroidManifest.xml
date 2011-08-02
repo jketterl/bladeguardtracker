@@ -6,17 +6,17 @@
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@style/net.djmacgyver.bgt.style">
-        <activity android:name="net.djmacgyver.bgt.MainActivity"
+        <activity android:name=".activity.MainActivity"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="Map" android:label="@string/map_name"/>
+        <activity android:name=".activity.Map" android:label="@string/map_name"/>
         <uses-library android:required="true" android:name="com.google.android.maps"></uses-library>
-        <activity android:name="Settings" android:label="@string/settings"></activity>
-        <activity android:name="Signup"></activity>
+        <activity android:name=".activity.Settings" android:label="@string/settings"></activity>
+        <activity android:name=".activity.Signup"></activity>
         <service android:name="GPSListener"></service>
 
     </application>
