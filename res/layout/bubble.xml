@@ -19,7 +19,7 @@
 	</LinearLayout>
 	<ImageView android:layout_height="wrap_content"
 		android:src="@drawable/balloon_overlay_close" android:layout_width="wrap_content"
-		android:paddingLeft="2dip" android:paddingRight="2dip"
+		android:paddingLeft="5dip" android:paddingRight="2dip"
 		android:paddingTop="2dip" android:paddingBottom="2dip"
 		android:id="@+id/balloon_overlay_close"
 		android:layout_toRightOf="@id/content"></ImageView>
