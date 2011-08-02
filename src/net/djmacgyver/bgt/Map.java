@@ -23,19 +23,19 @@ import com.google.android.maps.MyLocationOverlay;
 public class Map extends MapActivity implements KeepAliveTarget {
 	private UserOverlay users;
 	private MyLocationOverlay myLoc;
-	private MapView view;
 	private HttpConnection updater;
 	private KeepAliveThread refresher;
 	private RouteOverlay route;
 	private GPSListener service;
 	private boolean bound = false;
+	private MapView map;
+	
     ServiceConnection conn = new ServiceConnection() {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			service = null;
 			if (!hasLocationOverlay()) return;
-	    	view = (MapView) findViewById(R.id.mapview);
-	    	view.getOverlays().remove(getLocationOverlay());
+	    	getMap().getOverlays().remove(getLocationOverlay());
 	    	getLocationOverlay().disableMyLocation();
 	    	setLocationOverlay(null);
 		}
@@ -44,16 +44,22 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		public void onServiceConnected(ComponentName name, IBinder binder) {
 			service = ((GPSListener.LocalBinder) binder).getService();
 			if (!service.isEnabled()) return;
-	    	view = (MapView) findViewById(R.id.mapview);
-			setLocationOverlay(new MyLocationOverlay(getApplicationContext(), view));
+			setLocationOverlay(new MyLocationOverlay(getApplicationContext(), getMap()));
 			getLocationOverlay().enableMyLocation();
-	    	view.getOverlays().add(getLocationOverlay());
+	    	getMap().getOverlays().add(getLocationOverlay());
 		}
 	};
 	
+	public MapView getMap() {
+		if (map == null) {
+			map = (MapView) findViewById(R.id.mapview);
+		}
+		return map;
+	}
+	
 	private RouteOverlay getRoute() {
 		if (route == null) {
-			route = new RouteOverlay(view);
+			route = new RouteOverlay(getMap());
 			route.getPaint().setAntiAlias(true);
 			route.getPaint().setColor(Color.BLUE);
 			route.getPaint().setAlpha(64);
@@ -66,7 +72,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	{
 		if (users == null) {
 	    	Drawable d = this.getResources().getDrawable(R.drawable.map_pin);
-	    	users = new UserOverlay(d);
+	    	users = new UserOverlay(d, this);
 		}
 		return users;
 	}
@@ -113,11 +119,10 @@ public class Map extends MapActivity implements KeepAliveTarget {
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.map_name);
     	
-    	view = (MapView) findViewById(R.id.mapview);
-    	view.setBuiltInZoomControls(true);
+    	getMap().setBuiltInZoomControls(true);
     	
-    	view.getOverlays().add(getRoute());
-    	view.getOverlays().add(getUserOverlay());
+    	getMap().getOverlays().add(getRoute());
+    	getMap().getOverlays().add(getUserOverlay());
 
         bindService(new Intent(this, GPSListener.class), conn, Context.BIND_AUTO_CREATE);
         bound = true;
@@ -169,7 +174,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		if (source != getRefresher()) return;
 		runOnUiThread(new Runnable() {
 			public void run() {
-				view.invalidate();
+				getMap().invalidate();
 			}
 		});
 	}
