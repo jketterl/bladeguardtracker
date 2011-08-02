@@ -35,23 +35,13 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 	
 	public synchronized void addUser(UserOverlayItem user) {
 		overlays.put(user.getUserId(), user);
+		populate();
 	}
 	
 	public UserOverlayItem getUser(int userId) {
 		return overlays.get(userId);
 	}
 	
-	public synchronized void updateUser(int userId, GeoPoint point) {
-		UserOverlayItem i = getUser(userId);
-		if (i != null) {
-			i.setPoint(point);
-		} else {
-			this.addUser(new UserOverlayItem(point, userId, Integer.toString(userId), "Bladeguard"));
-		}
-		setLastFocusedIndex(-1);
-		populate();
-	}
-
 	public synchronized void removeUser(int userId) {
 		overlays.remove(userId);
 		setLastFocusedIndex(-1);
@@ -158,5 +148,10 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
 	protected boolean onTap(int index) {
 		displayBubble(getItem(index));
 		return super.onTap(index);
+	}
+	
+	public void pop() {
+		setLastFocusedIndex(-1);
+		populate();
 	}
 }

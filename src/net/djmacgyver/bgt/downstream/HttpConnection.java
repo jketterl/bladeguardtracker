@@ -20,6 +20,7 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.http.HttpClient;
 import net.djmacgyver.bgt.map.RouteOverlay;
 import net.djmacgyver.bgt.map.UserOverlay;
+import net.djmacgyver.bgt.map.UserOverlayItem;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -141,7 +142,14 @@ public class HttpConnection extends Thread {
 					}
 					GeoPoint point = new GeoPoint(lat, lon);
 					int userId = Integer.parseInt(users.item(i).getAttributes().getNamedItem("id").getNodeValue());
-					this.users.updateUser(userId, point);
+					//this.users.updateUser(userId, point);
+					UserOverlayItem o = this.users.getUser(userId);
+					if (o != null) {
+						o.setPoint(point);
+					} else {
+						this.users.addUser(new UserOverlayItem(point, userId, Integer.toString(userId), "Bladeguard"));
+					}
+					this.users.pop();
 				}
 				
 				// get removals
