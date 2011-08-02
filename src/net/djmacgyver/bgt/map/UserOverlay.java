@@ -46,7 +46,7 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> implements Use
 	
 	public synchronized void removeUser(int userId) {
 		UserOverlayItem i = getUser(userId);
-		i.removeListener(this);
+		if (i != null) i.removeListener(this);
 		overlays.remove(userId);
 		setLastFocusedIndex(-1);
 		populate();
