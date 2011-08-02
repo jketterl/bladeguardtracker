@@ -22,8 +22,8 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 
-public class UserOverlay extends ItemizedOverlay<OverlayItem> {
-	private HashMap<Integer, OverlayItem> mOverlays = new HashMap<Integer, OverlayItem>();
+public class UserOverlay extends ItemizedOverlay<UserOverlayItem> {
+	private HashMap<Integer, UserOverlayItem> overlays = new HashMap<Integer, UserOverlayItem>();
 	private Map map;
 	private RelativeLayout bubble;
 
@@ -32,36 +32,38 @@ public class UserOverlay extends ItemizedOverlay<OverlayItem> {
 		populate();
 		this.map = map;
 	}
-
+	
 	public synchronized void updateUser(int userId, GeoPoint point) {
-		OverlayItem i = mOverlays.get(userId);
-		if (i != null)
-			mOverlays.remove(i);
-		mOverlays.put(userId, new OverlayItem(point, Integer.toString(userId), "Bladeguard"));
+		UserOverlayItem i = overlays.get(userId);
+		if (i != null) {
+			i.setPoint(point);
+		} else {
+			overlays.put(userId, new UserOverlayItem(point, Integer.toString(userId), "Bladeguard"));
+		}
 		setLastFocusedIndex(-1);
 		populate();
 	}
 
 	public synchronized void removeUser(int userId) {
-		mOverlays.remove(userId);
+		overlays.remove(userId);
 		setLastFocusedIndex(-1);
 		populate();
 	}
 
 	public synchronized void reset() {
-		mOverlays.clear();
+		overlays.clear();
 		setLastFocusedIndex(-1);
 		populate();
 	}
 
 	@Override
-	protected OverlayItem createItem(int i) {
-		return (OverlayItem) mOverlays.values().toArray()[i];
+	protected UserOverlayItem createItem(int i) {
+		return (UserOverlayItem) overlays.values().toArray()[i];
 	}
 
 	@Override
 	public int size() {
-		return mOverlays.size();
+		return overlays.size();
 	}
 
 	@Override
