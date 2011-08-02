@@ -141,13 +141,15 @@ public class HttpConnection extends Thread {
 						if (coord.getNodeName().equals("lon")) lon = value;
 					}
 					GeoPoint point = new GeoPoint(lat, lon);
-					int userId = Integer.parseInt(users.item(i).getAttributes().getNamedItem("id").getNodeValue());
-					//this.users.updateUser(userId, point);
+					Node user = users.item(i);
+					int userId = Integer.parseInt(user.getAttributes().getNamedItem("id").getNodeValue());
 					UserOverlayItem o = this.users.getUser(userId);
 					if (o != null) {
 						o.setPoint(point);
 					} else {
-						this.users.addUser(new UserOverlayItem(point, userId, Integer.toString(userId), "Bladeguard"));
+						String userName = user.getAttributes().getNamedItem("name").getNodeValue();
+						String team = user.getAttributes().getNamedItem("team").getNodeValue();
+						this.users.addUser(new UserOverlayItem(point, userId, userName, team));
 					}
 					this.users.pop();
 				}
