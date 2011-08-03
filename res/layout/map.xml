@@ -5,34 +5,36 @@
 
 	<com.google.android.maps.MapView
 		android:layout_width="fill_parent" android:layout_height="fill_parent"
-		android:clickable="true" android:apiKey="@string/maps_api_key" android:id="@+id/mapview"/>
+		android:clickable="true" android:apiKey="@string/maps_api_key"
+		android:id="@+id/mapview" />
 
 	<LinearLayout android:layout_height="wrap_content"
 		android:orientation="horizontal" android:id="@+id/linearLayout1"
-		android:weightSum="3" android:layout_width="match_parent" android:layout_alignTop="@id/mapview">
+		android:weightSum="3" android:layout_width="match_parent"
+		android:layout_alignTop="@id/mapview">
 		<LinearLayout style="@style/box" android:orientation="vertical"
 			android:layout_height="match_parent" android:layout_weight="1"
-			android:layout_width="100dip">
-			<TextView style="@style/boxHeadline" android:layout_height="wrap_content" android:text="@string/track_length"
-				android:layout_width="wrap_content" ></TextView>
+			android:layout_width="wrap_content">
+			<TextView style="@style/boxHeadline" android:layout_height="wrap_content"
+				android:text="@string/track_length" android:layout_width="wrap_content"></TextView>
 			<TextView android:id="@+id/bladeNightLength"
 				android:textAppearance="?android:attr/textAppearanceSmall"
 				android:layout_height="wrap_content" android:layout_width="wrap_content"></TextView>
 		</LinearLayout>
 		<LinearLayout style="@style/box" android:orientation="vertical"
 			android:id="@+id/linearLayout2" android:layout_height="match_parent"
-			android:layout_weight="1" android:layout_width="100dip">
+			android:layout_weight="1" android:layout_width="wrap_content">
 			<TextView style="@style/boxHeadline" android:id="@+id/textView1"
-				android:layout_height="wrap_content" android:layout_width="wrap_content"
-				android:text="@string/average_speed" ></TextView>
+				android:layout_height="wrap_content" android:text="@string/average_speed"
+				android:layout_width="wrap_content"></TextView>
 
 		</LinearLayout>
 		<LinearLayout style="@style/box" android:id="@+id/linearLayout3"
 			android:layout_height="match_parent" android:orientation="vertical"
-			android:layout_width="100dip" android:layout_weight="1" >
+			android:layout_weight="1" android:layout_width="wrap_content">
 			<TextView style="@style/boxHeadline" android:id="@+id/textView2"
-				android:layout_height="wrap_content" android:layout_width="wrap_content"
-				android:text="@string/cycle_time" ></TextView>
+				android:layout_height="wrap_content" android:text="@string/cycle_time"
+				android:layout_width="wrap_content"></TextView>
 		</LinearLayout>
 	</LinearLayout>
 </RelativeLayout>
