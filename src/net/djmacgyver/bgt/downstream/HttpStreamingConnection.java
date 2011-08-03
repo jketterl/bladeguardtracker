@@ -3,16 +3,11 @@ package net.djmacgyver.bgt.downstream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.Iterator;
 
-import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
 
-import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.http.HttpClient;
 
 import org.apache.http.HttpEntity;
@@ -26,17 +21,24 @@ import android.os.Handler;
 import android.os.Message;
 
 
-abstract public class HttpStreamingConnection extends Thread {
+public class HttpStreamingConnection extends Thread {
 	private HttpClient client;
 	private Context context;
 	private boolean terminate = false;
-	private XPath xPath;
+	private String url;
+	private Handler handler;
 	
-	public HttpStreamingConnection(Context context) {
+	public static final int RECONNECT = 1;
+	
+	public HttpStreamingConnection(Context context, String url, Handler handler) {
 		this.context = context;
+		this.url = url;
+		this.handler = handler;
 	}
 	
-	abstract protected Handler getHandler();
+	protected Handler getHandler() {
+		return this.handler;
+	}
 	
 	private HttpClient getClient()
 	{
@@ -46,15 +48,13 @@ abstract public class HttpStreamingConnection extends Thread {
 		return client;
 	}
 	
-	protected void onReconnect() {
-	}
-
 	@Override
 	public void run() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
 		DocumentBuilder builder;
 		InputSource in = new InputSource();
+		Message msg;
 		try {
 			builder = dbf.newDocumentBuilder();
 		} catch (ParserConfigurationException e1) {
@@ -62,11 +62,13 @@ abstract public class HttpStreamingConnection extends Thread {
 			return;
 		}
 		while (!terminate) try {
-			HttpGet req = new HttpGet(context.getResources().getString(R.string.base_url) + "stream");
+			HttpGet req = new HttpGet(url);
 			HttpEntity entity = getClient().execute(req).getEntity();
 			if (!entity.isStreaming()) return;
 			
-			onReconnect();
+			msg = new Message();
+			msg.obj = RECONNECT;
+			this.getHandler().sendMessage(msg);
 			
 			InputStream is = entity.getContent();
 			byte[] buf = new byte[4096];
@@ -83,7 +85,7 @@ abstract public class HttpStreamingConnection extends Thread {
 				try {
 					Document dom = builder.parse(in);
 
-					Message msg = new Message();
+					msg = new Message();
 					msg.obj = dom;
 					getHandler().sendMessage(msg);
 				} catch (SAXException e) {
@@ -98,31 +100,6 @@ abstract public class HttpStreamingConnection extends Thread {
 			} catch (InterruptedException e1) {}
 		}
 		getClient().getConnectionManager().shutdown();
-	}
-	
-	protected XPath getXPath() {
-		if (xPath == null) {
-			XPathFactory xfactory = XPathFactory.newInstance();
-			xPath = xfactory.newXPath();
-			xPath.setNamespaceContext(new NamespaceContext() {
-				@Override
-				public Iterator<String> getPrefixes(String namespaceURI) {
-					return null;
-				}
-				
-				@Override
-				public String getPrefix(String namespaceURI) {
-					return null;
-				}
-				
-				@Override
-				public String getNamespaceURI(String prefix) {
-					if (prefix.equals("gpx")) return "http://www.topografix.com/GPX/1/1";
-					return null;
-				}
-			});
-		}
-		return xPath;
 	}
 	
 	public void terminate() {

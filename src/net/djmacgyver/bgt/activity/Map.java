@@ -3,9 +3,9 @@ package net.djmacgyver.bgt.activity;
 import net.djmacgyver.bgt.GPSListener;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.downstream.HttpStreamingConnection;
-import net.djmacgyver.bgt.downstream.MapStreamingConnection;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
+import net.djmacgyver.bgt.map.MapHandler;
 import net.djmacgyver.bgt.map.RouteOverlay;
 import net.djmacgyver.bgt.map.UserOverlay;
 import android.content.ComponentName;
@@ -103,7 +103,9 @@ public class Map extends MapActivity implements KeepAliveTarget {
 					length.setText((String) msg.obj);
 				}
 			};
-			updater = new MapStreamingConnection(getUserOverlay(), getRoute(), getApplicationContext(), h);
+			
+			Handler handler = new MapHandler(getUserOverlay(), getRoute(), h);
+			updater = new HttpStreamingConnection(getApplicationContext(), getResources().getString(R.string.base_url) + "stream", handler);
 		}
 		return updater;
 	}

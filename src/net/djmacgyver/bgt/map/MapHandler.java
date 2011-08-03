@@ -1,38 +1,40 @@
-package net.djmacgyver.bgt.downstream;
+package net.djmacgyver.bgt.map;
 
 import java.text.DecimalFormat;
+import java.util.Iterator;
 
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import net.djmacgyver.bgt.downstream.HttpStreamingConnection;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.google.android.maps.GeoPoint;
-
-import net.djmacgyver.bgt.map.RouteOverlay;
-import net.djmacgyver.bgt.map.UserOverlay;
-import net.djmacgyver.bgt.map.UserOverlayItem;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
-public class MapStreamingConnection extends HttpStreamingConnection {
+import com.google.android.maps.GeoPoint;
+
+public class MapHandler extends Handler {
 	private UserOverlay users;
 	private RouteOverlay route;
 	private Handler length;
+	private XPath xPath;
+	
 	private XPathExpression pointExpression;
 	private XPathExpression userExpression;
 	private XPathExpression locationExpression;
 	private XPathExpression quitExpression;
 	private XPathExpression mapExpression;
 	private XPathExpression statsExpression;
-	private Handler handler;
 
-	public MapStreamingConnection(UserOverlay users, RouteOverlay route, Context context, Handler h) {
-		super(context);
+	public MapHandler(UserOverlay users, RouteOverlay route, Handler h) {
 		this.users = users;
 		this.route = route;
 		this.length = h;
@@ -46,24 +48,45 @@ public class MapStreamingConnection extends HttpStreamingConnection {
 			statsExpression = getXPath().compile("/updates/stats[1]");
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();
-			terminate();
 		}
-	}
-	
-	@Override
-	protected Handler getHandler() {
-		if (handler == null) {
-			handler = new Handler() {
-				@Override
-				public void handleMessage(Message msg) {
-					if (!(msg.obj instanceof Document)) return;
-					parseData((Document) msg.obj);
-				}
-			};
-		}
-		return handler;
 	}
 
+	@Override
+	public void handleMessage(Message msg) {
+		if (msg.obj instanceof Document) {
+			parseData((Document) msg.obj);
+		} switch (((Integer) msg.obj).intValue()) {
+			case HttpStreamingConnection.RECONNECT :
+				this.users.reset();
+				break;
+		}
+	}
+
+	protected XPath getXPath() {
+		if (xPath == null) {
+			XPathFactory xfactory = XPathFactory.newInstance();
+			xPath = xfactory.newXPath();
+			xPath.setNamespaceContext(new NamespaceContext() {
+				@Override
+				public Iterator<String> getPrefixes(String namespaceURI) {
+					return null;
+				}
+				
+				@Override
+				public String getPrefix(String namespaceURI) {
+					return null;
+				}
+				
+				@Override
+				public String getNamespaceURI(String prefix) {
+					if (prefix.equals("gpx")) return "http://www.topografix.com/GPX/1/1";
+					return null;
+				}
+			});
+		}
+		return xPath;
+	}
+	
 	private void parseStatisticsUpdates(Document dom) throws XPathExpressionException {
 		Node stats = (Node) statsExpression.evaluate(dom, XPathConstants.NODE);
 		if (stats != null) {
@@ -132,11 +155,6 @@ public class MapStreamingConnection extends HttpStreamingConnection {
 		}
 	}
 	
-	@Override
-	protected void onReconnect() {
-		this.users.reset();
-	}
-
 	private void parseData(Document dom) {
 		try {
 			parseUserUpdates(dom);
@@ -145,7 +163,6 @@ public class MapStreamingConnection extends HttpStreamingConnection {
 			parseStatisticsUpdates(dom);
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();
-			terminate();
 		}
 	}
 }
