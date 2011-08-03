@@ -7,7 +7,7 @@
 		android:layout_alignParentLeft="true"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:id="@+id/content" android:orientation="vertical">
+		android:id="@+id/content" android:orientation="vertical" android:gravity="center_horizontal">
 		<TextView android:textSize="12dip"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
