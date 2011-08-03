@@ -55,10 +55,12 @@ public class MapHandler extends Handler {
 	public void handleMessage(Message msg) {
 		if (msg.obj instanceof Document) {
 			parseData((Document) msg.obj);
-		} switch (((Integer) msg.obj).intValue()) {
+		} else if (msg.obj instanceof Integer) switch (((Integer) msg.obj).intValue()) {
 			case HttpStreamingConnection.RECONNECT :
 				this.users.reset();
 				break;
+		} else {
+			throw new RuntimeException("unknown message type: " + msg.obj.getClass().getName());
 		}
 	}
 
