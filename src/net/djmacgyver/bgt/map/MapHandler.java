@@ -95,9 +95,9 @@ public class MapHandler extends Handler {
 			try {
 				float le = Float.parseFloat(l);
 				DecimalFormat df = new DecimalFormat("0.###");
-				msg.obj = "Zuglänge: " + df.format(le) + " km";
+				msg.obj = df.format(le) + " km";
 			} catch (NumberFormatException e) {
-				msg.obj = "Zuglänge derzeit unbekannt";
+				msg.obj = "n/a";
 			}
 			this.length.sendMessage(msg);
 		}

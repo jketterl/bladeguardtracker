@@ -24,4 +24,5 @@
     <string name="password_mismatch">Die eingegebenen Passwörter stimmen nicht überein!</string>
     <string name="tracker_activated">Bladeguard Tracker aktiviert</string>
     <string name="gps_ongoing">GPS-Datenübertragung ist aktiv</string>
+    <string name="track_length">Zuglänge</string>
 </resources>

@@ -11,7 +11,29 @@
     android:clickable="true"
     android:apiKey="@string/maps_api_key"
   android:id="@+id/mapview"/>
-  
-  <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/bladeNightLength"></TextView>
+  <LinearLayout
+    android:id="@+id/linearLayout1"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/box" android:orientation="horizontal">
     
+    <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+  
+      <TextView
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/track_length"/>
+
+      <TextView
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/bladeNightLength"/>
+        
+    </LinearLayout>
+  </LinearLayout>
 </RelativeLayout>
