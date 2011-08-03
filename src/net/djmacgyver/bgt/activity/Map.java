@@ -2,7 +2,7 @@ package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.GPSListener;
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.downstream.HttpConnection;
+import net.djmacgyver.bgt.downstream.HttpStreamingConnection;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.map.RouteOverlay;
@@ -27,7 +27,7 @@ import com.google.android.maps.MyLocationOverlay;
 public class Map extends MapActivity implements KeepAliveTarget {
 	private UserOverlay users;
 	private MyLocationOverlay myLoc;
-	private HttpConnection updater;
+	private HttpStreamingConnection updater;
 	private KeepAliveThread refresher;
 	private RouteOverlay route;
 	private GPSListener service;
@@ -93,7 +93,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		return myLoc != null;
 	}
 	
-	private HttpConnection getUpdater()
+	private HttpStreamingConnection getUpdater()
 	{
 		if (updater == null) {
 			final TextView length = (TextView) findViewById(R.id.bladeNightLength);
@@ -102,7 +102,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 					length.setText((String) msg.obj);
 				}
 			};
-			updater = new HttpConnection(getUserOverlay(), getRoute(), getApplicationContext(), h);
+			updater = new HttpStreamingConnection(getUserOverlay(), getRoute(), getApplicationContext(), h);
 		}
 		return updater;
 	}

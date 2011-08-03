@@ -37,7 +37,7 @@ import android.os.Message;
 
 import com.google.android.maps.GeoPoint;
 
-public class HttpConnection extends Thread {
+public class HttpStreamingConnection extends Thread {
 	private UserOverlay users;
 	private RouteOverlay route;
 	private HttpClient client;
@@ -52,7 +52,7 @@ public class HttpConnection extends Thread {
 	private XPathExpression mapExpression;
 	private XPathExpression statsExpression;
 	
-	public HttpConnection(UserOverlay users, RouteOverlay route, Context context, Handler h) {
+	public HttpStreamingConnection(UserOverlay users, RouteOverlay route, Context context, Handler h) {
 		this.users = users;
 		this.context = context;
 		this.route = route;
