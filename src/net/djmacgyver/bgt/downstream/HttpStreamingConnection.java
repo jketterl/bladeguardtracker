@@ -22,6 +22,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 
 
 abstract public class HttpStreamingConnection extends Thread {
@@ -33,6 +35,8 @@ abstract public class HttpStreamingConnection extends Thread {
 	public HttpStreamingConnection(Context context) {
 		this.context = context;
 	}
+	
+	abstract protected Handler getHandler();
 	
 	private HttpClient getClient()
 	{
@@ -78,7 +82,10 @@ abstract public class HttpStreamingConnection extends Thread {
 				in.setCharacterStream(new StringReader(xml));
 				try {
 					Document dom = builder.parse(in);
-					parseData(dom);
+
+					Message msg = new Message();
+					msg.obj = dom;
+					getHandler().sendMessage(msg);
 				} catch (SAXException e) {
 					e.printStackTrace();
 					terminate();
@@ -122,6 +129,4 @@ abstract public class HttpStreamingConnection extends Thread {
 		terminate = true;
 		interrupt();
 	}
-	
-	abstract protected void parseData(Document dom);
 }

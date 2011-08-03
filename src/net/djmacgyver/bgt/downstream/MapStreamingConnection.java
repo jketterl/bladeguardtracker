@@ -29,6 +29,7 @@ public class MapStreamingConnection extends HttpStreamingConnection {
 	private XPathExpression quitExpression;
 	private XPathExpression mapExpression;
 	private XPathExpression statsExpression;
+	private Handler handler;
 
 	public MapStreamingConnection(UserOverlay users, RouteOverlay route, Context context, Handler h) {
 		super(context);
@@ -47,6 +48,20 @@ public class MapStreamingConnection extends HttpStreamingConnection {
 			e.printStackTrace();
 			terminate();
 		}
+	}
+	
+	@Override
+	protected Handler getHandler() {
+		if (handler == null) {
+			handler = new Handler() {
+				@Override
+				public void handleMessage(Message msg) {
+					if (!(msg.obj instanceof Document)) return;
+					parseData((Document) msg.obj);
+				}
+			};
+		}
+		return handler;
 	}
 
 	private void parseStatisticsUpdates(Document dom) throws XPathExpressionException {
@@ -122,7 +137,7 @@ public class MapStreamingConnection extends HttpStreamingConnection {
 		this.users.reset();
 	}
 
-	protected void parseData(Document dom) {
+	private void parseData(Document dom) {
 		try {
 			parseUserUpdates(dom);
 			parseUserRemovals(dom);
