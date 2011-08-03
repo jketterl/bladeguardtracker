@@ -2,6 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <style name="box">
         <item name="android:background">@drawable/box</item>
+        <item name="android:gravity">center_horizontal</item>
     </style>
     <style name="boxHeadline" parent="android:Widget.TextView">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
