@@ -6,7 +6,6 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.http.HttpClient;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 
@@ -63,13 +62,11 @@ public class HttpStreamingThread extends Thread {
 				HttpPost req = new HttpPost(context.getResources().getString(R.string.base_url) + "log");
 				req.setEntity(getEntity());
 				getClient().execute(req).getEntity().consumeContent();
-				//entity = null;
-			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//Error communicating with the server
+				try {
+					Thread.sleep(60000);
+				} catch (InterruptedException e1) {}
 			}	
 			entity = null;
 		}
