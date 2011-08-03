@@ -53,6 +53,7 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> implements Use
 	}
 
 	public synchronized void reset() {
+		resetBubble();
 		overlays.clear();
 		setLastFocusedIndex(-1);
 		populate();
