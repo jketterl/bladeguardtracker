@@ -10,6 +10,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import net.djmacgyver.bgt.activity.Map;
 import net.djmacgyver.bgt.downstream.HttpStreamingConnection;
 
 import org.w3c.dom.Document;
@@ -22,9 +23,7 @@ import android.os.Message;
 import com.google.android.maps.GeoPoint;
 
 public class MapHandler extends Handler {
-	private UserOverlay users;
-	private RouteOverlay route;
-	private Handler length;
+	private Map map;
 	private XPath xPath;
 	
 	private XPathExpression pointExpression;
@@ -33,11 +32,11 @@ public class MapHandler extends Handler {
 	private XPathExpression quitExpression;
 	private XPathExpression mapExpression;
 	private XPathExpression statsExpression;
+	private XPathExpression lengthExpression;
+	private XPathExpression speedExpression;
 
-	public MapHandler(UserOverlay users, RouteOverlay route, Handler h) {
-		this.users = users;
-		this.route = route;
-		this.length = h;
+	public MapHandler(Map map) {
+		this.map = map;
 		
 		try {
 			userExpression = getXPath().compile("/updates/movements/user");
@@ -46,6 +45,8 @@ public class MapHandler extends Handler {
 			mapExpression = getXPath().compile("/updates/map[1]");
 			pointExpression = getXPath().compile("gpx:gpx/gpx:rte/gpx:rtept");
 			statsExpression = getXPath().compile("/updates/stats[1]");
+			lengthExpression = getXPath().compile("bladenightlength[1]");
+			speedExpression = getXPath().compile("bladenightspeed[1]");
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();
 		}
@@ -57,7 +58,7 @@ public class MapHandler extends Handler {
 			parseData((Document) msg.obj);
 		} else if (msg.obj instanceof Integer) switch (((Integer) msg.obj).intValue()) {
 			case HttpStreamingConnection.RECONNECT :
-				this.users.reset();
+				map.getUserOverlay().reset();
 				break;
 		} else {
 			throw new RuntimeException("unknown message type: " + msg.obj.getClass().getName());
@@ -92,16 +93,39 @@ public class MapHandler extends Handler {
 	private void parseStatisticsUpdates(Document dom) throws XPathExpressionException {
 		Node stats = (Node) statsExpression.evaluate(dom, XPathConstants.NODE);
 		if (stats != null) {
-			String l = stats.getChildNodes().item(0).getTextContent();
-			Message msg = new Message();
-			try {
-				float le = Float.parseFloat(l);
-				DecimalFormat df = new DecimalFormat("0.###");
-				msg.obj = df.format(le) + " km";
-			} catch (NumberFormatException e) {
-				msg.obj = "n/a";
+			String text;
+			
+			Node lengthNode = (Node) lengthExpression.evaluate(stats, XPathConstants.NODE);
+			float length = -1;
+			text = "n/a";
+			if (lengthNode != null) {
+				try {
+					length = Float.parseFloat(lengthNode.getTextContent());
+					DecimalFormat df = new DecimalFormat("0.#");
+					text = df.format(length) + " km";
+				} catch (NumberFormatException e) {}
 			}
-			this.length.sendMessage(msg);
+			map.getLengthTextView().setText(text);
+			
+			Node speedNode = (Node) speedExpression.evaluate(stats, XPathConstants.NODE);
+			double speed = -1;
+			text = "n/a";
+			if (speedNode != null) {
+				try {
+					speed = Double.parseDouble(speedNode.getTextContent());
+					DecimalFormat df = new DecimalFormat("0.#");
+					text = df.format(speed * 3.6) + " km/h";
+				} catch (NumberFormatException e) {}
+			}
+			map.getSpeedTextView().setText(text);
+			
+			text = "n/a";
+			if (length > 0 && speed > 0) {
+				double cycleTime = (length * 1000 / speed) / 60;
+				DecimalFormat df = new DecimalFormat("0");
+				text = df.format(cycleTime) + " min";
+			}
+			map.getCycleTimeTextView().setText(text);
 		}
 	}
 
@@ -118,7 +142,7 @@ public class MapHandler extends Handler {
 				geoPoints[i] = gPoint;
 			}
 			
-			route.setPoints(geoPoints);
+			this.map.getRoute().setPoints(geoPoints);
 		}
 	}
 
@@ -127,7 +151,7 @@ public class MapHandler extends Handler {
 		NodeList users = (NodeList) quitExpression.evaluate(dom, XPathConstants.NODESET);
 		for (int i = 0; i < users.getLength(); i++) {
 			int userId = Integer.parseInt(users.item(i).getAttributes().getNamedItem("id").getNodeValue());
-			this.users.removeUser(userId);
+			map.getUserOverlay().removeUser(userId);
 		}
 	}
 
@@ -146,13 +170,13 @@ public class MapHandler extends Handler {
 			GeoPoint point = new GeoPoint(lat, lon);
 			Node user = users.item(i);
 			int userId = Integer.parseInt(user.getAttributes().getNamedItem("id").getNodeValue());
-			UserOverlayItem o = this.users.getUser(userId);
+			UserOverlayItem o = map.getUserOverlay().getUser(userId);
 			if (o != null) {
 				o.setPoint(point);
 			} else {
 				String userName = user.getAttributes().getNamedItem("name").getNodeValue();
 				String team = user.getAttributes().getNamedItem("team").getNodeValue();
-				this.users.addUser(new UserOverlayItem(point, userId, userName, team));
+				map.getUserOverlay().addUser(new UserOverlayItem(point, userId, userName, team));
 			}
 		}
 	}

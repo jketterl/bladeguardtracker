@@ -12,7 +12,7 @@
 			<TextView style="@style/boxHeadline" android:layout_height="wrap_content"
 				android:text="@string/track_length" android:layout_width="wrap_content"></TextView>
 			<TextView android:id="@+id/bladeNightLength"
-				android:textAppearance="?android:attr/textAppearanceSmall"
+				android:textAppearance="?android:attr/textAppearanceMedium"
 				android:layout_height="wrap_content" android:layout_width="wrap_content"></TextView>
 		</LinearLayout>
 		<LinearLayout style="@style/box" android:orientation="vertical"
@@ -21,6 +21,9 @@
 			<TextView style="@style/boxHeadline" android:id="@+id/textView1"
 				android:layout_height="wrap_content" android:text="@string/average_speed"
 				android:layout_width="wrap_content"></TextView>
+			<TextView android:layout_height="wrap_content"
+				android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium"
+				android:id="@+id/bladeNightSpeed"></TextView>
 
 		</LinearLayout>
 		<LinearLayout style="@style/box" android:id="@+id/linearLayout3"
@@ -29,13 +32,13 @@
 			<TextView style="@style/boxHeadline" android:id="@+id/textView2"
 				android:layout_height="wrap_content" android:text="@string/cycle_time"
 				android:layout_width="wrap_content"></TextView>
+			<TextView android:layout_height="wrap_content"
+				android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium"
+				android:id="@+id/bladeNightCycleTime"></TextView>
 		</LinearLayout>
 	</LinearLayout>
 	<com.google.android.maps.MapView
-		android:layout_width="match_parent"
-		android:id="@+id/mapview"
-		android:layout_weight="1"
-		android:clickable="true"
-		android:layout_height="match_parent"
-		android:apiKey="@string/maps_api_key" />
+		android:layout_width="match_parent" android:id="@+id/mapview"
+		android:layout_weight="1" android:clickable="true"
+		android:layout_height="match_parent" android:apiKey="@string/maps_api_key" />
 </LinearLayout>

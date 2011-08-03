@@ -17,7 +17,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.view.Window;
 import android.widget.TextView;
 
@@ -62,7 +61,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		return map;
 	}
 	
-	private RouteOverlay getRoute() {
+	public RouteOverlay getRoute() {
 		if (route == null) {
 			route = new RouteOverlay(getMap());
 			route.getPaint().setAntiAlias(true);
@@ -73,7 +72,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		return route;
 	}
 	
-	private UserOverlay getUserOverlay()
+	public UserOverlay getUserOverlay()
 	{
 		if (users == null) {
 	    	Drawable d = this.getResources().getDrawable(R.drawable.map_pin);
@@ -94,17 +93,22 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		return myLoc != null;
 	}
 	
+	public TextView getLengthTextView() {
+		return (TextView) findViewById(R.id.bladeNightLength);
+	}
+	
+	public TextView getSpeedTextView() {
+		return (TextView) findViewById(R.id.bladeNightSpeed);
+	}
+	
+	public TextView getCycleTimeTextView() {
+		return (TextView) findViewById(R.id.bladeNightCycleTime);
+	}
+	
 	private HttpStreamingConnection getUpdater()
 	{
 		if (updater == null) {
-			final TextView length = (TextView) findViewById(R.id.bladeNightLength);
-			Handler h = new Handler(){
-				public void handleMessage(Message msg) {
-					length.setText((String) msg.obj);
-				}
-			};
-			
-			Handler handler = new MapHandler(getUserOverlay(), getRoute(), h);
+			Handler handler = new MapHandler(this);
 			updater = new HttpStreamingConnection(getApplicationContext(), getResources().getString(R.string.base_url) + "stream", handler);
 		}
 		return updater;
