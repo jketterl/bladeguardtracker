@@ -3,6 +3,7 @@ package net.djmacgyver.bgt.activity;
 import net.djmacgyver.bgt.GPSListener;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.downstream.HttpStreamingConnection;
+import net.djmacgyver.bgt.downstream.MapStreamingConnection;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.map.RouteOverlay;
@@ -102,7 +103,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 					length.setText((String) msg.obj);
 				}
 			};
-			updater = new HttpStreamingConnection(getUserOverlay(), getRoute(), getApplicationContext(), h);
+			updater = new MapStreamingConnection(getUserOverlay(), getRoute(), getApplicationContext(), h);
 		}
 		return updater;
 	}
