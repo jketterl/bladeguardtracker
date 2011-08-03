@@ -25,4 +25,6 @@
     <string name="tracker_activated">Bladeguard Tracker aktiviert</string>
     <string name="gps_ongoing">GPS-Datenübertragung ist aktiv</string>
     <string name="track_length">Zuglänge</string>
+    <string name="average_speed">Geschwindigkeit</string>
+    <string name="cycle_time">Durchlaufzeit</string>
 </resources>

@@ -26,5 +26,7 @@
     <string name="password_mismatch">Passwords do not match!</string>
     <string name="tracker_activated">Bladeguard Tracker activated</string>
     <string name="gps_ongoing">GPS data transmission is ongoing</string>
-    <string name="track_length">Track Length</string>
+    <string name="track_length">Track length</string>
+    <string name="average_speed">Speed</string>
+    <string name="cycle_time">Cycle time</string>
 </resources>

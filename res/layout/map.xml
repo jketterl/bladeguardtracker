@@ -1,39 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:orientation="vertical"
-  android:layout_width="fill_parent"
-  android:layout_height="fill_parent">
-  
-  <com.google.android.maps.MapView
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:clickable="true"
-    android:apiKey="@string/maps_api_key"
-  android:id="@+id/mapview"/>
-  <LinearLayout
-    android:id="@+id/linearLayout1"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/box" android:orientation="horizontal">
-    
-    <LinearLayout
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="vertical">
-  
-      <TextView
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="@string/track_length"/>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
 
-      <TextView
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:id="@+id/bladeNightLength"/>
-        
-    </LinearLayout>
-  </LinearLayout>
+	<com.google.android.maps.MapView
+		android:layout_width="fill_parent" android:layout_height="fill_parent"
+		android:clickable="true" android:apiKey="@string/maps_api_key" android:id="@+id/mapview"/>
+
+	<LinearLayout android:layout_height="wrap_content"
+		android:orientation="horizontal" android:id="@+id/linearLayout1"
+		android:weightSum="3" android:layout_width="match_parent" android:layout_alignTop="@id/mapview">
+		<LinearLayout style="@style/box" android:orientation="vertical"
+			android:layout_height="match_parent" android:layout_weight="1"
+			android:layout_width="100dip">
+			<TextView style="@style/boxHeadline" android:layout_height="wrap_content" android:text="@string/track_length"
+				android:layout_width="wrap_content" ></TextView>
+			<TextView android:id="@+id/bladeNightLength"
+				android:textAppearance="?android:attr/textAppearanceSmall"
+				android:layout_height="wrap_content" android:layout_width="wrap_content"></TextView>
+		</LinearLayout>
+		<LinearLayout style="@style/box" android:orientation="vertical"
+			android:id="@+id/linearLayout2" android:layout_height="match_parent"
+			android:layout_weight="1" android:layout_width="100dip">
+			<TextView style="@style/boxHeadline" android:id="@+id/textView1"
+				android:layout_height="wrap_content" android:layout_width="wrap_content"
+				android:text="@string/average_speed" ></TextView>
+
+		</LinearLayout>
+		<LinearLayout style="@style/box" android:id="@+id/linearLayout3"
+			android:layout_height="match_parent" android:orientation="vertical"
+			android:layout_width="100dip" android:layout_weight="1" >
+			<TextView style="@style/boxHeadline" android:id="@+id/textView2"
+				android:layout_height="wrap_content" android:layout_width="wrap_content"
+				android:text="@string/cycle_time" ></TextView>
+		</LinearLayout>
+	</LinearLayout>
 </RelativeLayout>
