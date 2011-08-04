@@ -1,7 +1,9 @@
 package net.djmacgyver.bgt.activity;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.http.HttpClient;
@@ -16,6 +18,8 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -67,32 +71,54 @@ public class Signup extends PreferenceActivity {
 				
 				showDialog(DIALOG_SIGNUP_RUNNING);
 				
-				HttpClient c = new HttpClient(getApplicationContext());
-				HttpPost req = new HttpPost(getResources().getString(R.string.base_url) + "signup");
+				final HttpPost req = new HttpPost(getResources().getString(R.string.base_url) + "signup");
 				try {
 					req.setEntity(new StringEntity("user=" + username + "&pass=" + password));
-					HttpResponse res = c.execute(req);
-					dismissDialog(DIALOG_SIGNUP_RUNNING);
-					if (res.getStatusLine().getStatusCode() != 200) {
-						HttpEntity e = res.getEntity();
-						BufferedReader in = new BufferedReader(new InputStreamReader(e.getContent()));
-						String line = null;
-						String message = getResources().getString(R.string.signup_server_message) + "\n\n";
-						while ((line = in.readLine()) != null) message = message.concat(line);
-						b.putString("message", message);
-						showDialog(DIALOG_SIGNUP_FAILED, b);
-					} else {
-						showDialog(DIALOG_SIGNUP_SUCCESSFUL);
-					}
-				} catch (Exception e) {
-					dismissDialog(DIALOG_SIGNUP_RUNNING);
-					
-					b.putString("message", getResources().getString(R.string.server_down));
-					showDialog(DIALOG_SIGNUP_FAILED, b);
-					
-					e.printStackTrace();
-				}
+				} catch (UnsupportedEncodingException e1) {}
 
+				final Handler h = new Handler() {
+					@Override
+					public void handleMessage(Message msg) {
+						dismissDialog(DIALOG_SIGNUP_RUNNING);
+						if (msg.obj == null) {
+							Bundle b = new Bundle();
+							b.putString("message", getResources().getString(R.string.server_down));
+							showDialog(DIALOG_SIGNUP_FAILED, b);
+						}
+						HttpResponse res = (HttpResponse) msg.obj;
+						if (res.getStatusLine().getStatusCode() != 200) try {
+							HttpEntity e = res.getEntity();
+							BufferedReader in = new BufferedReader(new InputStreamReader(e.getContent()));
+							String line = null;
+							String message = getResources().getString(R.string.signup_server_message) + "\n\n";
+							while ((line = in.readLine()) != null) message = message.concat(line);
+							Bundle b = new Bundle();
+							b.putString("message", message);
+							showDialog(DIALOG_SIGNUP_FAILED, b);
+						} catch (IOException e) {
+							Bundle b = new Bundle();
+							b.putString("message", getResources().getString(R.string.server_down));
+							showDialog(DIALOG_SIGNUP_FAILED, b);
+						} else {
+							showDialog(DIALOG_SIGNUP_SUCCESSFUL);
+						}
+					}
+				};
+				
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						HttpClient c = new HttpClient(getApplicationContext());
+						Message msg = new Message();
+						try {
+							msg.obj = c.execute(req);
+						} catch (IOException e) {
+							msg.obj = null;
+						}
+						h.sendMessage(msg);
+					}
+				}).start();
+					
 				return true;
 			}
 		});
