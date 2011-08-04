@@ -57,8 +57,11 @@ public class MapHandler extends Handler {
 		if (msg.obj instanceof Document) {
 			parseData((Document) msg.obj);
 		} else if (msg.obj instanceof Integer) switch (((Integer) msg.obj).intValue()) {
-			case HttpStreamingConnection.RECONNECT :
-				map.getUserOverlay().reset();
+			case HttpStreamingConnection.CONNECT:
+				map.onConnect();
+				break;
+			case HttpStreamingConnection.DISCONNECT:
+				map.onDisconnect();
 				break;
 		} else {
 			throw new RuntimeException("unknown message type: " + msg.obj.getClass().getName());

@@ -29,4 +29,5 @@
     <string name="track_length">Track length</string>
     <string name="average_speed">Speed</string>
     <string name="cycle_time">Cycle time</string>
+    <string name="connect_progress">Connecting to server...</string>
 </resources>

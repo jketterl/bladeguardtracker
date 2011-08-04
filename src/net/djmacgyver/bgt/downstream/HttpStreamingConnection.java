@@ -28,7 +28,9 @@ public class HttpStreamingConnection extends Thread {
 	private String url;
 	private Handler handler;
 	
-	public static final int RECONNECT = 1;
+	public static final int CONNECT = 0;
+	public static final int DISCONNECT = 1;
+	public static final int TERMINATE = 2;
 	
 	public HttpStreamingConnection(Context context, String url, Handler handler) {
 		this.context = context;
@@ -67,7 +69,7 @@ public class HttpStreamingConnection extends Thread {
 			if (!entity.isStreaming()) return;
 			
 			msg = new Message();
-			msg.obj = RECONNECT;
+			msg.obj = CONNECT;
 			this.getHandler().sendMessage(msg);
 			
 			InputStream is = entity.getContent();
@@ -93,13 +95,24 @@ public class HttpStreamingConnection extends Thread {
 					terminate();
 				}
 			} while (read >= 0);
+
+			msg = new Message();
+			msg.obj = DISCONNECT;
+			this.getHandler().sendMessage(msg);
 		} catch (IOException e) {
+			msg = new Message();
+			msg.obj = DISCONNECT;
+			this.getHandler().sendMessage(msg);
+
 			//Error communicating with the server
 			try {
 				Thread.sleep(60000);
 			} catch (InterruptedException e1) {}
 		}
 		getClient().getConnectionManager().shutdown();
+		msg = new Message();
+		msg.obj = TERMINATE;
+		this.getHandler().sendMessage(msg);
 	}
 	
 	public void terminate() {

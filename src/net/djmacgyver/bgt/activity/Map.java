@@ -8,6 +8,8 @@ import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.map.MapHandler;
 import net.djmacgyver.bgt.map.RouteOverlay;
 import net.djmacgyver.bgt.map.UserOverlay;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +35,8 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	private GPSListener service;
 	private boolean bound = false;
 	private MapView map;
+	
+	public static final int DIALOG_CONNECTING = 1;
 	
     ServiceConnection conn = new ServiceConnection() {
 		@Override
@@ -163,6 +167,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		showDialog(DIALOG_CONNECTING);
     	getUpdater().start();
     	getRefresher().start();
     	if (service != null && hasLocationOverlay() && service.isEnabled()) {
@@ -188,5 +193,26 @@ public class Map extends MapActivity implements KeepAliveTarget {
 				getMap().invalidate();
 			}
 		});
+	}
+
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+			case DIALOG_CONNECTING:
+				Dialog d = new ProgressDialog(this);
+				d.setCancelable(false);
+				d.setTitle(R.string.connect_progress);
+				return d;
+		}
+		return super.onCreateDialog(id);
+	}
+	
+	public void onConnect() {
+		removeDialog(Map.DIALOG_CONNECTING);
+	}
+	
+	public void onDisconnect() {
+		getUserOverlay().reset();
+		if (!this.isFinishing()) showDialog(Map.DIALOG_CONNECTING);
 	}
 }

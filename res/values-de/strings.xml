@@ -27,4 +27,5 @@
     <string name="track_length">Zuglänge</string>
     <string name="average_speed">Geschwindigkeit</string>
     <string name="cycle_time">Durchlaufzeit</string>
+    <string name="connect_progress">Verbinde mit dem Server...</string>
 </resources>
