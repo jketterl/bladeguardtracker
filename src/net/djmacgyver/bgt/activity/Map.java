@@ -19,6 +19,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.Window;
 import android.widget.TextView;
 
@@ -214,5 +216,20 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	public void onDisconnect() {
 		getUserOverlay().reset();
 		if (!this.isFinishing()) showDialog(Map.DIALOG_CONNECTING);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.map, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.mapselection:
+				return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 }
