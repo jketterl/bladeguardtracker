@@ -12,10 +12,10 @@ public class MapSelection extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
-        //setContentView(R.layout.map);
+        setContentView(R.layout.mapselection);
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
         TextView t = (TextView) findViewById(R.id.title);
-        //t.setText(R.string.map_selection);
+        t.setText(R.string.map_selection);
 	}
 	
 }
