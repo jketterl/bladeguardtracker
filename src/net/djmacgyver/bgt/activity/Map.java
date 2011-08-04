@@ -228,6 +228,8 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.mapselection:
+				Intent i = new Intent(getApplicationContext(), MapSelection.class);
+				startActivity(i);
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
