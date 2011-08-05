@@ -8,7 +8,9 @@
     <!-- <string name="maps_api_key">08cvEnK6frIUm2eoWIjal7KyBmUhpszplHN9mkg</string> -->
     
     <!-- public url -->
-    <string name="base_url">https://djmacgyver.homelinux.org/bgt/</string>
+    <!-- <string name="base_url">https://djmacgyver.homelinux.org/bgt/</string> -->
     <!-- private url -->
     <!-- <string name="base_url">https://www:8000/bgt/</string> -->
+    <!-- amazon ec2 url -->
+    <string name="base_url">https://ec2-46-137-136-20.eu-west-1.compute.amazonaws.com/bgt/</string>
 </resources>
