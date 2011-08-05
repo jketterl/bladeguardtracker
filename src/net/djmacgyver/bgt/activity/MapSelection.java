@@ -86,8 +86,8 @@ public class MapSelection extends ListActivity {
 		switch (id) {
 			case DIALOG_CONFIRM:
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle("are you sure?");
-				builder.setMessage("this will reset the map for all users...");
+				builder.setTitle(R.string.are_you_sure);
+				builder.setMessage(R.string.map_will_be_reset);
 				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
@@ -104,7 +104,7 @@ public class MapSelection extends ListActivity {
 				return builder.create();
 			case DIALOG_PROGRESS:
 				Dialog d = new ProgressDialog(this);
-				d.setTitle("switching map");
+				d.setTitle(R.string.switching_map);
 				return d;
 		}
 		return super.onCreateDialog(id);

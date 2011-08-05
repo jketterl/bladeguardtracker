@@ -32,4 +32,7 @@
     <string name="cycle_time">Cycle time</string>
     <string name="connect_progress">Connecting to server...</string>
     <string name="map_selection">Route Selection</string>
+    <string name="switching_map">Switching Route...</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="map_will_be_reset">This will reset the route for all connected users!</string>
 </resources>

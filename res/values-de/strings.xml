@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="cancel">Abbrechen</string>
     <string name="locate">Sende meine Position an den Tracking-Server</string>
     <string name="map_name">Kartenansicht</string>
     <string name="settings">Einstellungen</string>
@@ -29,4 +30,7 @@
     <string name="cycle_time">Durchlaufzeit</string>
     <string name="connect_progress">Verbinde mit dem Server...</string>
     <string name="map_selection">Streckenauswahl</string>
+    <string name="switching_map">Wechsle Strecke...</string>
+    <string name="are_you_sure">Bist du sicher?</string>
+    <string name="map_will_be_reset">Hiermit wird die Strecke für alle verbundenen Benutzer zurückgesetzt!</string>
 </resources>
