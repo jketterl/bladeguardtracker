@@ -1,6 +1,7 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.map.MapList;
 import android.app.ListActivity;
 import android.os.Bundle;
 import android.view.Window;
@@ -16,6 +17,8 @@ public class MapSelection extends ListActivity {
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.map_selection);
+        
+        setListAdapter(new MapList(getApplicationContext()));
 	}
 	
 }
