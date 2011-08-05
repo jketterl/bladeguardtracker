@@ -1,12 +1,22 @@
 package net.djmacgyver.bgt.activity;
 
+import java.io.IOException;
+
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.http.HttpClient;
 import net.djmacgyver.bgt.map.MapList;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpGet;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.Window;
 import android.widget.ListView;
@@ -14,7 +24,9 @@ import android.widget.TextView;
 
 public class MapSelection extends ListActivity {
 	private final static int DIALOG_CONFIRM = 0;
+	private final static int DIALOG_PROGRESS = 1;
 	private MapList maps;
+	private long selected;
 	
 	private MapList getMaps() {
 		if (maps == null) {
@@ -37,8 +49,36 @@ public class MapSelection extends ListActivity {
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		//System.out.println("clicked on map: " + id);
+		selected = id;
 		showDialog(DIALOG_CONFIRM);
+	}
+	
+	private void switchMap() {
+		showDialog(DIALOG_PROGRESS);
+		
+		final Handler h = new Handler(){
+			@Override
+			public void handleMessage(Message msg) {
+				dismissDialog(DIALOG_PROGRESS);
+				finish();
+			}
+		};
+		
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				HttpGet req = new HttpGet(getResources().getString(R.string.base_url) + "setmap?id=" + selected);
+				HttpClient c = new HttpClient(getApplicationContext());
+				try {
+					HttpEntity e = c.execute(req).getEntity();
+					e.consumeContent();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				h.sendEmptyMessage(0);
+			}
+		}).start();
 	}
 
 	@Override
@@ -52,6 +92,7 @@ public class MapSelection extends ListActivity {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
+						switchMap();
 					}
 				});
 				builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -61,6 +102,10 @@ public class MapSelection extends ListActivity {
 					}
 				});
 				return builder.create();
+			case DIALOG_PROGRESS:
+				Dialog d = new ProgressDialog(this);
+				d.setTitle("switching map");
+				return d;
 		}
 		return super.onCreateDialog(id);
 	}
