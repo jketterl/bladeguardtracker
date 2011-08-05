@@ -89,7 +89,6 @@ public class MapList implements ListAdapter {
 
 	@Override
 	public int getCount() {
-		System.out.println(getMaps().getLength() + " maps loaded!");
 		return getMaps().getLength();
 	}
 
