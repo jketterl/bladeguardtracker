@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Bladeguard Tracker</string>
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
     <string name="locate">Send my position to the tracking server</string>
     <string name="map_name">Map View</string>
     <string name="settings">Settings</string>
