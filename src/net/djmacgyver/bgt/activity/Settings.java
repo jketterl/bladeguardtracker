@@ -1,5 +1,6 @@
 package net.djmacgyver.bgt.activity;
 
+import net.djmacgyver.bgt.LoginService;
 import net.djmacgyver.bgt.R;
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,5 +30,11 @@ public class Settings extends PreferenceActivity {
 				return true;
 			}
 		});
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		startService(new Intent(this, LoginService.class));
 	}
 }
