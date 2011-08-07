@@ -71,6 +71,7 @@ public class LoginServiceThread extends Thread {
 				} else {
 					invalidated = false;
 				}
+				res.getEntity().consumeContent();
 			}
 			
 			return TIMEOUT;
