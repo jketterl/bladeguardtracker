@@ -31,6 +31,7 @@ public class HttpStreamingConnection extends Thread {
 	public static final int CONNECT = 0;
 	public static final int DISCONNECT = 1;
 	public static final int TERMINATE = 2;
+	public static final int BEFORECONNECT = 3;
 	
 	public HttpStreamingConnection(Context context, String url, Handler handler) {
 		this.context = context;
@@ -56,7 +57,6 @@ public class HttpStreamingConnection extends Thread {
 		dbf.setNamespaceAware(true);
 		DocumentBuilder builder;
 		InputSource in = new InputSource();
-		Message msg;
 		try {
 			builder = dbf.newDocumentBuilder();
 		} catch (ParserConfigurationException e1) {
@@ -64,13 +64,13 @@ public class HttpStreamingConnection extends Thread {
 			return;
 		}
 		while (!terminate) try {
+			sendMessage(BEFORECONNECT);
+			
 			HttpGet req = new HttpGet(url);
 			HttpEntity entity = getClient().execute(req).getEntity();
 			if (!entity.isStreaming()) return;
 			
-			msg = new Message();
-			msg.obj = CONNECT;
-			this.getHandler().sendMessage(msg);
+			sendMessage(CONNECT);
 			
 			InputStream is = entity.getContent();
 			byte[] buf = new byte[4096];
@@ -86,23 +86,16 @@ public class HttpStreamingConnection extends Thread {
 				in.setCharacterStream(new StringReader(xml));
 				try {
 					Document dom = builder.parse(in);
-
-					msg = new Message();
-					msg.obj = dom;
-					getHandler().sendMessage(msg);
+					sendMessage(dom);
 				} catch (SAXException e) {
 					e.printStackTrace();
 					terminate();
 				}
 			} while (read >= 0);
 
-			msg = new Message();
-			msg.obj = DISCONNECT;
-			this.getHandler().sendMessage(msg);
+			sendMessage(DISCONNECT);
 		} catch (IOException e) {
-			msg = new Message();
-			msg.obj = DISCONNECT;
-			this.getHandler().sendMessage(msg);
+			sendMessage(DISCONNECT);
 
 			//Error communicating with the server
 			try {
@@ -110,13 +103,17 @@ public class HttpStreamingConnection extends Thread {
 			} catch (InterruptedException e1) {}
 		}
 		getClient().getConnectionManager().shutdown();
-		msg = new Message();
-		msg.obj = TERMINATE;
-		this.getHandler().sendMessage(msg);
+		sendMessage(TERMINATE);
 	}
 	
 	public void terminate() {
 		terminate = true;
 		interrupt();
+	}
+	
+	private void sendMessage(Object o) {
+		Message msg = new Message();
+		msg.obj = o;
+		getHandler().sendMessage(msg);
 	}
 }

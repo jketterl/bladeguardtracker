@@ -210,12 +210,11 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	}
 	
 	public void onConnect() {
+		getUserOverlay().reset();
 		removeDialog(Map.DIALOG_CONNECTING);
 	}
 	
 	public void onDisconnect() {
-		getUserOverlay().reset();
-		if (!this.isFinishing()) showDialog(Map.DIALOG_CONNECTING);
 	}
 
 	@Override
@@ -233,5 +232,9 @@ public class Map extends MapActivity implements KeepAliveTarget {
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	public void onBeforeConnect() {
+		if (!this.isFinishing()) showDialog(Map.DIALOG_CONNECTING);
 	}
 }

@@ -60,6 +60,9 @@ public class MapHandler extends Handler {
 			case HttpStreamingConnection.CONNECT:
 				map.onConnect();
 				break;
+			case HttpStreamingConnection.BEFORECONNECT:
+				map.onBeforeConnect();
+				break;
 			case HttpStreamingConnection.DISCONNECT:
 				map.onDisconnect();
 				break;
