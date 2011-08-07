@@ -13,7 +13,7 @@ import android.content.Context;
 
 public class LoginServiceThread extends Thread {
 	// 6h timeout... this should be enough ;)
-	private static final int TIMEOUT = 518400000;
+	private static final int TIMEOUT = 21600000;
 	
 	private HttpClient client;
 	private Context context;
