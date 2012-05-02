@@ -12,5 +12,5 @@
     <!-- private url -->
     <!-- <string name="base_url">https://www:8000/bgt/</string> -->
     <!-- amazon ec2 url -->
-    <string name="base_url">https://ec2-46-137-174-199.eu-west-1.compute.amazonaws.com/bgt/</string>
+    <string name="base_url">https://bgt.justjakob.de/bgt/</string>
 </resources>
