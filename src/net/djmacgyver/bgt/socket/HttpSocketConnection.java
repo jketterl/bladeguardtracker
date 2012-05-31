@@ -1,4 +1,4 @@
-package net.djmacgyver.bgt.upstream;
+package net.djmacgyver.bgt.socket;
 
 import java.io.IOException;
 import java.net.URI;
@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import com.codebutler.android_websockets.WebSocketClient;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.upstream.Connection;
 
 import android.content.Context;
 import android.content.SharedPreferences;
