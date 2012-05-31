@@ -334,11 +334,25 @@ public class HybiParser {
     }
 
     private byte[] slice(byte[] array, int start) {
-        return Arrays.copyOfRange(array, start, array.length);
+    	int from = start;
+    	int to = array.length;
+    	byte[] original = array;
+    	
+    	// code copied from http://www.docjar.com/html/api/java/util/Arrays.java.html
+    	int newLength = to - from;
+    	if (newLength < 0)
+    		throw new IllegalArgumentException(from + " > " + to);
+    	byte[] copy = new byte[newLength];
+    	System.arraycopy(original, from, copy, 0,
+    					Math.min(original.length - from, newLength));
+    	return copy;
+        //return Arrays.copyOfRange(array, start, array.length);
     }
 
     public static class ProtocolError extends IOException {
-        public ProtocolError(String detailMessage) {
+		private static final long serialVersionUID = 3235810088403426201L;
+
+		public ProtocolError(String detailMessage) {
             super(detailMessage);
         }
     }

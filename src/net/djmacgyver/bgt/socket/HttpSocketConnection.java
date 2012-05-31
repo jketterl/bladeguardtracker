@@ -10,13 +10,11 @@ import java.util.HashMap;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.codebutler.android_websockets.WebSocketClient;
-
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.upstream.Connection;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -24,6 +22,8 @@ import android.content.res.Resources.NotFoundException;
 import android.location.Location;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.codebutler.android_websockets.WebSocketClient;
 
 public class HttpSocketConnection extends Connection {
 	private Context context;
@@ -49,7 +49,7 @@ public class HttpSocketConnection extends Connection {
 					
 					@Override
 					public void onMessage(String message) {
-						if (message.isEmpty()) return;
+						if (message.length() == 0) return;
 						try {
 							JSONObject response = new JSONObject(message);
 							if (response.has("requestId")) {
