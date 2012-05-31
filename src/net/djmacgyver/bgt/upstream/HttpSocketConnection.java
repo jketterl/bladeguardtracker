@@ -17,8 +17,10 @@ import com.codebutler.android_websockets.WebSocketClient;
 import net.djmacgyver.bgt.R;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources.NotFoundException;
 import android.location.Location;
+import android.preference.PreferenceManager;
 
 public class HttpSocketConnection extends Connection {
 	private Context context;
@@ -60,6 +62,19 @@ public class HttpSocketConnection extends Connection {
 					public void onConnect() {
 						System.out.println("connected");
 						connected = true;
+						SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
+						if (!p.getBoolean("anonymous", true)) try {
+							System.out.println("Sending authentication");
+							JSONObject obj = new JSONObject();
+							obj.put("command", "auth");
+							JSONObject data = new JSONObject();
+							data.put("user", p.getString("username", ""));
+							data.put("pass", p.getString("password", ""));
+							obj.put("data", data);
+							getSocket().send(obj.toString());
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
 					}
 				}, null);
 				WebSocketClient.setTrustManagers(new TrustManager[]{
@@ -115,12 +130,9 @@ public class HttpSocketConnection extends Connection {
 
 	@Override
 	protected void executeLocationSend(Location location) {
-		System.out.println("about to send a location update");
-		if (!connected) {
-			System.out.println("skipping location update, not connected!");
-			return;
-		}
+		if (!connected)	return;
 		try {
+			// build a json object to send to the server
 			JSONObject obj = new JSONObject();
 			obj.put("command", "log");
 			JSONObject data = new JSONObject();
@@ -128,8 +140,8 @@ public class HttpSocketConnection extends Connection {
 			data.put("lon", location.getLongitude());
 			if (location.hasSpeed()) data.put("speed", location.getSpeed());
 			obj.put("data", data);
+			// send it
 			getSocket().send(obj.toString());
-			System.out.println(obj);
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -138,6 +150,15 @@ public class HttpSocketConnection extends Connection {
 
 	@Override
 	public void sendQuit() {
+		if (!connected) return;
+		try {
+			JSONObject obj = new JSONObject();
+			obj.put("commant", "quit");
+			getSocket().send(obj.toString());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
