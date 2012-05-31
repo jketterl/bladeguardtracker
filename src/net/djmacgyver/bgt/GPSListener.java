@@ -3,14 +3,16 @@ package net.djmacgyver.bgt;
 import net.djmacgyver.bgt.activity.MainActivity;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
-import net.djmacgyver.bgt.socket.HttpSocketConnection;
+import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.upstream.Connection;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -25,19 +27,37 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	private boolean enabled = false;
 	private LocationManager locationManager;
 	private static final int NOTIFICATION = 1;
+
+	private SocketService sockService;
+	private ServiceConnection sconn = new ServiceConnection() {
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			sockService = null;
+		}
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			sockService = ((SocketService.LocalBinder) service).getService();
+		}
+	};
 	
 	@Override
 	public void onCreate() {
+        startService(new Intent(this, SocketService.class));
+        bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
+        
 		this.locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 	}
 	
 	public void onDestroy() {
+		unbindService(sconn);
 		this.disable();
 	}
 	
 	private Connection getConnection() {
 		if (conn == null) {
-			conn = new HttpSocketConnection(getApplicationContext());
+			//conn = new HttpSocketConnection(getApplicationContext());
+			conn = sockService.getSharedConnection();
 		}
 		return conn;
 	}
@@ -76,7 +96,7 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 		nm.cancel(NOTIFICATION);
 
 		locationManager.removeUpdates(this);
-		getConnection().disconnect();
+		getConnection().sendQuit();
 		getGpsReminder().terminate();
 		gpsReminder = null;
 		conn = null;
@@ -102,7 +122,8 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 		enabled = true;
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
 		
-		getConnection().connect();
+		getConnection();
+		//getConnection().connect();
 		
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		Notification notification = new Notification(
