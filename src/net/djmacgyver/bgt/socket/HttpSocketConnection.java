@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -22,11 +23,14 @@ import android.content.SharedPreferences;
 import android.content.res.Resources.NotFoundException;
 import android.location.Location;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class HttpSocketConnection extends Connection {
 	private Context context;
 	private WebSocketClient socket;
 	private boolean connected = false;
+	private int requestCount = 0;
+	private HashMap <Integer, SocketCommand> requests = new HashMap<Integer, SocketCommand>();
 	
 	public HttpSocketConnection(Context applicationContext) {
 		this.context = applicationContext;
@@ -45,7 +49,22 @@ public class HttpSocketConnection extends Connection {
 					
 					@Override
 					public void onMessage(String message) {
-						System.out.println(message);
+						if (message.isEmpty()) return;
+						try {
+							JSONObject response = new JSONObject(message);
+							if (response.has("requestId")) {
+								Integer id = response.getInt("requestId");
+								if (requests.containsKey(id)) {
+									((SocketCommand) requests.get(id)).updateResult(response);
+									requests.remove(id);
+								} else {
+									Log.e("SocketConnection", "received response for unknown command id: " + id);
+								}
+							}
+						} catch (JSONException e) {
+							// propably an old XML message. ignore... for now we only support json
+							//System.out.println("unable to parse message: " + message);
+						}
 					}
 					
 					@Override
@@ -69,7 +88,14 @@ public class HttpSocketConnection extends Connection {
 							JSONObject data = new JSONObject();
 							data.put("user", p.getString("username", ""));
 							data.put("pass", p.getString("password", ""));
-							sendCommand(new SocketCommand("auth", data));
+							final SocketCommand command = new SocketCommand("auth", data);
+							command.setCallback(new Runnable() {
+								@Override
+								public void run() {
+									System.out.println("login successful? " + command.wasSuccessful());
+								}
+							});
+							sendCommand(command);
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
@@ -109,7 +135,13 @@ public class HttpSocketConnection extends Connection {
 		return socket;
 	}
 	
+	private void sendCommand(String command) {
+		sendCommand(new SocketCommand(command));
+	}
+	
 	private void sendCommand(SocketCommand command) {
+		requests.put(requestCount, command);
+		command.setRequestId(requestCount++);
 		getSocket().send(command.getJson());
 	}
 
@@ -151,7 +183,7 @@ public class HttpSocketConnection extends Connection {
 	@Override
 	public void sendQuit() {
 		if (!connected) return;
-		sendCommand(new SocketCommand("quit"));
+		sendCommand("quit");
 	}
 
 }
