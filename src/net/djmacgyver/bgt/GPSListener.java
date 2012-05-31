@@ -4,7 +4,7 @@ import net.djmacgyver.bgt.activity.MainActivity;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.upstream.Connection;
-import net.djmacgyver.bgt.upstream.HttpStreamingConnection;
+import net.djmacgyver.bgt.upstream.HttpSocketConnection;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -37,8 +37,7 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	
 	private Connection getConnection() {
 		if (conn == null) {
-			conn = new HttpStreamingConnection(getApplicationContext());
-			conn.connect();
+			conn = new HttpSocketConnection(getApplicationContext());
 		}
 		return conn;
 	}
@@ -102,6 +101,8 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	public void enable() {
 		enabled = true;
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+		
+		getConnection().connect();
 		
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		Notification notification = new Notification(

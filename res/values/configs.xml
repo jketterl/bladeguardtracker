@@ -13,4 +13,6 @@
     <!-- <string name="base_url">https://www:8000/bgt/</string> -->
     <!-- amazon ec2 url -->
     <string name="base_url">https://bgt.justjakob.de/bgt/</string>
+    <!-- WebSocket for combined up & downstream -->
+    <string name="websocket">wss://bgt.justjakob.de/bgt/socket</string>
 </resources>

@@ -20,9 +20,11 @@ public abstract class Connection implements KeepAliveTarget {
 	public abstract void sendQuit();
 
 	public void sendLocation(Location location) {
+		System.out.println("sendLocation");
 		if (location.equals(lastLocation)) return;
 		if (lastLocation != null && location.distanceTo(lastLocation) == 0) return;
 		if (updateBlocked) {
+			System.out.println("location updates blocked");
 			queuedLocation = location;
 			return;
 		}
