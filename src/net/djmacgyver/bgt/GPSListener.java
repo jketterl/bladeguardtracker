@@ -54,25 +54,17 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 		this.disable();
 	}
 	
-	private Connection getConnection() {
-		if (conn == null) {
-			//conn = new HttpSocketConnection(getApplicationContext());
-			conn = sockService.getSharedConnection();
-		}
-		return conn;
-	}
-	
 	@Override
 	public void onLocationChanged(Location location) {
 		if (!getGpsReminder().isAlive()) getGpsReminder().start();
 		getGpsReminder().interrupt();
-		getConnection().sendLocation(location);
+		conn.sendLocation(location);
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
 		if (!provider.equals("gps")) return;
-		getConnection().sendGpsUnavailable();
+		conn.sendGpsUnavailable();
 	}
 
 	@Override
@@ -85,7 +77,7 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 		switch (status) {
 			case LocationProvider.TEMPORARILY_UNAVAILABLE:
 			case LocationProvider.OUT_OF_SERVICE:
-				getConnection().sendGpsUnavailable();
+				conn.sendGpsUnavailable();
 				break;
 		}
 	}
@@ -96,10 +88,14 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 		nm.cancel(NOTIFICATION);
 
 		locationManager.removeUpdates(this);
-		getConnection().sendQuit();
+		
 		getGpsReminder().terminate();
 		gpsReminder = null;
+		
+		conn.sendQuit();
+		sockService.removeStake(this);
 		conn = null;
+		
 		enabled = false;
 	}
 	
@@ -113,7 +109,7 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	@Override
 	public void keepAlive(KeepAliveThread source) {
 		if (source != getGpsReminder()) return;
-		getConnection().sendGpsUnavailable();
+		conn.sendGpsUnavailable();
 		getGpsReminder().terminate();
 		gpsReminder = null;
 	}
@@ -122,8 +118,7 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 		enabled = true;
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
 		
-		getConnection();
-		//getConnection().connect();
+		conn = sockService.getSharedConnection(this);
 		
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		Notification notification = new Notification(

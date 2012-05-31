@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -31,6 +32,7 @@ public class HttpSocketConnection extends Connection {
 	private boolean connected = false;
 	private int requestCount = 0;
 	private HashMap <Integer, SocketCommand> requests = new HashMap<Integer, SocketCommand>();
+	private LinkedList<SocketCommand> queue;
 	
 	public HttpSocketConnection(Context applicationContext) {
 		this.context = applicationContext;
@@ -65,6 +67,7 @@ public class HttpSocketConnection extends Connection {
 							// propably an old XML message. ignore... for now we only support json
 							//System.out.println("unable to parse message: " + message);
 						}
+						checkDisconnect();
 					}
 					
 					@Override
@@ -82,7 +85,9 @@ public class HttpSocketConnection extends Connection {
 					public void onConnect() {
 						System.out.println("connected");
 						connected = true;
-						authenticate();
+						while (!queue.isEmpty()) sendCommand(queue.poll());
+						queue = null;
+						checkDisconnect();
 					}
 				}, null);
 				WebSocketClient.setTrustManagers(new TrustManager[]{
@@ -144,7 +149,10 @@ public class HttpSocketConnection extends Connection {
 	}
 	
 	private void sendCommand(SocketCommand command) {
-		if (!connected) return;
+		if (!connected) {
+			queue.add(command);
+			return;
+		}
 		requests.put(requestCount, command);
 		command.setRequestId(requestCount++);
 		getSocket().send(command.getJson());
@@ -152,20 +160,30 @@ public class HttpSocketConnection extends Connection {
 
 	@Override
 	public void connect() {
+		queue = new LinkedList<SocketCommand>();
 		getSocket().connect();
+		authenticate();
 		getGpsReminder().start();
 	}
 
 	@Override
 	public void disconnect() {
-		sendQuit();
 		getGpsReminder().terminate();
+		doDisconnect = true;
+		checkDisconnect();
+	}
+	
+	private boolean doDisconnect = false;
+	
+	private void checkDisconnect() {
+		if (!connected || !doDisconnect || queue != null || !requests.isEmpty()) return;
 		try {
 			getSocket().disconnect();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		doDisconnect = false;
 	}
 
 	@Override

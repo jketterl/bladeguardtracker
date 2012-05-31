@@ -26,7 +26,8 @@ public class Settings extends PreferenceActivity {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			System.out.println("connected to service");
 			sockService = ((SocketService.LocalBinder) service).getService();
-			sockService.getSharedConnection().authenticate();
+			sockService.getSharedConnection(this).authenticate();
+			sockService.removeStake(this);
 			unbindService(this);
 		}
 	};
