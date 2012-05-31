@@ -82,23 +82,7 @@ public class HttpSocketConnection extends Connection {
 					public void onConnect() {
 						System.out.println("connected");
 						connected = true;
-						SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
-						if (!p.getBoolean("anonymous", true)) try {
-							// send our authentication data as soon as we are connected
-							JSONObject data = new JSONObject();
-							data.put("user", p.getString("username", ""));
-							data.put("pass", p.getString("password", ""));
-							final SocketCommand command = new SocketCommand("auth", data);
-							command.setCallback(new Runnable() {
-								@Override
-								public void run() {
-									System.out.println("login successful? " + command.wasSuccessful());
-								}
-							});
-							sendCommand(command);
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
+						authenticate();
 					}
 				}, null);
 				WebSocketClient.setTrustManagers(new TrustManager[]{
@@ -135,11 +119,32 @@ public class HttpSocketConnection extends Connection {
 		return socket;
 	}
 	
+	public void authenticate() {
+		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
+		if (!p.getBoolean("anonymous", true)) try {
+			// send our authentication data as soon as we are connected
+			JSONObject data = new JSONObject();
+			data.put("user", p.getString("username", ""));
+			data.put("pass", p.getString("password", ""));
+			final SocketCommand command = new SocketCommand("auth", data);
+			command.setCallback(new Runnable() {
+				@Override
+				public void run() {
+					System.out.println("login successful? " + command.wasSuccessful());
+				}
+			});
+			sendCommand(command);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void sendCommand(String command) {
 		sendCommand(new SocketCommand(command));
 	}
 	
 	private void sendCommand(SocketCommand command) {
+		if (!connected) return;
 		requests.put(requestCount, command);
 		command.setRequestId(requestCount++);
 		getSocket().send(command.getJson());
@@ -165,7 +170,6 @@ public class HttpSocketConnection extends Connection {
 
 	@Override
 	protected void executeLocationSend(Location location) {
-		if (!connected)	return;
 		try {
 			// build a json object to send to the server
 			JSONObject data = new JSONObject();
@@ -182,7 +186,6 @@ public class HttpSocketConnection extends Connection {
 
 	@Override
 	public void sendQuit() {
-		if (!connected) return;
 		sendCommand("quit");
 	}
 

@@ -1,7 +1,6 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.GPSListener;
-import net.djmacgyver.bgt.LoginService;
 import net.djmacgyver.bgt.R;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -44,8 +43,6 @@ public class MainActivity extends Activity {
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.app_name);
-        
-        startService(new Intent(this, LoginService.class));
         
         startService(new Intent(this, GPSListener.class));
         bindService(new Intent(this, GPSListener.class), conn, Context.BIND_AUTO_CREATE);

@@ -43,7 +43,7 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	
 	@Override
 	public void onCreate() {
-        startService(new Intent(this, SocketService.class));
+        //startService(new Intent(this, SocketService.class));
         bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
         
 		this.locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);

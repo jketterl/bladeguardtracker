@@ -19,7 +19,6 @@
         <activity android:name=".activity.Signup"></activity>
         <service android:name="GPSListener"></service>
         <activity android:name=".activity.MapSelection"></activity>
-        <service android:name="LoginService"></service>
         <service android:name=".socket.SocketService"></service>
 
     </application>
