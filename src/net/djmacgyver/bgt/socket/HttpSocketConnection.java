@@ -5,7 +5,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import javax.net.ssl.TrustManager;
@@ -33,6 +35,7 @@ public class HttpSocketConnection extends Connection {
 	private int requestCount = 0;
 	private HashMap <Integer, SocketCommand> requests = new HashMap<Integer, SocketCommand>();
 	private LinkedList<SocketCommand> queue;
+	private ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
 	
 	public HttpSocketConnection(Context applicationContext) {
 		this.context = applicationContext;
@@ -61,6 +64,12 @@ public class HttpSocketConnection extends Connection {
 									requests.remove(id);
 								} else {
 									Log.e("SocketConnection", "received response for unknown command id: " + id);
+								}
+							} else if (response.has("event") && response.getString("event").equals("update")) {
+								if (response.has("data")) {
+									sendUpdate(response.getJSONObject("data"));
+								} else {
+									System.out.println("received message without data!");
 								}
 							}
 						} catch (JSONException e) {
@@ -227,5 +236,24 @@ public class HttpSocketConnection extends Connection {
 			e.printStackTrace();
 		}
 		return this;
+	}
+	
+	protected void sendUpdate(JSONObject update) {
+		Iterator<HttpSocketListener> i = listeners.iterator();
+		while (i.hasNext()) {
+			i.next().receiveUpdate(update);
+		}
+	}
+	
+	public void addListener(HttpSocketListener listener)
+	{
+		if (listeners.contains(listener)) return;
+		listeners.add(listener);
+	}
+	
+	public void removeListener(HttpSocketListener listener)
+	{
+		if (!listeners.contains(listener)) return;
+		listeners.remove(listener);
 	}
 }

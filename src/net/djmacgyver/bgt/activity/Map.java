@@ -1,12 +1,16 @@
 package net.djmacgyver.bgt.activity;
 
+import org.json.JSONObject;
+
 import net.djmacgyver.bgt.GPSListener;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
+import net.djmacgyver.bgt.map.MapHandler;
 import net.djmacgyver.bgt.map.RouteOverlay;
 import net.djmacgyver.bgt.map.UserOverlay;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
+import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketService;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -18,6 +22,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -35,6 +40,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	private GPSListener service;
 	private boolean bound = false;
 	private MapView map;
+	private MapHandler handler = new MapHandler(this);
 	
 	public static final int DIALOG_CONNECTING = 1;
 	
@@ -190,6 +196,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		getRefresher().terminate();
 		this.refresher = null;
 		socket.unSubscribeUpdates("movements").unSubscribeUpdates("map").unSubscribeUpdates("stats");
+		//socket.removeListener(handler);
 		sockService.removeStake(this);
 		unbindService(sconn);
 	}
@@ -217,6 +224,14 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	}
 	
 	public void onConnect() {
+		socket.addListener(new HttpSocketListener() {
+			@Override
+			public void receiveUpdate(JSONObject data) {
+				Message msg = new Message();
+				msg.obj = data;
+				handler.dispatchMessage(msg);
+			}
+		});
 		socket.subscribeUpdates("movements").subscribeUpdates("map").subscribeUpdates("stats");
 		getUserOverlay().reset();
 		removeDialog(Map.DIALOG_CONNECTING);
