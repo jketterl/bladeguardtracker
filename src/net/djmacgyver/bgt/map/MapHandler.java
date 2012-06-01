@@ -1,17 +1,12 @@
 package net.djmacgyver.bgt.map;
 
 import java.text.DecimalFormat;
-import java.util.Iterator;
 
 import net.djmacgyver.bgt.activity.Map;
-import net.djmacgyver.bgt.downstream.HttpStreamingConnection;
-import net.djmacgyver.bgt.socket.HttpSocketListener;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import android.os.Handler;
 import android.os.Message;
@@ -28,7 +23,6 @@ public class MapHandler extends Handler {
 	@Override
 	public void handleMessage(Message msg) {
 		JSONObject data = (JSONObject) msg.obj;
-		System.out.println("got update: " + data);
 		parseUserUpdates(data);
 		parseUserRemovals(data);
 		parseMapData(data);
@@ -37,16 +31,12 @@ public class MapHandler extends Handler {
 
 	private void parseStatisticsUpdates(JSONObject data) {
 		if (!data.has("stats")) return;
-		System.out.println("testing for stats...");
 		JSONObject stats;
 		try {
-			System.out.println(data.get("stats"));
 			stats = data.getJSONArray("stats").getJSONObject(0);
 		} catch (JSONException e1) {
-			e1.printStackTrace();
 			return;
 		}
-		System.out.println("got stats: " + stats);
 		
 		String text;
 		double length = -1;
@@ -63,16 +53,17 @@ public class MapHandler extends Handler {
 		}
 		map.getLengthTextView().setText(text);
 		
-		/*
-		Node speedNode = (Node) speedExpression.evaluate(stats, XPathConstants.NODE);
 		double speed = -1;
 		text = "n/a";
-		if (speedNode != null) {
+		if (stats.has("bladeNightSpeed")) {
 			try {
-				speed = Double.parseDouble(speedNode.getTextContent());
+				speed = stats.getDouble("bladeNightSpeed");
 				DecimalFormat df = new DecimalFormat("0.#");
 				text = df.format(speed * 3.6) + " km/h";
-			} catch (NumberFormatException e) {}
+			} catch (NumberFormatException e) {} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		map.getSpeedTextView().setText(text);
 		
@@ -83,10 +74,16 @@ public class MapHandler extends Handler {
 			text = df.format(cycleTime) + " min";
 		}
 		map.getCycleTimeTextView().setText(text);
-		*/
 	}
 
 	private void parseMapData(JSONObject data) {
+		if (!data.has("map")) return;
+		try {
+			System.out.println("received map: " + data.getString("map"));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		/*
 		Node map = (Node) mapExpression.evaluate(data, XPathConstants.NODE);
 		if (map != null) {
@@ -106,41 +103,44 @@ public class MapHandler extends Handler {
 	}
 
 	private void parseUserRemovals(JSONObject data) {
-		/*
 		// get removals
-		NodeList users = (NodeList) quitExpression.evaluate(data, XPathConstants.NODESET);
-		for (int i = 0; i < users.getLength(); i++) {
-			int userId = Integer.parseInt(users.item(i).getAttributes().getNamedItem("id").getNodeValue());
-			map.getUserOverlay().removeUser(userId);
+		if (!data.has("quit")) return;
+		try {
+			JSONArray quits = data.getJSONArray("quit");
+			for (int i = 0; i < quits.length(); i++) {
+				int userId = quits.getJSONObject(i).getJSONObject("user").getInt("id");
+				map.getUserOverlay().removeUser(userId);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
-		*/
 	}
 
 	private void parseUserUpdates(JSONObject data) {
-		/*
+		if (!data.has("movements")) return;
 		// get location updates
-		NodeList users = (NodeList) userExpression.evaluate(data, XPathConstants.NODESET);
-		for (int i = 0; i < users.getLength(); i++) {
-			Node location = (Node) locationExpression.evaluate(users.item(i), XPathConstants.NODE);
-			int lat = 0, lon = 0;
-			for (int k = 0; k < location.getChildNodes().getLength(); k++) {
-				Node coord = location.getChildNodes().item(k);
-				int value = (int) (Float.parseFloat(coord.getTextContent()) * 1E6);
-				if (coord.getNodeName().equals("lat")) lat = value;
-				if (coord.getNodeName().equals("lon")) lon = value;
+		try {
+			JSONArray movements = data.getJSONArray("movements");
+			for (int i = 0; i < movements.length(); i++) {
+				JSONObject movement = movements.getJSONObject(i);
+				JSONObject location = movement.getJSONObject("location");
+				JSONObject user = movement.getJSONObject("user");
+	
+				int lat = (int) (location.getDouble("lat") * 1E6),
+					lon = (int) (location.getDouble("lon") * 1E6);
+				GeoPoint point = new GeoPoint(lat, lon);
+				int userId = user.getInt("id");
+				UserOverlayItem o = map.getUserOverlay().getUser(userId);
+				if (o != null) {
+					o.setPoint(point);
+				} else {
+					String userName = user.getString("name");
+					String team = user.getString("team");
+					map.getUserOverlay().addUser(new UserOverlayItem(point, userId, userName, team));
+				}
 			}
-			GeoPoint point = new GeoPoint(lat, lon);
-			Node user = users.item(i);
-			int userId = Integer.parseInt(user.getAttributes().getNamedItem("id").getNodeValue());
-			UserOverlayItem o = map.getUserOverlay().getUser(userId);
-			if (o != null) {
-				o.setPoint(point);
-			} else {
-				String userName = user.getAttributes().getNamedItem("name").getNodeValue();
-				String team = user.getAttributes().getNamedItem("team").getNodeValue();
-				map.getUserOverlay().addUser(new UserOverlayItem(point, userId, userName, team));
-			}
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
-		*/
 	}
 }

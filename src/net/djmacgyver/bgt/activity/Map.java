@@ -41,6 +41,14 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	private boolean bound = false;
 	private MapView map;
 	private MapHandler handler = new MapHandler(this);
+	private HttpSocketListener listener = new HttpSocketListener() {
+		@Override
+		public void receiveUpdate(JSONObject data) {
+			Message msg = new Message();
+			msg.obj = data;
+			handler.sendMessage(msg);
+		}
+	};
 	
 	public static final int DIALOG_CONNECTING = 1;
 	
@@ -195,8 +203,8 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		if (hasLocationOverlay()) getLocationOverlay().disableMyLocation();
 		getRefresher().terminate();
 		this.refresher = null;
-		socket.unSubscribeUpdates("movements").unSubscribeUpdates("map").unSubscribeUpdates("stats");
-		//socket.removeListener(handler);
+		socket.unSubscribeUpdates("movements").unSubscribeUpdates("map").unSubscribeUpdates("stats").unSubscribeUpdates("quit");
+		socket.removeListener(listener);
 		sockService.removeStake(this);
 		unbindService(sconn);
 	}
@@ -224,15 +232,8 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	}
 	
 	public void onConnect() {
-		socket.addListener(new HttpSocketListener() {
-			@Override
-			public void receiveUpdate(JSONObject data) {
-				Message msg = new Message();
-				msg.obj = data;
-				handler.dispatchMessage(msg);
-			}
-		});
-		socket.subscribeUpdates("movements").subscribeUpdates("map").subscribeUpdates("stats");
+		socket.addListener(listener);
+		socket.subscribeUpdates("movements").subscribeUpdates("map").subscribeUpdates("stats").subscribeUpdates("quit");
 		getUserOverlay().reset();
 		removeDialog(Map.DIALOG_CONNECTING);
 	}

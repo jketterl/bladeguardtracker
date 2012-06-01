@@ -74,7 +74,7 @@ public class HttpSocketConnection extends Connection {
 							}
 						} catch (JSONException e) {
 							// propably an old XML message. ignore... for now we only support json
-							//System.out.println("unable to parse message: " + message);
+							System.out.println("unable to parse message: " + message);
 						}
 						checkDisconnect();
 					}
