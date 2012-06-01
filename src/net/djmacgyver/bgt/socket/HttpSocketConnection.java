@@ -207,4 +207,25 @@ public class HttpSocketConnection extends Connection {
 		sendCommand("quit");
 	}
 
+	public HttpSocketConnection subscribeUpdates(String category) {
+		try {
+			JSONObject data = new JSONObject();
+			data.put("category", category);
+			sendCommand(new SocketCommand("subscribeUpdates", data));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return this;
+	}
+	
+	public HttpSocketConnection unSubscribeUpdates(String category) {
+		try {
+			JSONObject data = new JSONObject();
+			data.put("category", category);
+			sendCommand(new SocketCommand("unSubscribeUpdates", data));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return this;
+	}
 }
