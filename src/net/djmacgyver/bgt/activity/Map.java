@@ -2,12 +2,12 @@ package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.GPSListener;
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.downstream.HttpStreamingConnection;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
-import net.djmacgyver.bgt.map.MapHandler;
 import net.djmacgyver.bgt.map.RouteOverlay;
 import net.djmacgyver.bgt.map.UserOverlay;
+import net.djmacgyver.bgt.socket.HttpSocketConnection;
+import net.djmacgyver.bgt.socket.SocketService;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -17,7 +17,6 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +30,6 @@ import com.google.android.maps.MyLocationOverlay;
 public class Map extends MapActivity implements KeepAliveTarget {
 	private UserOverlay users;
 	private MyLocationOverlay myLoc;
-	private HttpStreamingConnection updater;
 	private KeepAliveThread refresher;
 	private RouteOverlay route;
 	private GPSListener service;
@@ -40,7 +38,8 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	
 	public static final int DIALOG_CONNECTING = 1;
 	
-    ServiceConnection conn = new ServiceConnection() {
+	// GPSListener Service connection
+    private ServiceConnection conn = new ServiceConnection() {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			service = null;
@@ -57,6 +56,24 @@ public class Map extends MapActivity implements KeepAliveTarget {
 			setLocationOverlay(new MyLocationOverlay(getApplicationContext(), getMap()));
 			getLocationOverlay().enableMyLocation();
 	    	getMap().getOverlays().add(getLocationOverlay());
+		}
+	};
+	
+	private HttpSocketConnection socket;
+	private SocketService sockService;
+	
+	// SocketService connection
+	private ServiceConnection sconn = new ServiceConnection() {
+		
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+		}
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder s) {
+			sockService = ((SocketService.LocalBinder) s).getService();
+			socket = sockService.getSharedConnection(Map.this);
+			onConnect();
 		}
 	};
 	
@@ -111,15 +128,6 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		return (TextView) findViewById(R.id.bladeNightCycleTime);
 	}
 	
-	private HttpStreamingConnection getUpdater()
-	{
-		if (updater == null) {
-			Handler handler = new MapHandler(this);
-			updater = new HttpStreamingConnection(getApplicationContext(), getResources().getString(R.string.base_url) + "stream", handler);
-		}
-		return updater;
-	}
-	
 	private KeepAliveThread getRefresher()
 	{
 		if (refresher == null) {
@@ -143,8 +151,6 @@ public class Map extends MapActivity implements KeepAliveTarget {
 
         bindService(new Intent(this, GPSListener.class), conn, Context.BIND_AUTO_CREATE);
         bound = true;
-    	
-    	//new MapDownloaderThread(getApplicationContext(), getRoute(), view).start();
     }
 
 	@Override
@@ -170,7 +176,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	protected void onResume() {
 		super.onResume();
 		showDialog(DIALOG_CONNECTING);
-    	getUpdater().start();
+        bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
     	getRefresher().start();
     	if (service != null && hasLocationOverlay() && service.isEnabled()) {
     		getLocationOverlay().enableMyLocation();
@@ -181,10 +187,11 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	protected void onPause() {
 		super.onPause();
 		if (hasLocationOverlay()) getLocationOverlay().disableMyLocation();
-		getUpdater().terminate();
-		this.updater = null;
 		getRefresher().terminate();
 		this.refresher = null;
+		socket.unSubscribeUpdates("movements").unSubscribeUpdates("map").unSubscribeUpdates("stats");
+		sockService.removeStake(this);
+		unbindService(sconn);
 	}
 
 	@Override
@@ -210,6 +217,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	}
 	
 	public void onConnect() {
+		socket.subscribeUpdates("movements").subscribeUpdates("map").subscribeUpdates("stats");
 		getUserOverlay().reset();
 		removeDialog(Map.DIALOG_CONNECTING);
 	}
