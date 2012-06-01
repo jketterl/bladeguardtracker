@@ -79,27 +79,24 @@ public class MapHandler extends Handler {
 	private void parseMapData(JSONObject data) {
 		if (!data.has("map")) return;
 		try {
-			System.out.println("received map: " + data.getString("map"));
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		/*
-		Node map = (Node) mapExpression.evaluate(data, XPathConstants.NODE);
-		if (map != null) {
-			NodeList points = (NodeList) pointExpression.evaluate(map, XPathConstants.NODESET);
-			GeoPoint[] geoPoints = new GeoPoint[points.getLength()];
-			for (int i = 0; i < points.getLength(); i++) {
+			System.out.println("received map");
+			JSONObject map = data.getJSONArray("map").getJSONObject(0);
+			JSONArray points = map.getJSONArray("points");
+			GeoPoint[] geoPoints = new GeoPoint[points.length()];
+			for (int i = 0; i < points.length(); i++) {
+				JSONObject point = points.getJSONObject(i);
 				GeoPoint gPoint = new GeoPoint(
-						(int) (Float.parseFloat(points.item(i).getAttributes().getNamedItem("lat").getNodeValue()) * 1E6),
-						(int) (Float.parseFloat(points.item(i).getAttributes().getNamedItem("lon").getNodeValue()) * 1E6)
+						(int) (point.getDouble("lat") * 1E6),
+						(int) (point.getDouble("lon") * 1E6)
 				);
 				geoPoints[i] = gPoint;
 			}
 			
 			this.map.getRoute().setPoints(geoPoints);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		*/
 	}
 
 	private void parseUserRemovals(JSONObject data) {
