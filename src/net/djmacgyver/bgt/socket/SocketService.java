@@ -28,13 +28,8 @@ public class SocketService extends Service {
 	
 	// public service methods
 	public HttpSocketConnection getSharedConnection(Object stake) {
-		if (sharedConn == null) {
-			System.out.println("starting new connection!");
-			sharedConn = new HttpSocketConnection(getApplicationContext());
-			sharedConn.connect();
-		}
 		addStake(stake);
-		return sharedConn;
+		return getSharedConnection();
 	}
 	
 	public void addStake(Object obj) {
@@ -48,5 +43,14 @@ public class SocketService extends Service {
 			sharedConn.disconnect();
 			sharedConn = null;
 		}
+	}
+
+	public HttpSocketConnection getSharedConnection() {
+		if (sharedConn == null) {
+			System.out.println("starting new connection!");
+			sharedConn = new HttpSocketConnection(getApplicationContext());
+			sharedConn.connect();
+		}
+		return sharedConn;
 	}
 }
