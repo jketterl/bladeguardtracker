@@ -153,11 +153,11 @@ public class HttpSocketConnection extends Connection {
 		}
 	}
 	
-	private void sendCommand(String command) {
+	public void sendCommand(String command) {
 		sendCommand(new SocketCommand(command));
 	}
 	
-	private void sendCommand(SocketCommand command) {
+	public void sendCommand(SocketCommand command) {
 		if (!connected) {
 			queue.add(command);
 			return;
