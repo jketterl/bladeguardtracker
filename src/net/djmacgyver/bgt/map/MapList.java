@@ -1,28 +1,24 @@
 package net.djmacgyver.bgt.map;
 
-import java.io.IOException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.http.HttpClient;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketService;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.DataSetObserver;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,75 +27,64 @@ import android.widget.TextView;
 
 public class MapList implements ListAdapter {
 	private Context context;
-	private HttpClient client;
-	private Document dom;
-	private NodeList maps;
+	private JSONArray maps;
+	private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
+	
+	private ServiceConnection conn = new ServiceConnection() {
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+		}
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			SocketService s = ((SocketService.LocalBinder) service).getService();
+			final SocketCommand c = new SocketCommand("getMaps", new JSONObject());
+			c.setCallback(new Runnable() {
+				@Override
+				public void run() {
+					maps = c.getResponseData();
+					fireChanged();
+				}
+			});
+			s.getSharedConnection().sendCommand(c);
+		}
+	};
 	
 	public MapList(Context context) {
 		this.context = context;
+		context.bindService(new Intent(context, SocketService.class), conn, Context.BIND_AUTO_CREATE);
 	}
 	
-	private HttpClient getClient() {
-		if (client == null) {
-			return new HttpClient(context);
-		}
-		return client;
-	}
-	
-	private Document getDom() {
-		if (dom == null) {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			dbf.setNamespaceAware(true);
-			
-			HttpGet req = new HttpGet(context.getResources().getString(R.string.base_url) + "map");
-			try {
-				HttpEntity e = getClient().execute(req).getEntity();
-				DocumentBuilder builder = dbf.newDocumentBuilder();
-				dom = builder.parse(e.getContent());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalStateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return dom;
-	}
-	
-	private NodeList getMaps() {
-		if (maps == null) {
-			XPath x = XPathFactory.newInstance().newXPath();
-			try {
-				XPathExpression mapExpr = x.compile("/maps/map");
-				maps = (NodeList) mapExpr.evaluate(getDom(), XPathConstants.NODESET);
-			} catch (XPathExpressionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+	private JSONArray getMaps() {
 		return maps;
 	}
 
 	@Override
 	public int getCount() {
-		return getMaps().getLength();
+		if (getMaps() == null) return 0;
+		return getMaps().length();
 	}
 
 	@Override
 	public Object getItem(int arg0) {
-		return getMaps().item(arg0);
+		try {
+			return getMaps().getJSONObject(arg0);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override
 	public long getItemId(int arg0) {
-		return Integer.parseInt(getMaps().item(arg0).getAttributes().getNamedItem("id").getNodeValue());
+		try {
+			return getMaps().getJSONObject(arg0).getInt("id");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	@Override
@@ -112,8 +97,13 @@ public class MapList implements ListAdapter {
 		LayoutInflater inf = LayoutInflater.from(context);
 		View v = inf.inflate(R.layout.maplistitem, arg2, false);
 		TextView text = (TextView) v.findViewById(R.id.mapName);
-		Node map = getMaps().item(arg0);
-		text.setText(map.getTextContent());
+		JSONObject map;
+		try {
+			map = getMaps().getJSONObject(arg0);
+			text.setText(map.getString("name"));
+		} catch (JSONException e) {
+			text.setText("undefined");
+		}
 		return v;
 	}
 
@@ -134,16 +124,26 @@ public class MapList implements ListAdapter {
 
 	@Override
 	public void registerDataSetObserver(DataSetObserver arg0) {
-		// TODO Auto-generated method stub
-
+		observers.add(arg0);
 	}
 
 	@Override
 	public void unregisterDataSetObserver(DataSetObserver arg0) {
-		// TODO Auto-generated method stub
-
+		observers.remove(arg0);
+	}
+	
+	private void fireChanged() {
+		h.sendMessage(new Message());
 	}
 
+	private Handler h = new Handler(){
+		@Override
+		public void handleMessage(Message msg) {
+			Iterator<DataSetObserver> i = observers.iterator();
+			while (i.hasNext()) i.next().onChanged();
+		}
+	};
+	
 	@Override
 	public boolean areAllItemsEnabled() {
 		return true;
