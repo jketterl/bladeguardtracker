@@ -2,12 +2,14 @@ package net.djmacgyver.bgt.socket;
 
 import java.util.Vector;
 
+import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
+import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
-public class SocketService extends Service {
+public class SocketService extends Service implements KeepAliveTarget {
 	// necessary for interaction with service clients
 	private Binder binder = new LocalBinder();
 	
@@ -25,6 +27,7 @@ public class SocketService extends Service {
 	// instance variables
 	private HttpSocketConnection sharedConn;
 	private Vector<Object> stakes = new Vector<Object>();
+	private KeepAliveThread socketTimeout;
 	
 	// public service methods
 	public HttpSocketConnection getSharedConnection(Object stake) {
@@ -52,5 +55,18 @@ public class SocketService extends Service {
 			sharedConn.connect();
 		}
 		return sharedConn;
+	}
+
+	private KeepAliveThread getSocketTimeout() {
+		if (socketTimeout == null) {
+			socketTimeout = new KeepAliveThread(this, 300);
+		}
+		return socketTimeout;
+	}
+
+	public void keepAlive(KeepAliveThread source) {
+		if (source == getSocketTimeout()) {
+			
+		}
 	}
 }
