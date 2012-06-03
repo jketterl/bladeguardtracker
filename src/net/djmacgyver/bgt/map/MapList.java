@@ -47,6 +47,7 @@ public class MapList implements ListAdapter {
 				}
 			});
 			s.getSharedConnection().sendCommand(c);
+			context.unbindService(this);
 		}
 	};
 	
