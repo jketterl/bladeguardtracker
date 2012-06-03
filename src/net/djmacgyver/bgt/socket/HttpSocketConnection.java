@@ -94,8 +94,10 @@ public class HttpSocketConnection extends Connection {
 					public void onConnect() {
 						System.out.println("connected");
 						connected = true;
+						authenticate();
+						LinkedList<SocketCommand> queue = HttpSocketConnection.this.queue;
+						HttpSocketConnection.this.queue = null;
 						while (!queue.isEmpty()) sendCommand(queue.poll());
-						queue = null;
 						checkDisconnect();
 					}
 				}, null);
@@ -171,7 +173,6 @@ public class HttpSocketConnection extends Connection {
 	public void connect() {
 		queue = new LinkedList<SocketCommand>();
 		getSocket().connect();
-		authenticate();
 		getGpsReminder().start();
 	}
 
