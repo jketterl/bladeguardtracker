@@ -84,6 +84,8 @@ public class MapHandler extends Handler {
 		}
 		
 		this.map.getRoute().setPoints(geoPoints);
+		
+		this.map.getTitleTextView().setText(map.getString("name"));
 	}
 
 	private void parseUserRemovals(JSONObject data) throws JSONException {
