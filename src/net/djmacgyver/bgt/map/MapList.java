@@ -133,7 +133,7 @@ public class MapList implements ListAdapter {
 	}
 	
 	private void fireChanged() {
-		h.sendMessage(new Message());
+		h.sendEmptyMessage(0);
 	}
 
 	private Handler h = new Handler(){
