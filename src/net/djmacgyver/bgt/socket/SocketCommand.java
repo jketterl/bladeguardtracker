@@ -1,5 +1,6 @@
 package net.djmacgyver.bgt.socket;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,7 +9,7 @@ public class SocketCommand {
 	private JSONObject data;
 	private Runnable callback;
 	private int requestId;
-	private JSONObject responseData;
+	private JSONArray responseData;
 	private boolean result = false;
 	
 	public SocketCommand(String command, JSONObject data, Runnable callback) {
@@ -53,7 +54,15 @@ public class SocketCommand {
 	{
 		try {
 			result = response.getBoolean("success");
-			if (response.has("data")) responseData = response.getJSONObject("data");
+			if (response.has("data")) {
+				Object data = response.get("data");
+				if (data instanceof JSONObject) {
+					responseData = new JSONArray();
+					responseData.put(0, data);
+				} else if (data instanceof JSONArray) {
+					responseData = (JSONArray) data;
+				}
+			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -67,7 +76,7 @@ public class SocketCommand {
 		return result;
 	}
 	
-	public JSONObject getResponseData()
+	public JSONArray getResponseData()
 	{
 		return responseData;
 	}
