@@ -1,21 +1,25 @@
 package net.djmacgyver.bgt.activity;
 
-import java.io.IOException;
-
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.http.HttpClient;
 import net.djmacgyver.bgt.map.MapList;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketService;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpGet;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.view.View;
 import android.view.Window;
@@ -67,16 +71,34 @@ public class MapSelection extends ListActivity {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				HttpGet req = new HttpGet(getResources().getString(R.string.base_url) + "setmap?id=" + selected);
-				HttpClient c = new HttpClient(getApplicationContext());
-				try {
-					HttpEntity e = c.execute(req).getEntity();
-					e.consumeContent();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				h.sendEmptyMessage(0);
+				ServiceConnection conn = new ServiceConnection() {
+					@Override
+					public void onServiceDisconnected(ComponentName name) {
+					}
+					
+					@Override
+					public void onServiceConnected(ComponentName name, IBinder service) {
+						SocketService s = ((SocketService.LocalBinder) service).getService();
+						try {
+							JSONObject data = new JSONObject();
+							data.put("id", selected);
+							SocketCommand command = new SocketCommand("setMap", data);
+							command.setCallback(new Runnable() {
+								@Override
+								public void run() {
+									h.sendEmptyMessage(0);
+								}
+							});
+							s.getSharedConnection().sendCommand(command);
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						unbindService(this);
+					}
+				};
+
+				bindService(new Intent(MapSelection.this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
 			}
 		}).start();
 	}
