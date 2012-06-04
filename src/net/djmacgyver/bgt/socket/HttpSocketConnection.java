@@ -107,7 +107,10 @@ public class HttpSocketConnection extends Connection {
 						connected = false;
 						
 						// the disconnection was intentional - ok. accept it and leave it that way.
-						if (doDisconnect) return;
+						if (doDisconnect) {
+							doDisconnect = false;
+							return;
+						}
 						
 						// otherwise: try to reconnect
 						reconnect();
@@ -225,7 +228,6 @@ public class HttpSocketConnection extends Connection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		doDisconnect = false;
 	}
 
 	@Override
