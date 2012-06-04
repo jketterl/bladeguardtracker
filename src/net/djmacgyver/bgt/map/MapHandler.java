@@ -67,6 +67,11 @@ public class MapHandler extends Handler {
 			text = df.format(cycleTime) + " min";
 		}
 		map.getCycleTimeTextView().setText(text);
+		
+		if (stats.has("between")) {
+			JSONArray between = stats.getJSONArray("between");
+			map.getRoute().setBetween(between.getInt(0), between.getInt(1));
+		}
 	}
 
 	private void parseMapData(JSONObject data) throws JSONException {

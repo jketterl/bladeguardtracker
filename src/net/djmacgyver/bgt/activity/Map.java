@@ -1,7 +1,5 @@
 package net.djmacgyver.bgt.activity;
 
-import org.json.JSONObject;
-
 import net.djmacgyver.bgt.GPSListener;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
@@ -12,13 +10,15 @@ import net.djmacgyver.bgt.map.UserOverlay;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketService;
+
+import org.json.JSONObject;
+
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -101,10 +101,6 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	public RouteOverlay getRoute() {
 		if (route == null) {
 			route = new RouteOverlay(getMap());
-			route.getPaint().setAntiAlias(true);
-			route.getPaint().setColor(Color.BLUE);
-			route.getPaint().setAlpha(64);
-			route.getPaint().setStrokeWidth(2);
 		}
 		return route;
 	}

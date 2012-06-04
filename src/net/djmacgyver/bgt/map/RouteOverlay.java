@@ -1,6 +1,7 @@
 package net.djmacgyver.bgt.map;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 
@@ -10,8 +11,9 @@ import com.google.android.maps.Overlay;
 
 public class RouteOverlay extends Overlay {
 	private GeoPoint[] points;
-	private Paint paint;
+	private Paint paint, trackPaint;
 	private MapView view;
+	private int from = -1, to = -1;
 	
 	public RouteOverlay(MapView view) {
 		this.view = view;
@@ -32,11 +34,26 @@ public class RouteOverlay extends Overlay {
 		view.getController().setCenter(new GeoPoint((maxLat + minLat) / 2, (maxLon + minLon) / 2));
 	}
 	
-	public Paint getPaint() {
+	private Paint getRegularPaint() {
 		if (paint == null) {
 			paint = new Paint();
+			paint.setAntiAlias(true);
+			paint.setColor(Color.BLUE);
+			paint.setAlpha(64);
+			paint.setStrokeWidth(2);
 		}
 		return paint;
+	}
+	
+	private Paint getTrackPaint() {
+		if (trackPaint == null) {
+			trackPaint = new Paint();
+			trackPaint.setAntiAlias(true);
+			trackPaint.setAlpha(64);
+			trackPaint.setStrokeWidth(4);
+			trackPaint.setColor(Color.rgb(255, 192, 0));
+		}
+		return trackPaint;
 	}
 	
 	@Override
@@ -50,9 +67,19 @@ public class RouteOverlay extends Overlay {
 			Point point = new Point();
 			mapView.getProjection().toPixels(points[i], point);
 			if (previousPoint != null) {
-				canvas.drawLine(previousPoint.x, previousPoint.y, point.x, point.y, getPaint());
+				// if the current part of the map is occupied, draw it twice:
+				// once in highlighted, once in regular
+				if (i >= from && i <= to)
+					canvas.drawLine(previousPoint.x, previousPoint.y, point.x, point.y, getTrackPaint());
+				canvas.drawLine(previousPoint.x, previousPoint.y, point.x, point.y, getRegularPaint());
 			}
 			previousPoint = point;
 		}
+	}
+	
+	public void setBetween(int from, int to) {
+		System.out.println("from: " + from + "; to: " + to);
+		this.from = from;
+		this.to = to;
 	}
 }
