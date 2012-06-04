@@ -36,6 +36,7 @@ public class HttpSocketConnection extends Connection {
 	private HashMap <Integer, SocketCommand> requests = new HashMap<Integer, SocketCommand>();
 	private LinkedList<SocketCommand> queue;
 	private ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
+	private ArrayList<String> subscribed = new ArrayList<String>();
 	
 	public HttpSocketConnection(Context applicationContext) {
 		this.context = applicationContext;
@@ -82,22 +83,52 @@ public class HttpSocketConnection extends Connection {
 					@Override
 					public void onError(Exception error) {
 						error.printStackTrace();
+						reconnect();
+					}
+					
+					private void reconnect(){
+						// put up a new queue
+						queue = new LinkedList<SocketCommand>();
+						socket = null;
+						// give the server 10s grace time
+						try {
+							Thread.sleep(10000);
+						} catch (InterruptedException e) {}
+						getSocket().connect();
 					}
 					
 					@Override
 					public void onDisconnect(int code, String reason) {
+						// we got disconnected.
 						System.out.println("disconnected");
+						
+						// connected is already false - why were we connected in the first place? WTF?
+						if (!connected) return;
 						connected = false;
+						
+						// the disconnection was intentional - ok. accept it and leave it that way.
+						if (doDisconnect) return;
+						
+						// otherwise: try to reconnect
+						reconnect();
 					}
 					
 					@Override
 					public void onConnect() {
 						System.out.println("connected");
 						connected = true;
+						
+						// first things first: send our authentication.
 						authenticate();
+						
+						// send all queued commands
 						LinkedList<SocketCommand> queue = HttpSocketConnection.this.queue;
 						HttpSocketConnection.this.queue = null;
 						while (!queue.isEmpty()) sendCommand(queue.poll());
+						
+						sendSubscriptions();
+						
+						// check whether this connection is eligible for disconnection
 						checkDisconnect();
 					}
 				}, null);
@@ -137,7 +168,8 @@ public class HttpSocketConnection extends Connection {
 	
 	public void authenticate() {
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
-		if (!p.getBoolean("anonymous", true)) try {
+		if (p.getBoolean("anonymous", true)) return;
+		try {
 			// send our authentication data as soon as we are connected
 			JSONObject data = new JSONObject();
 			data.put("user", p.getString("username", ""));
@@ -218,10 +250,14 @@ public class HttpSocketConnection extends Connection {
 	}
 
 	public HttpSocketConnection subscribeUpdates(String category) {
+		if (subscribed.contains(category)) return this;
 		try {
-			JSONObject data = new JSONObject();
-			data.put("category", category);
-			sendCommand(new SocketCommand("subscribeUpdates", data));
+			if (connected) {
+				JSONObject data = new JSONObject();
+				data.put("category", category);
+				sendCommand(new SocketCommand("subscribeUpdates", data));
+			}
+			subscribed.add(category);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -229,10 +265,14 @@ public class HttpSocketConnection extends Connection {
 	}
 	
 	public HttpSocketConnection unSubscribeUpdates(String category) {
+		if (!subscribed.contains(category)) return this;
 		try {
-			JSONObject data = new JSONObject();
-			data.put("category", category);
-			sendCommand(new SocketCommand("unSubscribeUpdates", data));
+			if (connected) {
+				JSONObject data = new JSONObject();
+				data.put("category", category);
+				sendCommand(new SocketCommand("unSubscribeUpdates", data));
+			}
+			subscribed.remove(category);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -256,5 +296,20 @@ public class HttpSocketConnection extends Connection {
 	{
 		if (!listeners.contains(listener)) return;
 		listeners.remove(listener);
+	}
+
+	private void sendSubscriptions() {
+		// re-subscribe to all categories (in case of a re-connect)
+		Iterator<String> i = subscribed.iterator();
+		while (i.hasNext()) {
+			try {
+				JSONObject data = new JSONObject();
+				data.put("category", i.next());
+				sendCommand(new SocketCommand("subscribeUpdates", data));
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 }
