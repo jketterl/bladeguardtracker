@@ -33,4 +33,6 @@
     <string name="switching_map">Wechsle Strecke...</string>
     <string name="are_you_sure">Bist du sicher?</string>
     <string name="map_will_be_reset">Hiermit wird die Strecke für alle verbundenen Benutzer zurückgesetzt!</string>
+    <string name="logging_in">Anmeldung...</string>
+    <string name="credentials_wrong">Die eingegebenen Anmeldedaten sind ungültig.\n\nBitte gib eine gültige Kombination aus Benutzername und Passwort ein (oder benutze das anonyme Tracking)!</string>
 </resources>

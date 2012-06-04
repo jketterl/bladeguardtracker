@@ -169,39 +169,35 @@ public class HttpSocketConnection extends Connection {
 		return socket;
 	}
 	
-	public void authenticate() {
+	public SocketCommand authenticate() {
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
-		if (p.getBoolean("anonymous", true)) return;
+		if (p.getBoolean("anonymous", true)) return null;
 		try {
 			// send our authentication data as soon as we are connected
 			JSONObject data = new JSONObject();
 			data.put("user", p.getString("username", ""));
 			data.put("pass", p.getString("password", ""));
-			final SocketCommand command = new SocketCommand("auth", data);
-			command.setCallback(new Runnable() {
-				@Override
-				public void run() {
-					System.out.println("login successful? " + command.wasSuccessful());
-				}
-			});
-			sendCommand(command);
+			SocketCommand command = new SocketCommand("auth", data);
+			return sendCommand(command);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 	
-	public void sendCommand(String command) {
-		sendCommand(new SocketCommand(command));
+	public SocketCommand sendCommand(String command) {
+		return sendCommand(new SocketCommand(command));
 	}
 	
-	public void sendCommand(SocketCommand command) {
+	public SocketCommand sendCommand(SocketCommand command) {
 		if (!connected) {
 			queue.add(command);
-			return;
+			return command;
 		}
 		requests.put(requestCount, command);
 		command.setRequestId(requestCount++);
 		getSocket().send(command.getJson());
+		return command;
 	}
 
 	@Override

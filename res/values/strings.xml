@@ -35,4 +35,6 @@
     <string name="switching_map">Switching Route...</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="map_will_be_reset">This will reset the route for all connected users!</string>
+    <string name="logging_in">Logging in...</string>
+    <string name="credentials_wrong">The credentials you have provided are invalid.\n\nPlease enter a valid username / password combination (or use anonymous tracking)!</string>
 </resources>
