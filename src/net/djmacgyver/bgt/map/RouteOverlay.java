@@ -50,7 +50,7 @@ public class RouteOverlay extends Overlay {
 			trackPaint = new Paint();
 			trackPaint.setAntiAlias(true);
 			trackPaint.setAlpha(64);
-			trackPaint.setStrokeWidth(4);
+			trackPaint.setStrokeWidth(6);
 			trackPaint.setColor(Color.rgb(255, 192, 0));
 		}
 		return trackPaint;
