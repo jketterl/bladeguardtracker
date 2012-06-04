@@ -71,6 +71,8 @@ public class MapHandler extends Handler {
 		if (stats.has("between")) {
 			JSONArray between = stats.getJSONArray("between");
 			map.getRoute().setBetween(between.getInt(0), between.getInt(1));
+		} else {
+			map.getRoute().setBetween(-1, -1);
 		}
 	}
 
