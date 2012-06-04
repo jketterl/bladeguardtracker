@@ -37,14 +37,18 @@ public class SocketService extends Service implements KeepAliveTarget {
 	
 	public void addStake(Object obj) {
 		if (stakes.contains(obj)) return;
+		if (socketTimeout != null) {
+			getSocketTimeout().terminate();
+			socketTimeout = null;
+		}
 		stakes.add(obj);
 	}
 	
 	public void removeStake(Object obj) {
+		if (!stakes.contains(obj)) return;
 		stakes.remove(obj);
 		if (stakes.isEmpty() && sharedConn != null) {
-			sharedConn.disconnect();
-			sharedConn = null;
+			if (!getSocketTimeout().isAlive()) getSocketTimeout().start();
 		}
 	}
 
@@ -64,9 +68,14 @@ public class SocketService extends Service implements KeepAliveTarget {
 		return socketTimeout;
 	}
 
+	@Override
 	public void keepAlive(KeepAliveThread source) {
 		if (source == getSocketTimeout()) {
-			
+			System.out.println("disconnecting now");
+			sharedConn.disconnect();
+			sharedConn = null;
+			getSocketTimeout().terminate();
+			socketTimeout = null;
 		}
 	}
 }
