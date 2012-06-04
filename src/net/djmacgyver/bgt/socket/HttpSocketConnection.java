@@ -14,7 +14,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.upstream.Connection;
+import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
+import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,7 +29,7 @@ import android.util.Log;
 
 import com.codebutler.android_websockets.WebSocketClient;
 
-public class HttpSocketConnection extends Connection {
+public class HttpSocketConnection implements KeepAliveTarget {
 	private Context context;
 	private WebSocketClient socket;
 	private boolean connected = false;
@@ -37,6 +38,10 @@ public class HttpSocketConnection extends Connection {
 	private LinkedList<SocketCommand> queue;
 	private ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
 	private ArrayList<String> subscribed = new ArrayList<String>();
+	private boolean updateBlocked = false;
+	private Location queuedLocation;
+	private Location lastLocation;
+	private KeepAliveThread gpsReminder;
 	
 	public HttpSocketConnection(Context applicationContext) {
 		this.context = applicationContext;
@@ -200,14 +205,12 @@ public class HttpSocketConnection extends Connection {
 		return command;
 	}
 
-	@Override
 	public void connect() {
 		queue = new LinkedList<SocketCommand>();
 		getSocket().connect();
 		getGpsReminder().start();
 	}
 
-	@Override
 	public void disconnect() {
 		getGpsReminder().terminate();
 		doDisconnect = true;
@@ -226,7 +229,6 @@ public class HttpSocketConnection extends Connection {
 		}
 	}
 
-	@Override
 	protected void executeLocationSend(Location location) {
 		try {
 			// build a json object to send to the server
@@ -242,7 +244,6 @@ public class HttpSocketConnection extends Connection {
 		}
 	}
 
-	@Override
 	public void sendQuit() {
 		sendCommand("quit");
 	}
@@ -309,5 +310,47 @@ public class HttpSocketConnection extends Connection {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	@Override
+	public void keepAlive(KeepAliveThread source) {
+		if (source == getGpsReminder()) {
+			updateBlocked = false;
+			sendLocation();
+		}
+	}
+
+	private void sendLocation() {
+		if (queuedLocation == null) return;
+		Location l = queuedLocation;
+		queuedLocation = null;
+		sendLocation(l);
+	}
+
+	public void sendLocation(Location location) {
+		if (location.equals(lastLocation)) return;
+		if (lastLocation != null && location.distanceTo(lastLocation) == 0) return;
+		if (updateBlocked) {
+			queuedLocation = location;
+			return;
+		}
+	
+		executeLocationSend(location);
+		
+		getGpsReminder().interrupt();
+		lastLocation = location;
+		updateBlocked = true;
+	}
+
+	public void sendGpsUnavailable() {
+		sendCommand("gpsUnavailable");
+		lastLocation = null;
+	}
+
+	protected KeepAliveThread getGpsReminder() {
+		if (gpsReminder == null) {
+			gpsReminder = new KeepAliveThread(this, 5);
+		}
+		return gpsReminder;
 	}
 }

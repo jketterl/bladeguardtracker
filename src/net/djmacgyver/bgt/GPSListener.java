@@ -3,8 +3,8 @@ package net.djmacgyver.bgt;
 import net.djmacgyver.bgt.activity.MainActivity;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
+import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.SocketService;
-import net.djmacgyver.bgt.upstream.Connection;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 public class GPSListener extends Service implements LocationListener, KeepAliveTarget {
-	private Connection conn;
+	private HttpSocketConnection conn;
 	private KeepAliveThread gpsReminder;
 	private boolean enabled = false;
 	private LocationManager locationManager;
