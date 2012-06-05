@@ -78,7 +78,6 @@ public class RouteOverlay extends Overlay {
 	}
 	
 	public void setBetween(int from, int to) {
-		System.out.println("from: " + from + "; to: " + to);
 		this.from = from;
 		this.to = to;
 	}
