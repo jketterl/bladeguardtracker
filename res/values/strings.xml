@@ -38,4 +38,5 @@
     <string name="logging_in">Logging in...</string>
     <string name="credentials_wrong">The credentials you have provided are invalid.\n\nPlease enter a valid username / password combination (or use anonymous tracking)!</string>
     <string name="team">Team selection...</string>
+    <string name="teamselection">Team selection</string>
 </resources>

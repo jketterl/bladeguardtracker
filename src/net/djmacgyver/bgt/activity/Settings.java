@@ -77,6 +77,16 @@ public class Settings extends PreferenceActivity {
 				return true;
 			}
 		});
+        
+        Preference team = findPreference("team");
+        team.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+				Intent i = new Intent(Settings.this, TeamSelection.class);
+				startActivity(i);
+				return true;
+			}
+		});
 	}
 	
 	@Override
