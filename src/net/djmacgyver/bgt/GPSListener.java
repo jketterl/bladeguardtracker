@@ -27,6 +27,10 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	private boolean enabled = false;
 	private LocationManager locationManager;
 	private static final int NOTIFICATION = 1;
+	private KeepAliveThread locationReminder;
+	private boolean updateBlocked = false;
+	private Location queuedLocation;
+	private Location lastLocation;
 
 	private SocketService sockService;
 	private ServiceConnection sconn = new ServiceConnection() {
@@ -58,13 +62,13 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	public void onLocationChanged(Location location) {
 		if (!getGpsReminder().isAlive()) getGpsReminder().start();
 		getGpsReminder().interrupt();
-		conn.sendLocation(location);
+		sendLocation(location);
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
 		if (!provider.equals("gps")) return;
-		conn.sendGpsUnavailable();
+		sendGpsUnavailable();
 	}
 
 	@Override
@@ -77,13 +81,16 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 		switch (status) {
 			case LocationProvider.TEMPORARILY_UNAVAILABLE:
 			case LocationProvider.OUT_OF_SERVICE:
-				conn.sendGpsUnavailable();
+				sendGpsUnavailable();
 				break;
 		}
 	}
 	
 	public void disable() {
 		if (!enabled) return;
+		
+		getLocationReminder().terminate();
+		
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(NOTIFICATION);
 
@@ -108,10 +115,15 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 
 	@Override
 	public void keepAlive(KeepAliveThread source) {
-		if (source != getGpsReminder()) return;
-		conn.sendGpsUnavailable();
-		getGpsReminder().terminate();
-		gpsReminder = null;
+		if (source == getGpsReminder()) {
+			sendGpsUnavailable();
+			getGpsReminder().terminate();
+			gpsReminder = null;
+		}
+		if (source == getLocationReminder()) {
+			updateBlocked = false;
+			sendLocation();
+		}
 	}
 
 	public void enable() {
@@ -135,6 +147,8 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 		);
 		notification.flags = Notification.FLAG_ONGOING_EVENT;
 		nm.notify(NOTIFICATION, notification);
+
+		getLocationReminder().start();
 	}
 	
 	public boolean isEnabled() {
@@ -157,5 +171,39 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		return START_STICKY;
+	}
+
+	protected KeepAliveThread getLocationReminder() {
+		if (locationReminder == null) {
+			locationReminder = new KeepAliveThread(this, 5);
+		}
+		return locationReminder;
+	}
+
+	private void sendLocation() {
+		if (queuedLocation == null) return;
+		Location l = queuedLocation;
+		queuedLocation = null;
+		sendLocation(l);
+	}
+
+	public void sendLocation(Location location) {
+		if (location.equals(lastLocation)) return;
+		if (lastLocation != null && location.distanceTo(lastLocation) == 0) return;
+		if (updateBlocked) {
+			queuedLocation = location;
+			return;
+		}
+	
+		conn.sendLocation(location);
+		
+		getLocationReminder().interrupt();
+		lastLocation = location;
+		updateBlocked = true;
+	}
+
+	private void sendGpsUnavailable() {
+		conn.sendGpsUnavailable();
+		lastLocation = null;
 	}
 }

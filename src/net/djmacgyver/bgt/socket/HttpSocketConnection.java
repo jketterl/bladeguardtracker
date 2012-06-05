@@ -38,10 +38,6 @@ public class HttpSocketConnection implements KeepAliveTarget {
 	private LinkedList<SocketCommand> queue;
 	private ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
 	private ArrayList<String> subscribed = new ArrayList<String>();
-	private boolean updateBlocked = false;
-	private Location queuedLocation;
-	private Location lastLocation;
-	private KeepAliveThread gpsReminder;
 	
 	public HttpSocketConnection(Context applicationContext) {
 		this.context = applicationContext;
@@ -208,11 +204,9 @@ public class HttpSocketConnection implements KeepAliveTarget {
 	public void connect() {
 		queue = new LinkedList<SocketCommand>();
 		getSocket().connect();
-		getGpsReminder().start();
 	}
 
 	public void disconnect() {
-		getGpsReminder().terminate();
 		doDisconnect = true;
 		checkDisconnect();
 	}
@@ -229,7 +223,7 @@ public class HttpSocketConnection implements KeepAliveTarget {
 		}
 	}
 
-	protected void executeLocationSend(Location location) {
+	public SocketCommand sendLocation(Location location) {
 		try {
 			// build a json object to send to the server
 			JSONObject data = new JSONObject();
@@ -237,11 +231,12 @@ public class HttpSocketConnection implements KeepAliveTarget {
 			data.put("lon", location.getLongitude());
 			if (location.hasSpeed()) data.put("speed", location.getSpeed());
 			// send it
-			sendCommand(new SocketCommand("log", data));
+			return sendCommand(new SocketCommand("log", data));
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 	}
 
 	public void sendQuit() {
@@ -314,43 +309,9 @@ public class HttpSocketConnection implements KeepAliveTarget {
 
 	@Override
 	public void keepAlive(KeepAliveThread source) {
-		if (source == getGpsReminder()) {
-			updateBlocked = false;
-			sendLocation();
-		}
-	}
-
-	private void sendLocation() {
-		if (queuedLocation == null) return;
-		Location l = queuedLocation;
-		queuedLocation = null;
-		sendLocation(l);
-	}
-
-	public void sendLocation(Location location) {
-		if (location.equals(lastLocation)) return;
-		if (lastLocation != null && location.distanceTo(lastLocation) == 0) return;
-		if (updateBlocked) {
-			queuedLocation = location;
-			return;
-		}
-	
-		executeLocationSend(location);
-		
-		getGpsReminder().interrupt();
-		lastLocation = location;
-		updateBlocked = true;
 	}
 
 	public void sendGpsUnavailable() {
 		sendCommand("gpsUnavailable");
-		lastLocation = null;
-	}
-
-	protected KeepAliveThread getGpsReminder() {
-		if (gpsReminder == null) {
-			gpsReminder = new KeepAliveThread(this, 5);
-		}
-		return gpsReminder;
 	}
 }
