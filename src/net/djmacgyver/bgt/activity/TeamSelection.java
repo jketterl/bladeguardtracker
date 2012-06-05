@@ -1,6 +1,7 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.team.TeamList;
 import android.app.ListActivity;
 import android.os.Bundle;
 import android.view.Window;
@@ -13,9 +14,11 @@ public class TeamSelection extends ListActivity {
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
 	
+		setContentView(R.layout.mapselection);
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.teamselection);
-        //addPreferencesFromResource(R.xml.teamselection);
+        
+        setListAdapter(new TeamList(this));
 	}
 }
