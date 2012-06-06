@@ -75,7 +75,6 @@ public class Signup extends PreferenceActivity {
 		public void handleMessage(Message msg) {
 			dismissDialog(DIALOG_SIGNUP_RUNNING);
 			Result res = (Result) msg.obj;
-			System.out.println(res.data);
 			if (!res.success) {
 				String message = "unknown error";
 				try {
