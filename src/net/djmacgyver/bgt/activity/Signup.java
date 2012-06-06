@@ -1,24 +1,24 @@
 package net.djmacgyver.bgt.activity;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.http.HttpClient;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketService;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
@@ -31,6 +31,64 @@ public class Signup extends PreferenceActivity {
 	static final int DIALOG_SIGNUP_RUNNING = 0;
 	static final int DIALOG_SIGNUP_SUCCESSFUL = 1;
 	static final int DIALOG_SIGNUP_FAILED = 2;
+	
+	private class Result
+	{
+		public boolean success;
+		public JSONArray data;
+	}
+	
+	private ServiceConnection conn = new ServiceConnection() {
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+		}
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			SocketService s = ((SocketService.LocalBinder) service).getService();
+			try {
+				JSONObject data = new JSONObject();
+				data.put("user", ((EditTextPreference) findPreference("username")).getEditText().getText().toString());
+				data.put("pass", ((EditTextPreference) findPreference("password")).getEditText().getText().toString());
+				final SocketCommand c = new SocketCommand("signup", data);
+				c.setCallback(new Runnable() {
+					@Override
+					public void run() {
+						Message msg = new Message();
+						Result res = new Result();
+						res.success = c.wasSuccessful();
+						res.data = c.getResponseData();
+						msg.obj = res;
+						handler.sendMessage(msg);
+					}
+				});
+				s.getSharedConnection().sendCommand(c);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			unbindService(this);
+		}
+	};
+	
+	private Handler handler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			dismissDialog(DIALOG_SIGNUP_RUNNING);
+			Result res = (Result) msg.obj;
+			System.out.println(res.data);
+			if (!res.success) {
+				String message = "unknown error";
+				try {
+					message = res.data.getJSONObject(0).getString("message");
+				} catch (JSONException e) {};
+				Bundle b = new Bundle();
+				b.putString("message", message);
+				showDialog(DIALOG_SIGNUP_FAILED, b);
+			} else {
+				showDialog(DIALOG_SIGNUP_SUCCESSFUL);
+			}
+		}
+	};
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,79 +105,7 @@ public class Signup extends PreferenceActivity {
         signup.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				String username = ((EditTextPreference) findPreference("username")).getEditText().getText().toString();
-				String password = ((EditTextPreference) findPreference("password")).getEditText().getText().toString();
-				String passwordConfirmation = ((EditTextPreference) findPreference("password_confirm")).getEditText().getText().toString();
-		        
-				Bundle b = new Bundle();
-				
-				if (username.equals("")) {
-					b.putString("message", getResources().getString(R.string.username_must_not_be_empty));
-					showDialog(DIALOG_SIGNUP_FAILED, b);
-					return false;
-				}
-				if (password.equals("")) {
-					b.putString("message", getResources().getString(R.string.password_must_not_be_empty));
-					showDialog(DIALOG_SIGNUP_FAILED, b);
-					return false;
-				}
-				if (!password.equals(passwordConfirmation)) {
-					b.putString("message", getResources().getString(R.string.password_mismatch));
-					showDialog(DIALOG_SIGNUP_FAILED, b);
-					return false;
-				}
-				
-				showDialog(DIALOG_SIGNUP_RUNNING);
-				
-				final HttpPost req = new HttpPost(getResources().getString(R.string.base_url) + "signup");
-				try {
-					req.setEntity(new StringEntity("user=" + username + "&pass=" + password));
-				} catch (UnsupportedEncodingException e1) {}
-
-				final Handler h = new Handler() {
-					@Override
-					public void handleMessage(Message msg) {
-						dismissDialog(DIALOG_SIGNUP_RUNNING);
-						if (msg.obj == null) {
-							Bundle b = new Bundle();
-							b.putString("message", getResources().getString(R.string.server_down));
-							showDialog(DIALOG_SIGNUP_FAILED, b);
-						}
-						HttpResponse res = (HttpResponse) msg.obj;
-						if (res.getStatusLine().getStatusCode() != 200) try {
-							HttpEntity e = res.getEntity();
-							BufferedReader in = new BufferedReader(new InputStreamReader(e.getContent()));
-							String line = null;
-							String message = getResources().getString(R.string.signup_server_message) + "\n\n";
-							while ((line = in.readLine()) != null) message = message.concat(line);
-							Bundle b = new Bundle();
-							b.putString("message", message);
-							showDialog(DIALOG_SIGNUP_FAILED, b);
-						} catch (IOException e) {
-							Bundle b = new Bundle();
-							b.putString("message", getResources().getString(R.string.server_down));
-							showDialog(DIALOG_SIGNUP_FAILED, b);
-						} else {
-							showDialog(DIALOG_SIGNUP_SUCCESSFUL);
-						}
-					}
-				};
-				
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						HttpClient c = new HttpClient(getApplicationContext());
-						Message msg = new Message();
-						try {
-							msg.obj = c.execute(req);
-						} catch (IOException e) {
-							msg.obj = null;
-						}
-						h.sendMessage(msg);
-					}
-				}).start();
-					
-				return true;
+				return signUp();
 			}
 		});
 	}
@@ -169,5 +155,40 @@ public class Signup extends PreferenceActivity {
 				d.setMessage(message.concat("\n\n" + args.getString("message")));
 		}
 		super.onPrepareDialog(id, dialog, args);
+	}
+
+	private boolean signUp() {
+		String username = ((EditTextPreference) findPreference("username")).getEditText().getText().toString();
+		String password = ((EditTextPreference) findPreference("password")).getEditText().getText().toString();
+		String passwordConfirmation = ((EditTextPreference) findPreference("password_confirm")).getEditText().getText().toString();
+		
+		Bundle b = new Bundle();
+		
+		if (username.equals("")) {
+			b.putString("message", getResources().getString(R.string.username_must_not_be_empty));
+			showDialog(DIALOG_SIGNUP_FAILED, b);
+			return false;
+		}
+		if (password.equals("")) {
+			b.putString("message", getResources().getString(R.string.password_must_not_be_empty));
+			showDialog(DIALOG_SIGNUP_FAILED, b);
+			return false;
+		}
+		if (!password.equals(passwordConfirmation)) {
+			b.putString("message", getResources().getString(R.string.password_mismatch));
+			showDialog(DIALOG_SIGNUP_FAILED, b);
+			return false;
+		}
+		
+		showDialog(DIALOG_SIGNUP_RUNNING);
+		
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				bindService(new Intent(Signup.this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
+			}
+		}).start();
+		
+		return true;
 	}
 }
