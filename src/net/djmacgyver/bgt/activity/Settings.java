@@ -23,23 +23,27 @@ public class Settings extends PreferenceActivity {
 	public static final int DIALOG_LOGGING_IN = 1;
 	public static final int DIALOG_CREDENTIALS_WRONG = 2;
 	
-	SocketService sockService;
-	ServiceConnection conn = new ServiceConnection() {
+	private class CallbackService implements ServiceConnection {
+		private Runnable callback;
+		
+		public void setCallback(Runnable callback) {
+			this.callback = callback;
+		}
+		
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			sockService = null;
 		}
 		
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			sockService = ((SocketService.LocalBinder) service).getService();
-			final SocketCommand command = sockService.getSharedConnection(this).authenticate();
+			SocketService sockService = ((SocketService.LocalBinder) service).getService();
+			final SocketCommand command = sockService.getSharedConnection().authenticate();
 			if (command != null) command.setCallback(new Runnable() {
 				@Override
 				public void run() {
 					dismissDialog(DIALOG_LOGGING_IN);
 					if (command.wasSuccessful()) {
-						finish();
+						runCallback();
 					} else {
 						runOnUiThread(new Runnable() {
 							@Override
@@ -51,12 +55,19 @@ public class Settings extends PreferenceActivity {
 				}
 			}); else {
 				dismissDialog(DIALOG_LOGGING_IN);
-				finish();
+				runCallback();
 			}
-			sockService.removeStake(this);
 			unbindService(this);
 		}
+		
+		private void runCallback(){
+			if (callback == null) return;
+			callback.run();
+			callback = null;
+		}
 	};
+	
+	private CallbackService conn = new CallbackService();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +93,12 @@ public class Settings extends PreferenceActivity {
         team.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				Intent i = new Intent(Settings.this, TeamSelection.class);
-				startActivity(i);
+				testLogin(new Runnable() {
+					@Override
+					public void run() {
+						startActivity(new Intent(Settings.this, TeamSelection.class));
+					}
+				});
 				return true;
 			}
 		});
@@ -91,6 +106,17 @@ public class Settings extends PreferenceActivity {
 	
 	@Override
 	public void onBackPressed() {
+		testLogin(new Runnable() {
+			@Override
+			public void run() {
+				finish();
+			}
+		});
+	}
+	
+	private void testLogin(Runnable callback)
+	{
+		conn.setCallback(callback);
 		// the service is setup to test the credentials provided automatically.
 		// display a progress dialog
 		showDialog(DIALOG_LOGGING_IN);
