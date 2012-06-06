@@ -7,7 +7,9 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.team.TeamList;
+import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +22,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class TeamSelection extends ListActivity {
+	public static final int DIALOG_SWITCHING = 1;
+	
 	private int selected;
 	
 	@Override
@@ -50,6 +54,7 @@ public class TeamSelection extends ListActivity {
 				command.setCallback(new Runnable() {
 					@Override
 					public void run() {
+						dismissDialog(DIALOG_SWITCHING);
 						finish();
 					}
 				});
@@ -63,7 +68,19 @@ public class TeamSelection extends ListActivity {
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
+		showDialog(DIALOG_SWITCHING);
 		selected = (int) id;
 		bindService(new Intent(this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
+	}
+
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+			case DIALOG_SWITCHING:
+				Dialog d = new ProgressDialog(this);
+				d.setTitle(R.string.switching_team);
+				return d;
+		}
+		return super.onCreateDialog(id);
 	}
 }

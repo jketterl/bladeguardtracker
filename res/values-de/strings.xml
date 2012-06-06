@@ -37,4 +37,5 @@
     <string name="credentials_wrong">Die eingegebenen Anmeldedaten sind ungültig.\n\nBitte gib eine gültige Kombination aus Benutzername und Passwort ein (oder benutze das anonyme Tracking)!</string>
     <string name="team">Team auswählen...</string>
     <string name="teamselection">Teamauswahl</string>
+    <string name="switching_team">Wechsle Team...</string>
 </resources>
