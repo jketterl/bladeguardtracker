@@ -7,12 +7,6 @@
     <!-- debug @ home -->
     <!-- <string name="maps_api_key">08cvEnK6frIUm2eoWIjal7KyBmUhpszplHN9mkg</string> -->
     
-    <!-- public url -->
-    <!-- <string name="base_url">https://djmacgyver.homelinux.org/bgt/</string> -->
-    <!-- private url -->
-    <!-- <string name="base_url">https://www:8000/bgt/</string> -->
-    <!-- amazon ec2 url -->
-    <string name="base_url">https://bgt.justjakob.de/bgt/</string>
     <!-- WebSocket for combined up & downstream -->
     <string name="websocket">wss://bgt.justjakob.de/bgt/socket</string>
 </resources>
