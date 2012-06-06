@@ -43,7 +43,7 @@ public class MapSelection extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
-        setContentView(R.layout.mapselection);
+        setContentView(R.layout.fullscreenlist);
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.map_selection);

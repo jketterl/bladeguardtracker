@@ -14,7 +14,7 @@ public class TeamSelection extends ListActivity {
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
 	
-		setContentView(R.layout.mapselection);
+		setContentView(R.layout.fullscreenlist);
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.teamselection);
