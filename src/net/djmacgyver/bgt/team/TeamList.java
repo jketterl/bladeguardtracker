@@ -3,14 +3,14 @@ package net.djmacgyver.bgt.team;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketService;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.socket.HttpSocketConnection;
-import net.djmacgyver.bgt.socket.SocketCommand;
-import net.djmacgyver.bgt.socket.SocketService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -38,7 +38,6 @@ public class TeamList implements ListAdapter {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			SocketService s = ((SocketService.LocalBinder) service).getService();
-			HttpSocketConnection socket = s.getSharedConnection();
 			final SocketCommand command = new SocketCommand("getTeams");
 			command.setCallback(new Runnable() {
 				@Override
@@ -47,7 +46,8 @@ public class TeamList implements ListAdapter {
 					fireChanged();
 				}
 			});
-			socket.sendCommand(command);
+			s.getSharedConnection().sendCommand(command);
+			context.unbindService(this);
 		}
 	};
 	
