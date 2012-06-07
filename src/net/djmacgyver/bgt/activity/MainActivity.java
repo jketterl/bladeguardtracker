@@ -2,6 +2,7 @@ package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.GPSListener;
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.event.EventList;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,7 +15,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -66,6 +69,16 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				Intent i = new Intent(getApplicationContext(), Map.class);
 				startActivity(i);
+			}
+		});
+        
+        ListView eventList = (ListView) findViewById(R.id.upcomingEvents);
+        eventList.setAdapter(new EventList(this));
+        eventList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position,
+					long id) {
+				System.out.println("Selected event: " + id);
 			}
 		});
     }
