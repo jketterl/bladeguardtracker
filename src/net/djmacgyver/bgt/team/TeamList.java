@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.socket.ServerList;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
 
@@ -22,10 +23,9 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
-public class TeamList implements ListAdapter {
+public class TeamList extends ServerList {
 	private Context context;
 	private JSONArray teams;
 	private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
