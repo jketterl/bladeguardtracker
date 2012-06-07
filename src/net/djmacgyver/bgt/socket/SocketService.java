@@ -78,4 +78,12 @@ public class SocketService extends Service implements KeepAliveTarget {
 			socketTimeout = null;
 		}
 	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		if (sharedConn == null) return;
+		sharedConn.disconnect();
+		sharedConn = null;
+	}
 }
