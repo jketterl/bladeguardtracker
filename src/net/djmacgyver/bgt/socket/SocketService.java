@@ -42,6 +42,7 @@ public class SocketService extends Service implements KeepAliveTarget {
 			socketTimeout = null;
 		}
 		stakes.add(obj);
+		System.out.println("stakes: " + stakes.size());
 	}
 	
 	public void removeStake(Object obj) {
@@ -50,6 +51,7 @@ public class SocketService extends Service implements KeepAliveTarget {
 		if (stakes.isEmpty() && sharedConn != null) {
 			if (!getSocketTimeout().isAlive()) getSocketTimeout().start();
 		}
+		System.out.println("stakes: " + stakes.size());
 	}
 
 	public HttpSocketConnection getSharedConnection() {
