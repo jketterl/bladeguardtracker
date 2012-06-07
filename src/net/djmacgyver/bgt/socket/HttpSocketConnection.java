@@ -73,6 +73,9 @@ public class HttpSocketConnection implements KeepAliveTarget {
 								} else {
 									System.out.println("received message without data!");
 								}
+							} else if (response.has("command")) {
+								JSONObject data = response.has("data") ? response.getJSONObject("data") : new JSONObject();
+								sendCommand(response.getString("command"), data);
 							}
 						} catch (JSONException e) {
 							// propably an old XML message. ignore... for now we only support json
@@ -277,6 +280,13 @@ public class HttpSocketConnection implements KeepAliveTarget {
 		Iterator<HttpSocketListener> i = listeners.iterator();
 		while (i.hasNext()) {
 			i.next().receiveUpdate(update);
+		}
+	}
+	
+	protected void sendCommand(String command, JSONObject data) {
+		Iterator<HttpSocketListener> i = listeners.iterator();
+		while (i.hasNext()) {
+			i.next().receiveCommand(command, data);
 		}
 	}
 	
