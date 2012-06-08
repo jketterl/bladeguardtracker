@@ -261,7 +261,10 @@ public class HttpSocketConnection implements KeepAliveTarget {
 	}
 
 	public void sendQuit() {
-		sendCommand("quit");
+		// it is possible that the connection has been closed before we were able so send the "quit" message.
+		try {
+			sendCommand("quit");
+		} catch (NullPointerException e) {}
 	}
 
 	public HttpSocketConnection subscribeUpdates(String category) {
