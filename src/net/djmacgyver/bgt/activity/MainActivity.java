@@ -4,6 +4,7 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.alarm.AlarmReceiver;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
+import net.djmacgyver.bgt.gps.GPSTrackingListener;
 import net.djmacgyver.bgt.gps.GPSTrackingService;
 
 import org.json.JSONObject;
@@ -32,16 +33,33 @@ public class MainActivity extends Activity {
 	private GPSTrackingService service;
 	private boolean bound = false;
     ServiceConnection conn = new ServiceConnection() {
+    	private GPSTrackingListener l = new GPSTrackingListener() {
+			@Override
+			public void trackingEnabled() {
+		        ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
+				b.setChecked(true);
+			}
+			
+			@Override
+			public void trackingDisabled() {
+		        ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
+				b.setChecked(false);
+			}
+		};
+    	
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
+			service.removeListener(l);
 			service = null;
 		}
 		
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder binder) {
 			service = ((GPSTrackingService.LocalBinder) binder).getService();
-	        ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
+	        final ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
 	        b.setChecked(service.isEnabled());
+	        
+	        service.addListener(l);
 		}
 	};
 	
