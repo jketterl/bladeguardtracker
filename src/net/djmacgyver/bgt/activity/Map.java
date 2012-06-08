@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.view.Menu;
@@ -41,6 +42,17 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	private boolean bound = false;
 	private MapView map;
 	private MapHandler handler = new MapHandler(this);
+	private Handler stateHandler = new Handler(){
+		@Override
+		public void handleMessage(Message msg) {
+			int state = (Integer) msg.obj;
+			if (state == HttpSocketConnection.STATE_CONNECTED) {
+				removeDialog(DIALOG_CONNECTING);
+			} else {
+				showDialog(DIALOG_CONNECTING);
+			}
+		}
+	};
 	private HttpSocketListener listener = new HttpSocketListener() {
 		@Override
 		public void receiveUpdate(JSONObject data) {
@@ -55,7 +67,9 @@ public class Map extends MapActivity implements KeepAliveTarget {
 
 		@Override
 		public void receiveStateChange(int newState) {
-			
+			Message msg = new Message();
+			msg.obj = newState;
+			stateHandler.sendMessage(msg);
 		}
 	};
 	
@@ -244,7 +258,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		socket.addListener(listener);
 		socket.subscribeUpdates("movements").subscribeUpdates("map").subscribeUpdates("stats").subscribeUpdates("quit");
 		getUserOverlay().reset();
-		removeDialog(Map.DIALOG_CONNECTING);
+		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) removeDialog(Map.DIALOG_CONNECTING);
 	}
 	
 	public void onDisconnect() {
