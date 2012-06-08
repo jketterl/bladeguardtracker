@@ -93,6 +93,10 @@ public class HttpSocketConnection implements KeepAliveTarget {
 					private void reconnect(){
 						// put up a new queue
 						queue = new LinkedList<SocketCommand>();
+						// try disconnecting the old socket (if not already disconnected)
+						try {
+							socket.disconnect();
+						} catch (Exception e) {}
 						socket = null;
 						// give the server 10s grace time
 						try {
@@ -205,6 +209,7 @@ public class HttpSocketConnection implements KeepAliveTarget {
 	}
 
 	public void connect() {
+		if (queue != null) return;
 		queue = new LinkedList<SocketCommand>();
 		getSocket().connect();
 	}
