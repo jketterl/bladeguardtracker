@@ -1,5 +1,8 @@
 package net.djmacgyver.bgt.gps;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.MainActivity;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
@@ -32,6 +35,7 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	private boolean updateBlocked = false;
 	private Location queuedLocation;
 	private Location lastLocation;
+	private ArrayList<GPSTrackingListener> listeners = new ArrayList<GPSTrackingListener>();
 
 	private SocketService sockService;
 	private ServiceConnection sconn = new ServiceConnection() {
@@ -89,6 +93,8 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	
 	public void disable() {
 		if (!enabled) return;
+		
+		fireTrackingDisabled();
 		
 		getLocationReminder().terminate();
 		locationReminder = null;
@@ -151,6 +157,8 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		nm.notify(NOTIFICATION, notification);
 
 		getLocationReminder().start();
+		
+		fireTrackingEnabled();
 	}
 	
 	public boolean isEnabled() {
@@ -207,5 +215,25 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	private void sendGpsUnavailable() {
 		conn.sendGpsUnavailable();
 		lastLocation = null;
+	}
+	
+	public void addListener(GPSTrackingListener l) {
+		if (listeners.contains(l)) return;
+		listeners.add(l);
+	}
+	
+	public void removeListener(GPSTrackingListener l) {
+		if (!listeners.contains(l)) return;
+		listeners.remove(l);
+	}
+	
+	private void fireTrackingEnabled() {
+		Iterator<GPSTrackingListener> i = listeners.iterator();
+		while (i.hasNext()) i.next().trackingEnabled();
+	}
+	
+	private void fireTrackingDisabled() {
+		Iterator<GPSTrackingListener> i = listeners.iterator();
+		while (i.hasNext()) i.next().trackingDisabled();
 	}
 }
