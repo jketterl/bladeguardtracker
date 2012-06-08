@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 
 public class ControlService extends Service implements HttpSocketListener {
 	private HttpSocketConnection socket;
@@ -61,7 +62,9 @@ public class ControlService extends Service implements HttpSocketListener {
 		command.setCallback(new Runnable() {
 			@Override
 			public void run() {
-				if (!command.wasSuccessful()) stopSelf();
+				if (command.wasSuccessful()) return;
+				Log.e("ControlService", "Server did not accept control connection; error: " + command.getResponseData());
+				shutdown();
 			}
 		});
 		socket.sendCommand(command);
