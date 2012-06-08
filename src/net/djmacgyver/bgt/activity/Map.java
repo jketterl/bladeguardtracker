@@ -1,7 +1,7 @@
 package net.djmacgyver.bgt.activity;
 
-import net.djmacgyver.bgt.GPSListener;
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.gps.GPSTrackingService;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.map.MapHandler;
@@ -37,7 +37,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	private MyLocationOverlay myLoc;
 	private KeepAliveThread refresher;
 	private RouteOverlay route;
-	private GPSListener service;
+	private GPSTrackingService service;
 	private boolean bound = false;
 	private MapView map;
 	private MapHandler handler = new MapHandler(this);
@@ -69,7 +69,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder binder) {
-			service = ((GPSListener.LocalBinder) binder).getService();
+			service = ((GPSTrackingService.LocalBinder) binder).getService();
 			if (!service.isEnabled()) return;
 			setLocationOverlay(new MyLocationOverlay(getApplicationContext(), getMap()));
 			getLocationOverlay().enableMyLocation();
@@ -167,7 +167,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
     	getMap().getOverlays().add(getRoute());
     	getMap().getOverlays().add(getUserOverlay());
 
-        bindService(new Intent(this, GPSListener.class), conn, Context.BIND_AUTO_CREATE);
+        bindService(new Intent(this, GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
         bound = true;
     }
 

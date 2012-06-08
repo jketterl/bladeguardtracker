@@ -17,7 +17,7 @@
         <uses-library android:required="true" android:name="com.google.android.maps"></uses-library>
         <activity android:name=".activity.Settings" android:label="@string/settings"></activity>
         <activity android:name=".activity.Signup"></activity>
-        <service android:name="GPSListener"></service>
+        <service android:name=".gps.GPSTrackingService"></service>
         <activity android:name=".activity.MapSelection"></activity>
         <service android:name=".socket.SocketService"></service>
         <activity android:name=".activity.TeamSelection"></activity>

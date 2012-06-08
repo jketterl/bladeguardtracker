@@ -1,10 +1,10 @@
 package net.djmacgyver.bgt.activity;
 
-import net.djmacgyver.bgt.GPSListener;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.alarm.AlarmReceiver;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
+import net.djmacgyver.bgt.gps.GPSTrackingService;
 
 import org.json.JSONObject;
 
@@ -29,7 +29,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
-	private GPSListener service;
+	private GPSTrackingService service;
 	private boolean bound = false;
     ServiceConnection conn = new ServiceConnection() {
 		@Override
@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
 		
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder binder) {
-			service = ((GPSListener.LocalBinder) binder).getService();
+			service = ((GPSTrackingService.LocalBinder) binder).getService();
 	        ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
 	        b.setChecked(service.isEnabled());
 		}
@@ -54,8 +54,8 @@ public class MainActivity extends Activity {
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.app_name);
         
-        startService(new Intent(this, GPSListener.class));
-        bindService(new Intent(this, GPSListener.class), conn, Context.BIND_AUTO_CREATE);
+        startService(new Intent(this, GPSTrackingService.class));
+        bindService(new Intent(this, GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
         bound = true;
         
         ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
@@ -121,7 +121,7 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		if (bound) {
-			if (!service.isEnabled()) stopService(new Intent(this, GPSListener.class));
+			if (!service.isEnabled()) stopService(new Intent(this, GPSTrackingService.class));
 			unbindService(conn);
 			bound = false;
 		}

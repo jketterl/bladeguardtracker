@@ -1,5 +1,6 @@
-package net.djmacgyver.bgt;
+package net.djmacgyver.bgt.gps;
 
+import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.MainActivity;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
@@ -21,7 +22,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 
-public class GPSListener extends Service implements LocationListener, KeepAliveTarget {
+public class GPSTrackingService extends Service implements LocationListener, KeepAliveTarget {
 	private HttpSocketConnection conn;
 	private KeepAliveThread gpsReminder;
 	private boolean enabled = false;
@@ -157,8 +158,8 @@ public class GPSListener extends Service implements LocationListener, KeepAliveT
 	}
 	
 	public class LocalBinder extends Binder {
-		public GPSListener getService() {
-			return GPSListener.this;
+		public GPSTrackingService getService() {
+			return GPSTrackingService.this;
 		}
 	}
 	

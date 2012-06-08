@@ -3,7 +3,7 @@ package net.djmacgyver.bgt.control;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import net.djmacgyver.bgt.GPSListener;
+import net.djmacgyver.bgt.gps.GPSTrackingService;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketCommand;
@@ -25,12 +25,11 @@ public class ControlService extends Service implements HttpSocketListener {
 		return null;
 	}
 	
-	private ServiceConnection conn = new ServiceConnection() {
-		private SocketService s;
+	private class SocketServiceConnection implements ServiceConnection{
+		public SocketService s;
 		
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			s.removeStake(ControlService.this);
 		}
 		
 		@Override
@@ -38,7 +37,9 @@ public class ControlService extends Service implements HttpSocketListener {
 			s = ((SocketService.LocalBinder) service).getService();
 			setConnection(s.getSharedConnection(ControlService.this));
 		}
-	};
+	}
+	
+	private SocketServiceConnection conn = new SocketServiceConnection();
 
 	@Override
 	public void onCreate() {
@@ -47,7 +48,6 @@ public class ControlService extends Service implements HttpSocketListener {
 
 	@Override
 	public void onDestroy() {
-		unbindService(conn);
 		System.out.println("ControlService destroyed");
 	}
 	
@@ -75,6 +75,8 @@ public class ControlService extends Service implements HttpSocketListener {
 			socket.removeListener(this);
 		}
 		stopTracking();
+		conn.s.removeStake(this);
+		unbindService(conn);
 		stopSelf();
 	}
 	
@@ -89,14 +91,14 @@ public class ControlService extends Service implements HttpSocketListener {
 			
 			@Override
 			public void onServiceConnected(ComponentName arg0, IBinder arg1) {
-				GPSListener l = ((GPSListener.LocalBinder) arg1).getService();
+				GPSTrackingService l = ((GPSTrackingService.LocalBinder) arg1).getService();
 				l.enable();
 				unbindService(this);
 			}
 		};
 		
-		startService(new Intent(getApplicationContext(), GPSListener.class));
-		bindService(new Intent(getApplicationContext(), GPSListener.class), conn, Context.BIND_AUTO_CREATE);
+		startService(new Intent(getApplicationContext(), GPSTrackingService.class));
+		bindService(new Intent(getApplicationContext(), GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
 		trackingEnabled = true;
 	}
 	
@@ -108,12 +110,12 @@ public class ControlService extends Service implements HttpSocketListener {
 			
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
-				GPSListener l = ((GPSListener.LocalBinder) service).getService();
+				GPSTrackingService l = ((GPSTrackingService.LocalBinder) service).getService();
 				l.disable();
 				unbindService(this);
 			}
 		};
-		bindService(new Intent(getApplicationContext(), GPSListener.class), conn, Context.BIND_AUTO_CREATE);
+		bindService(new Intent(getApplicationContext(), GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
