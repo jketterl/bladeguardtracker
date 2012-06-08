@@ -72,18 +72,21 @@ public class SocketService extends Service implements KeepAliveTarget {
 	public void keepAlive(KeepAliveThread source) {
 		if (source == getSocketTimeout()) {
 			System.out.println("disconnecting now");
-			sharedConn.disconnect();
-			sharedConn = null;
-			getSocketTimeout().terminate();
-			socketTimeout = null;
+			disconnect();
 		}
+	}
+	
+	private void disconnect() {
+		if (sharedConn == null) return;
+		sharedConn.disconnect();
+		sharedConn = null;
+		getSocketTimeout().terminate();
+		socketTimeout = null;
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if (sharedConn == null) return;
-		sharedConn.disconnect();
-		sharedConn = null;
+		disconnect();
 	}
 }
