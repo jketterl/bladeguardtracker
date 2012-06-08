@@ -30,6 +30,11 @@ import android.util.Log;
 import com.codebutler.android_websockets.WebSocketClient;
 
 public class HttpSocketConnection implements KeepAliveTarget {
+	public static final int STATE_DISCONNECTED = 0;
+	public static final int STATE_CONNECTING = 1;
+	public static final int STATE_CONNECTED = 2;
+	public static final int STATE_DISCONNECTING = 3;
+	
 	private Context context;
 	private WebSocketClient socket;
 	private boolean connected = false;
@@ -38,6 +43,8 @@ public class HttpSocketConnection implements KeepAliveTarget {
 	private LinkedList<SocketCommand> queue;
 	private ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
 	private ArrayList<String> subscribed = new ArrayList<String>();
+	
+	private int state = STATE_DISCONNECTED;
 	
 	public HttpSocketConnection(Context applicationContext) {
 		this.context = applicationContext;
@@ -107,6 +114,8 @@ public class HttpSocketConnection implements KeepAliveTarget {
 					
 					@Override
 					public void onDisconnect(int code, String reason) {
+						setState(STATE_DISCONNECTED);
+						
 						// we got disconnected.
 						System.out.println("disconnected");
 						
@@ -138,6 +147,8 @@ public class HttpSocketConnection implements KeepAliveTarget {
 						while (!queue.isEmpty()) sendCommand(queue.poll());
 						
 						sendSubscriptions();
+						
+						setState(STATE_CONNECTED);
 						
 						// check whether this connection is eligible for disconnection
 						checkDisconnect();
@@ -209,12 +220,14 @@ public class HttpSocketConnection implements KeepAliveTarget {
 	}
 
 	public void connect() {
+		setState(STATE_CONNECTING);
 		if (queue != null) return;
 		queue = new LinkedList<SocketCommand>();
 		getSocket().connect();
 	}
 
 	public void disconnect() {
+		setState(STATE_DISCONNECTING);
 		doDisconnect = true;
 		checkDisconnect();
 	}
@@ -295,6 +308,11 @@ public class HttpSocketConnection implements KeepAliveTarget {
 		}
 	}
 	
+	protected void fireStateChange(int newState) {
+		Iterator<HttpSocketListener> i = listeners.iterator();
+		while (i.hasNext()) i.next().receiveStateChange(newState);
+	}
+	
 	public void addListener(HttpSocketListener listener)
 	{
 		if (listeners.contains(listener)) return;
@@ -328,5 +346,14 @@ public class HttpSocketConnection implements KeepAliveTarget {
 
 	public void sendGpsUnavailable() {
 		sendCommand("gpsUnavailable");
+	}
+	
+	private void setState(int newState)	{
+		state = newState;
+		fireStateChange(newState);
+	}
+	
+	public int getState() {
+		return state;
 	}
 }

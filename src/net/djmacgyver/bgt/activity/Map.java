@@ -52,6 +52,11 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		@Override
 		public void receiveCommand(String command, JSONObject data) {
 		}
+
+		@Override
+		public void receiveStateChange(int newState) {
+			
+		}
 	};
 	
 	public static final int DIALOG_CONNECTING = 1;

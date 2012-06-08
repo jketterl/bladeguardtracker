@@ -149,4 +149,8 @@ public class ControlService extends Service implements HttpSocketListener {
 		}
 		System.out.println("received unknown command: \"" + command + "\"");
 	}
+
+	@Override
+	public void receiveStateChange(int newState) {
+	}
 }
