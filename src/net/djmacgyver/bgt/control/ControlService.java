@@ -54,6 +54,12 @@ public class ControlService extends Service implements HttpSocketListener {
 	
 	private void setConnection(HttpSocketConnection socket) {
 		this.socket = socket;
+		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) enableControlSession();
+		socket.addListener(this);
+	}
+	
+	private void enableControlSession()
+	{
 		JSONObject data = new JSONObject();
 		try {
 			data.put("eventId", eventId);
@@ -68,8 +74,6 @@ public class ControlService extends Service implements HttpSocketListener {
 			}
 		});
 		socket.sendCommand(command);
-		
-		socket.addListener(this);
 	}
 	
 	private void shutdown() {
@@ -152,5 +156,6 @@ public class ControlService extends Service implements HttpSocketListener {
 
 	@Override
 	public void receiveStateChange(int newState) {
+		if (newState == HttpSocketConnection.STATE_CONNECTED) enableControlSession();
 	}
 }
