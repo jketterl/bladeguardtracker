@@ -17,7 +17,7 @@ import android.os.IBinder;
 
 public class ControlService extends Service implements HttpSocketListener {
 	private HttpSocketConnection socket;
-	private JSONObject event;
+	private int eventId;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -55,7 +55,7 @@ public class ControlService extends Service implements HttpSocketListener {
 		this.socket = socket;
 		JSONObject data = new JSONObject();
 		try {
-			data.put("eventId", event.getInt("id"));
+			data.put("eventId", eventId);
 		} catch (JSONException e) {}
 		final SocketCommand command = new SocketCommand("enableControl", data);
 		command.setCallback(new Runnable() {
@@ -74,26 +74,14 @@ public class ControlService extends Service implements HttpSocketListener {
 			socket.sendCommand("disableControl");
 			socket.removeListener(this);
 		}
-		if (trackingEnabled) {
-			ServiceConnection conn = new ServiceConnection() {
-				@Override
-				public void onServiceDisconnected(ComponentName name) {}
-				
-				@Override
-				public void onServiceConnected(ComponentName name, IBinder service) {
-					GPSListener l = ((GPSListener.LocalBinder) service).getService();
-					l.disable();
-					unbindService(this);
-				}
-			};
-			bindService(new Intent(getApplicationContext(), GPSListener.class), conn, Context.BIND_AUTO_CREATE);
-		}
+		stopTracking();
 		stopSelf();
 	}
 	
 	private boolean trackingEnabled = false;
 	
 	private void startTracking() {
+		if (trackingEnabled) return;
 		ServiceConnection conn = new ServiceConnection() {
 			@Override
 			public void onServiceDisconnected(ComponentName arg0) {
@@ -111,15 +99,27 @@ public class ControlService extends Service implements HttpSocketListener {
 		bindService(new Intent(getApplicationContext(), GPSListener.class), conn, Context.BIND_AUTO_CREATE);
 		trackingEnabled = true;
 	}
+	
+	private void stopTracking() {
+		if (!trackingEnabled) return;
+		ServiceConnection conn = new ServiceConnection() {
+			@Override
+			public void onServiceDisconnected(ComponentName name) {}
+			
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				GPSListener l = ((GPSListener.LocalBinder) service).getService();
+				l.disable();
+				unbindService(this);
+			}
+		};
+		bindService(new Intent(getApplicationContext(), GPSListener.class), conn, Context.BIND_AUTO_CREATE);
+	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		try {
-			event = new JSONObject(intent.getExtras().getString("event"));
-			bindService(new Intent(getApplicationContext(), SocketService.class), conn, Context.BIND_AUTO_CREATE);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+		eventId = intent.getExtras().getInt("eventId");
+		bindService(new Intent(getApplicationContext(), SocketService.class), conn, Context.BIND_AUTO_CREATE);
 		return START_NOT_STICKY;
 	}
 	
@@ -132,6 +132,10 @@ public class ControlService extends Service implements HttpSocketListener {
 		System.out.println("received command: " + command);
 		if (command.equals("shutdown")) {
 			shutdown();
+			return;
+		}
+		if (command.equals("disableGPS")) {
+			stopTracking();
 			return;
 		}
 		if (command.equals("enableGPS")) {

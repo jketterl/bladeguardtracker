@@ -1,16 +1,11 @@
 package net.djmacgyver.bgt.activity;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
 import net.djmacgyver.bgt.GPSListener;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.alarm.AlarmReceiver;
+import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -91,34 +86,15 @@ public class MainActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				try {
-					// get the event the user clicked on
-					JSONObject event = (JSONObject) events.getItem(position);
-					
-					// parse the event start time
-					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-					Date start = format.parse(event.getString("start"));
-					
-					// we want the control connection to be up 2 hours in advance, so adjust the start time accordingly
-					Calendar c = Calendar.getInstance();
-					c.setTime(start);
-					c.add(Calendar.HOUR, -2);
-					start = c.getTime();
-					System.out.println(start);
-					
-					// set up a system alarm that will wake us up when the time has come
-					AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-					Intent i = new Intent(MainActivity.this, AlarmReceiver.class);
-					i.putExtra("event", event.toString());
-					PendingIntent sender = PendingIntent.getBroadcast(MainActivity.this, 113124, i, PendingIntent.FLAG_UPDATE_CURRENT);
-					am.set(AlarmManager.RTC_WAKEUP, start.getTime(), sender);
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				// get the event the user clicked on
+				Event event = new Event((JSONObject) events.getItem(position));
+				
+				// set up a system alarm that will wake us up when the time has come
+				AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+				Intent i = new Intent(MainActivity.this, AlarmReceiver.class);
+				i.putExtra("eventId", event.getId());
+				PendingIntent sender = PendingIntent.getBroadcast(MainActivity.this, 113124, i, PendingIntent.FLAG_UPDATE_CURRENT);
+				am.set(AlarmManager.RTC_WAKEUP, event.getControlConnectionStartTime().getTime(), sender);
 			}
 		});
     }
