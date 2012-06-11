@@ -253,6 +253,13 @@ public class HybiParser {
     private void emitFrame() throws IOException {
         byte[] payload = mask(mPayload, mMask, 0);
         int opcode = mOpcode;
+        
+        // reset ping timeout interval
+        // (as long as there's data coming from the server, the connection is healthy.)
+        // some servers do not send a consistent ping, but pause the ping when the client transmits
+        // data. since a dead socket seems to keep accepting writes we cannot reset the timeout then.
+        // this code assumes that the server responds to every client send in some kind of way.
+        mClient.receivePing();
 
         if (opcode == OP_CONTINUATION) {
             if (mMode == 0) {
