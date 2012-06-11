@@ -382,16 +382,20 @@ public class HttpSocketConnection {
 
 	private void sendSubscriptions() {
 		// re-subscribe to all categories (in case of a re-connect)
-		Iterator<String> i = subscribed.iterator();
-		while (i.hasNext()) {
-			try {
-				JSONObject data = new JSONObject();
-				data.put("category", i.next());
-				sendCommand(new SocketCommand("subscribeUpdates", data));
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		try {
+			Iterator<String> i = subscribed.iterator();
+			JSONArray cats = new JSONArray();
+			int count = 0;
+			while (i.hasNext()) {
+				String cat = i.next();
+				cats.put(count++, cat);
 			}
+			JSONObject data = new JSONObject();
+			data.put("category", cats);
+			sendCommand(new SocketCommand("subscribeUpdates", data));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
