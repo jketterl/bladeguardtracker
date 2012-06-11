@@ -32,6 +32,7 @@ public class WebSocketClient {
     private Thread                   mThread;
     private List<BasicNameValuePair> mExtraHeaders;
     private HybiParser               mParser;
+    private PingSupervisor           pingSupervisor;
 
     private final Object mSendLock = new Object();
 
@@ -127,12 +128,15 @@ public class WebSocketClient {
             }
         });
         mThread.start();
+        pingSupervisor = new PingSupervisor();
+        pingSupervisor.start();
     }
 
     public void disconnect() throws IOException {
         if (mSocket != null) {
             mSocket.close();
             mSocket = null;
+            pingSupervisor.terminate();
         }
     }
 
@@ -191,6 +195,25 @@ public class WebSocketClient {
             mHandler.onError(e);
         }
     }
+    
+    private class PingSupervisor extends Thread {
+		private boolean terminate = false;
+		
+		@Override
+		public void run() {
+			while (!terminate) try {
+				// it seems like our server sends a ping every 20s. let's wait 30s at max
+				Thread.sleep(30000);
+				Log.w(TAG, "Ping timeout!");
+				mHandler.onError(new HybiParser.ProtocolError("Ping timeout!"));
+			} catch (InterruptedException e) {}
+		}
+		
+		public void terminate() {
+			terminate = true;
+			interrupt();
+		}
+    }
 
     public interface Handler {
         public void onConnect();
@@ -205,4 +228,8 @@ public class WebSocketClient {
         context.init(null, sTrustManagers, null);
         return context.getSocketFactory();
     }
+
+	protected void receivePing() {
+		pingSupervisor.interrupt();
+	}
 }
