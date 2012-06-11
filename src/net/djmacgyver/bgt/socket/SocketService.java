@@ -86,7 +86,7 @@ public class SocketService extends Service implements KeepAliveTarget {
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
 		disconnect();
+		super.onDestroy();
 	}
 }

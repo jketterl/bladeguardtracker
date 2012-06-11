@@ -53,7 +53,6 @@ public class SocketCommand {
 	public void updateResult(JSONObject response)
 	{
 		try {
-			result = response.getBoolean("success");
 			if (response.has("data")) {
 				Object data = response.get("data");
 				if (data instanceof JSONObject) {
@@ -63,12 +62,23 @@ public class SocketCommand {
 					responseData = (JSONArray) data;
 				}
 			}
+			updateResult(response.getBoolean("success"));
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			runCallback();
 		}
+	}
+	
+	protected void updateResult(boolean success) {
+		result = success;
+		runCallback();
+	}
+	
+	private void runCallback() {
 		if (callback == null) return;
 		callback.run();
+		callback = null;
 	}
 	
 	public boolean wasSuccessful()
