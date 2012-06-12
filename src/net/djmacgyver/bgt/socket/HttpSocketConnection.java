@@ -96,17 +96,25 @@ public class HttpSocketConnection {
 					@Override
 					public void onError(Exception error) {
 						if (!valid) return;
-						valid = false;
-						System.out.println("error on websocket conection!");
-						cancelRequests();
+												
+						System.out.println("Error on websocket connection!");
 						error.printStackTrace();
-						reconnect();
+						
+						// try disconnecting the current socket (if not already disconnected)
+						try {
+							// if the disconnect succeeds it should call onDisconnect()
+							socket.disconnect();
+						} catch (Exception e) {
+							// in case of an exception it is not sure whether
+							// onDiscconect() gets called, so call it manually.
+							onDisconnect(-1, e.getMessage());
+						}
 					}
 					
 					private void reconnect(){
 						System.out.println("reconnect()");
 						// there's already a queue in place? a reconnect should already be underway
-						if (queue != null || socket == null) return;
+						if (queue != null) return;
 						System.out.println("reconnect stage 2");
 						
 						// put up a new queue
@@ -116,29 +124,38 @@ public class HttpSocketConnection {
 						// send state notification
 						setState(STATE_CONNECTING);
 						
-						// try disconnecting the old socket (if not already disconnected)
-						try {
-							socket.disconnect();
-						} catch (Exception e) {}
-						socket = null;
 						// give the server 10s grace time
 						try {
 							Thread.sleep(10000);
 						} catch (InterruptedException e) {
 							System.out.println("interrupted!");
 						}
+						
+						// we might have changed our mind while we were sleeping...
+						if (doDisconnect) {
+							doDisconnect = false;
+							return;
+						}
+						
+						// if we get to here, we really want that connection to be back up
 						getSocket().connect();
 					}
 					
 					@Override
 					public void onDisconnect(int code, String reason) {
 						if (!valid) return;
+						
+						// invalidate this handler 
 						valid = false;
+						
+						// send state updates
 						setState(STATE_DISCONNECTED);
+						socket = null;
 						
 						// we got disconnected.
 						System.out.println("disconnected");
 
+						// cancel all outstanding requests (they won't receive data on a closed socket anyway)
 						cancelRequests();
 						
 						// the disconnection was intentional - ok. accept it and leave it that way.
