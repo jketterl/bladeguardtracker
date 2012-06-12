@@ -390,6 +390,7 @@ public class HttpSocketConnection {
 				String cat = i.next();
 				cats.put(count++, cat);
 			}
+			if (count == 0) return;
 			JSONObject data = new JSONObject();
 			data.put("category", cats);
 			sendCommand(new SocketCommand("subscribeUpdates", data));
