@@ -9,11 +9,26 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Event {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Event implements Parcelable {
 	private int id;
 	private String title;
 	private Date start;
 	private Date controlConnectionStartTime;
+	
+	public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
+		@Override
+		public Event createFromParcel(Parcel source) {
+			return new Event(source);
+		}
+
+		@Override
+		public Event[] newArray(int size) {
+			return new Event[size];
+		}
+	};
 	
 	public Event(JSONObject obj) {
 		try {
@@ -32,6 +47,19 @@ public class Event {
 		}
 	}
 	
+	public Event(Parcel source) {
+		id = source.readInt();
+		start = new Date(source.readLong());
+		title = source.readString();
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(id);
+		dest.writeLong(start.getTime());
+		dest.writeString(title);
+	}
+
 	public int getId() {
 		return id;
 	}
@@ -53,5 +81,10 @@ public class Event {
 			controlConnectionStartTime = c.getTime();
 		}
 		return controlConnectionStartTime;
+	}
+
+	@Override
+	public int describeContents() {
+		return hashCode();
 	}
 }

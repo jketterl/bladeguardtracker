@@ -1,7 +1,6 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.alarm.AlarmReceiver;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
 import net.djmacgyver.bgt.gps.GPSTrackingListener;
@@ -10,8 +9,6 @@ import net.djmacgyver.bgt.gps.GPSTrackingService;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -107,12 +104,18 @@ public class MainActivity extends Activity {
 				// get the event the user clicked on
 				Event event = new Event((JSONObject) events.getItem(position));
 				
+				Intent i = new Intent(MainActivity.this, EventDetail.class);
+				i.putExtra("event", event);
+				startActivity(i);
+				
+				/*
 				// set up a system alarm that will wake us up when the time has come
 				AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 				Intent i = new Intent(MainActivity.this, AlarmReceiver.class);
 				i.putExtra("eventId", event.getId());
 				PendingIntent sender = PendingIntent.getBroadcast(MainActivity.this, 113124, i, PendingIntent.FLAG_UPDATE_CURRENT);
 				am.set(AlarmManager.RTC_WAKEUP, event.getControlConnectionStartTime().getTime(), sender);
+				*/
 			}
 		});
     }

@@ -38,4 +38,8 @@
     <string name="team">Team auswählen...</string>
     <string name="teamselection">Teamauswahl</string>
     <string name="switching_team">Wechsle Team...</string>
+    <string name="event">Veranstaltungsdetails</string>
+    <string name="title">Titel</string>
+    <string name="start">Startzeit</string>
+    <string name="participate">An dieser Veranstaltung teilnehmen</string>
 </resources>

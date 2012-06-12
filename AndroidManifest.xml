@@ -23,6 +23,7 @@
         <activity android:name=".activity.TeamSelection"></activity>
         <receiver android:name=".alarm.AlarmReceiver" android:process=":remote"></receiver>
         <service android:name=".control.ControlService"></service>
+        <activity android:name=".activity.EventDetail"></activity>
 
     </application>
 </manifest>

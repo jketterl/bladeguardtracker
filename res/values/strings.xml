@@ -40,4 +40,8 @@
     <string name="team">Team selection...</string>
     <string name="teamselection">Team selection</string>
     <string name="switching_team">Switching Team...</string>
+    <string name="event">Event details</string>
+    <string name="start">Start time</string>
+    <string name="title">Title</string>
+    <string name="participate">Participate in that event</string>
 </resources>
