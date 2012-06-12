@@ -107,15 +107,6 @@ public class MainActivity extends Activity {
 				Intent i = new Intent(MainActivity.this, EventDetail.class);
 				i.putExtra("event", event);
 				startActivity(i);
-				
-				/*
-				// set up a system alarm that will wake us up when the time has come
-				AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-				Intent i = new Intent(MainActivity.this, AlarmReceiver.class);
-				i.putExtra("eventId", event.getId());
-				PendingIntent sender = PendingIntent.getBroadcast(MainActivity.this, 113124, i, PendingIntent.FLAG_UPDATE_CURRENT);
-				am.set(AlarmManager.RTC_WAKEUP, event.getControlConnectionStartTime().getTime(), sender);
-				*/
 			}
 		});
     }

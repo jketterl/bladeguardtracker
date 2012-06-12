@@ -10,7 +10,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		System.out.println("received alarm!");
 		Intent start = new Intent(context, ControlService.class);
-		start.putExtra("eventId", intent.getExtras().getInt("eventId"));
+		start.putExtra("event", intent.getExtras().getParcelable("event"));
 		context.startService(start);
 	}
 }

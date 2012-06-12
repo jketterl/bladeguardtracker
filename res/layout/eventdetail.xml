@@ -22,6 +22,6 @@
             <TextView android:layout_height="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_width="wrap_content" android:id="@+id/startView"></TextView>
         </TableRow>
     </TableLayout>
-    <CheckBox android:layout_width="wrap_content" android:id="@+id/checkBox1" android:layout_height="wrap_content" android:text="@string/participate"></CheckBox>
+    <CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/participate" android:id="@+id/participateCheckbox"></CheckBox>
     
 </LinearLayout>

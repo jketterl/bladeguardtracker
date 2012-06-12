@@ -3,6 +3,7 @@ package net.djmacgyver.bgt.control;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.gps.GPSTrackingService;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
@@ -18,7 +19,7 @@ import android.util.Log;
 
 public class ControlService extends Service implements HttpSocketListener {
 	private HttpSocketConnection socket;
-	private int eventId;
+	private Event event;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -62,7 +63,7 @@ public class ControlService extends Service implements HttpSocketListener {
 	{
 		JSONObject data = new JSONObject();
 		try {
-			data.put("eventId", eventId);
+			data.put("eventId", event.getId());
 		} catch (JSONException e) {}
 		final SocketCommand command = new SocketCommand("enableControl", data);
 		command.setCallback(new Runnable() {
@@ -127,7 +128,7 @@ public class ControlService extends Service implements HttpSocketListener {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		eventId = intent.getExtras().getInt("eventId");
+		event = (Event) intent.getExtras().getParcelable("event");
 		bindService(new Intent(getApplicationContext(), SocketService.class), conn, Context.BIND_AUTO_CREATE);
 		return START_NOT_STICKY;
 	}
