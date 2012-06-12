@@ -301,15 +301,15 @@ public class HttpSocketConnection {
 	
 	public HttpSocketConnection subscribeUpdates(String[] categories) {
 		try {
+			JSONArray cats = new JSONArray();
+			int count = 0;
+			for (int i = 0; i < categories.length; i++) {
+				if (subscribed.contains(categories[i])) continue;
+				cats.put(count++, categories[i]);
+				subscribed.add(categories[i]);
+			}
+			if (count == 0) return this;
 			if (queue == null) {
-				JSONArray cats = new JSONArray();
-				int count = 0;
-				for (int i = 0; i < categories.length; i++) {
-					if (subscribed.contains(categories[i])) continue;
-					cats.put(count++, categories[i]);
-					subscribed.add(categories[i]);
-				}
-				if (count == 0) return this;
 				JSONObject data = new JSONObject();
 				data.put("category", cats);
 				sendCommand(new SocketCommand("subscribeUpdates", data));
@@ -326,15 +326,15 @@ public class HttpSocketConnection {
 	
 	public HttpSocketConnection unSubscribeUpdates(String[] categories) {
 		try {
+			JSONArray cats = new JSONArray();
+			int count = 0;
+			for (int i = 0; i < categories.length; i++) {
+				if (!subscribed.contains(categories[i])) continue;
+				cats.put(count++, categories[i]);
+				subscribed.remove(categories[i]);
+			}
+			if (count == 0) return this;
 			if (queue == null) {
-				JSONArray cats = new JSONArray();
-				int count = 0;
-				for (int i = 0; i < categories.length; i++) {
-					if (!subscribed.contains(categories[i])) continue;
-					cats.put(count++, categories[i]);
-					subscribed.remove(categories[i]);
-				}
-				if (count == 0) return this;
 				JSONObject data = new JSONObject();
 				data.put("category", cats);
 				sendCommand(new SocketCommand("unSubscribeUpdates", data));
