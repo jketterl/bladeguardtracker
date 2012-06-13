@@ -133,10 +133,10 @@ public class WebSocketClient {
     }
 
     public void disconnect() throws IOException {
+        pingSupervisor.terminate();
         if (mSocket != null) {
             mSocket.close();
             mSocket = null;
-            pingSupervisor.terminate();
         }
     }
 
