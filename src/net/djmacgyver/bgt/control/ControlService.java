@@ -14,17 +14,25 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 public class ControlService extends Service implements HttpSocketListener {
 	private HttpSocketConnection socket;
 	private Event event;
+	
+	public class LocalBinder extends Binder {
+		public ControlService getService() {
+			return ControlService.this;
+		}
+	}
+	
+	private final Binder binder = new LocalBinder();
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		// nothing to bind here (for now)
-		return null;
+		return binder;
 	}
 	
 	private class SocketServiceConnection implements ServiceConnection{
@@ -77,7 +85,7 @@ public class ControlService extends Service implements HttpSocketListener {
 		socket.sendCommand(command);
 	}
 	
-	private void shutdown() {
+	public void shutdown() {
 		if (socket != null) {
 			socket.sendCommand("disableControl");
 			socket.removeListener(this);
