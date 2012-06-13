@@ -101,25 +101,26 @@ public class HttpSocketConnection {
 						error.printStackTrace();
 						
 						// try disconnecting the current socket (if not already disconnected)
-						try {
+						if (queue == null) try {
 							// if the disconnect succeeds it should call onDisconnect()
 							socket.disconnect();
 						} catch (Exception e) {
 							// in case of an exception it is not sure whether
 							// onDiscconect() gets called, so call it manually.
 							onDisconnect(-1, e.getMessage());
+						} else {
+							// if this connection was never really established, there cannot be
+							// a disconnect event. trigger it manually...
+							onDisconnect(-1, error.getMessage());
 						}
 					}
 					
 					private void reconnect(){
 						System.out.println("reconnect()");
-						// there's already a queue in place? a reconnect should already be underway
-						if (queue != null) return;
-						System.out.println("reconnect stage 2");
-						
+
 						// put up a new queue
 						// this also prevents new commands from being sent
-						queue = new LinkedList<SocketCommand>();
+						if (queue == null) queue = new LinkedList<SocketCommand>();
 						
 						// send state notification
 						setState(STATE_CONNECTING);
