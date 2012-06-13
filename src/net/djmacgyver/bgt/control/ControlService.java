@@ -132,6 +132,7 @@ public class ControlService extends Service implements HttpSocketListener {
 			}
 		};
 		bindService(new Intent(getApplicationContext(), GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
+		trackingEnabled = false;
 	}
 
 	@Override
