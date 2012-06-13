@@ -44,4 +44,8 @@
     <string name="start">Start time</string>
     <string name="title">Title</string>
     <string name="participate">Yes! I\'m participating!</string>
+    <string name="trigger_start">Start event</string>
+    <string name="trigger_pause">Pause event</string>
+    <string name="trigger_shutdown">End event</string>
+    <string name="admin_commands">Administrator commands</string>
 </resources>

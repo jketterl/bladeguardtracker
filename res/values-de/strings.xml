@@ -42,4 +42,8 @@
     <string name="title">Titel</string>
     <string name="start">Startzeit</string>
     <string name="participate">Ja! Ich bin dabei!</string>
+    <string name="trigger_start">Veranstaltung starten</string>
+    <string name="trigger_pause">Veranstaltung pausieren</string>
+    <string name="trigger_shutdown">Veranstaltung beenden</string>
+    <string name="admin_commands">Admin-Befehle</string>
 </resources>
