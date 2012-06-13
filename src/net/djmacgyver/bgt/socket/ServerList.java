@@ -30,7 +30,7 @@ public abstract class ServerList implements ListAdapter {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			SocketService s = ((SocketService.LocalBinder) service).getService();
 			final SocketCommand command = new SocketCommand(getServerCommand());
-			command.setCallback(new Runnable() {
+			command.addCallback(new Runnable() {
 				@Override
 				public void run() {
 					data = command.getResponseData();

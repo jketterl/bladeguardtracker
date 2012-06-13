@@ -51,7 +51,7 @@ public class Signup extends PreferenceActivity {
 				data.put("user", ((EditTextPreference) findPreference("username")).getEditText().getText().toString());
 				data.put("pass", ((EditTextPreference) findPreference("password")).getEditText().getText().toString());
 				final SocketCommand c = new SocketCommand("signup", data);
-				c.setCallback(new Runnable() {
+				c.addCallback(new Runnable() {
 					@Override
 					public void run() {
 						Message msg = new Message();

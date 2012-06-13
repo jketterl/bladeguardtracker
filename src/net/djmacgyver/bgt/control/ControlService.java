@@ -74,7 +74,7 @@ public class ControlService extends Service implements HttpSocketListener {
 			data.put("eventId", event.getId());
 		} catch (JSONException e) {}
 		final SocketCommand command = new SocketCommand("enableControl", data);
-		command.setCallback(new Runnable() {
+		command.addCallback(new Runnable() {
 			@Override
 			public void run() {
 				if (command.wasSuccessful()) return;

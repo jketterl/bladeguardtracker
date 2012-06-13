@@ -83,7 +83,7 @@ public class MapSelection extends ListActivity {
 							JSONObject data = new JSONObject();
 							data.put("id", selected);
 							SocketCommand command = new SocketCommand("setMap", data);
-							command.setCallback(new Runnable() {
+							command.addCallback(new Runnable() {
 								@Override
 								public void run() {
 									h.sendEmptyMessage(0);

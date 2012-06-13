@@ -51,7 +51,7 @@ public class TeamSelection extends ListActivity {
 			try {
 				data.put("id", selected);
 				final SocketCommand command = s.getSharedConnection().sendCommand(new SocketCommand("setTeam", data));
-				command.setCallback(new Runnable() {
+				command.addCallback(new Runnable() {
 					@Override
 					public void run() {
 						dismissDialog(DIALOG_SWITCHING);
