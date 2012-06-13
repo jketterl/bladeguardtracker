@@ -367,34 +367,40 @@ public class HttpSocketConnection {
 	}
 	
 	protected void sendUpdate(JSONObject update) {
-		Iterator<HttpSocketListener> i = listeners.iterator();
-		while (i.hasNext()) {
-			i.next().receiveUpdate(update);
+		synchronized (listeners) {
+			Iterator<HttpSocketListener> i = listeners.iterator();
+			while (i.hasNext()) i.next().receiveUpdate(update);
 		}
 	}
 	
 	protected void sendCommand(String command, JSONObject data) {
-		Iterator<HttpSocketListener> i = listeners.iterator();
-		while (i.hasNext()) {
-			i.next().receiveCommand(command, data);
+		synchronized (listeners) {
+			Iterator<HttpSocketListener> i = listeners.iterator();
+			while (i.hasNext()) i.next().receiveCommand(command, data);
 		}
 	}
 	
 	protected void fireStateChange(int newState) {
-		Iterator<HttpSocketListener> i = listeners.iterator();
-		while (i.hasNext()) i.next().receiveStateChange(newState);
+		synchronized (listeners) {
+			Iterator<HttpSocketListener> i = listeners.iterator();
+			while (i.hasNext()) i.next().receiveStateChange(newState);
+		}
 	}
 	
 	public void addListener(HttpSocketListener listener)
 	{
-		if (listeners.contains(listener)) return;
-		listeners.add(listener);
+		synchronized (listeners) {
+			if (listeners.contains(listener)) return;
+			listeners.add(listener);
+		}
 	}
 	
 	public void removeListener(HttpSocketListener listener)
 	{
-		if (!listeners.contains(listener)) return;
-		listeners.remove(listener);
+		synchronized (listeners) {
+			if (!listeners.contains(listener)) return;
+			listeners.remove(listener);
+		}
 	}
 
 	private void sendSubscriptions() {
