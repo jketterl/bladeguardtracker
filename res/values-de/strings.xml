@@ -41,5 +41,5 @@
     <string name="event">Veranstaltungsdetails</string>
     <string name="title">Titel</string>
     <string name="start">Startzeit</string>
-    <string name="participate">An dieser Veranstaltung teilnehmen</string>
+    <string name="participate">Ja! Ich bin dabei!</string>
 </resources>

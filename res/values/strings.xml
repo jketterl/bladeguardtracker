@@ -43,5 +43,5 @@
     <string name="event">Event details</string>
     <string name="start">Start time</string>
     <string name="title">Title</string>
-    <string name="participate">Participate in that event</string>
+    <string name="participate">Yes! I\'m participating!</string>
 </resources>
