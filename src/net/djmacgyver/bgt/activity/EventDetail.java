@@ -6,6 +6,8 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.alarm.AlarmReceiver;
 import net.djmacgyver.bgt.control.ControlService;
 import net.djmacgyver.bgt.event.Event;
+import net.djmacgyver.bgt.session.Session;
+import net.djmacgyver.bgt.user.User;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -15,9 +17,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.View;
 import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class EventDetail extends Activity {
@@ -75,6 +79,16 @@ public class EventDetail extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		// show the admin section, if the user is an admin
+        User user = Session.getUser();
+        LinearLayout adminLayout = (LinearLayout) findViewById(R.id.adminArea);
+        if (user != null && user.isAdmin()) {
+	        adminLayout.setVisibility(View.VISIBLE);
+        } else {
+        	adminLayout.setVisibility(View.GONE);
+        }		
+		
         event = getIntent().getExtras().getParcelable("event");
         
         TextView title = (TextView) findViewById(R.id.titleView);

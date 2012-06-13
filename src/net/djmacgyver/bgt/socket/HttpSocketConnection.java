@@ -14,6 +14,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.session.Session;
+import net.djmacgyver.bgt.user.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -239,6 +241,7 @@ public class HttpSocketConnection {
 	}
 
 	public SocketCommand authenticate() {
+		Session.setUser(null);
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
 		if (p.getBoolean("anonymous", true)) return null;
 		try {
@@ -246,7 +249,19 @@ public class HttpSocketConnection {
 			JSONObject data = new JSONObject();
 			data.put("user", p.getString("username", ""));
 			data.put("pass", p.getString("password", ""));
-			SocketCommand command = new SocketCommand("auth", data);
+			final SocketCommand command = new SocketCommand("auth", data);
+			command.addCallback(new Runnable() {
+				@Override
+				public void run() {
+					if (command.wasSuccessful()) {
+						try {
+							Session.setUser(new User(command.getResponseData().getJSONObject(0)));
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			});
 			return sendCommand(command);
 		} catch (JSONException e) {
 			e.printStackTrace();
