@@ -206,6 +206,7 @@ public class WebSocketClient {
 				Thread.sleep(30000);
 				Log.w(TAG, "Ping timeout!");
 				mHandler.onError(new HybiParser.ProtocolError("Ping timeout!"));
+				terminate = true;
 			} catch (InterruptedException e) {}
 		}
 		
