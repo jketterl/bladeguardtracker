@@ -2,11 +2,16 @@ package net.djmacgyver.bgt.activity;
 
 import java.util.Date;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.alarm.AlarmReceiver;
 import net.djmacgyver.bgt.control.ControlService;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.session.Session;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.user.User;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -19,6 +24,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
@@ -26,6 +32,51 @@ import android.widget.TextView;
 
 public class EventDetail extends Activity {
 	private Event event;
+	
+	private class SingleCommandConnection implements ServiceConnection {
+		private SocketCommand command;
+		
+		private SingleCommandConnection(SocketCommand c) {
+			command = c;
+		}
+		
+		@Override
+		public void onServiceConnected(ComponentName arg0, IBinder arg1) {
+			SocketService s = ((SocketService.LocalBinder) arg1).getService();
+			s.getSharedConnection().sendCommand(command);
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			unbindService(this);
+		}
+	}
+	
+	private class EventBoundOnClickListener implements View.OnClickListener {
+		private String command;
+		
+		private EventBoundOnClickListener(String command) {
+			this.command = command;
+		}
+		
+		@Override
+		public void onClick(View v) {
+			try {
+				JSONObject data = new JSONObject();
+				data.put("eventId", event.getId());
+				SocketCommand command = new SocketCommand(this.command, data);
+				bindService(
+						new Intent(EventDetail.this, SocketService.class),
+						new SingleCommandConnection(command),
+						Context.BIND_AUTO_CREATE
+				);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,8 +125,17 @@ public class EventDetail extends Activity {
 				}
 			}
 		});
+        
+        Button start = (Button) findViewById(R.id.startButton);
+        start.setOnClickListener(new EventBoundOnClickListener("startEvent"));
+        
+        Button pause = (Button) findViewById(R.id.pauseButton);
+        pause.setOnClickListener(new EventBoundOnClickListener("pauseEvent"));
+        
+        Button shutdown = (Button) findViewById(R.id.shutdownButton);
+        shutdown.setOnClickListener(new EventBoundOnClickListener("shutdownEvent"));
     }
-
+    
 	@Override
 	protected void onResume() {
 		super.onResume();
