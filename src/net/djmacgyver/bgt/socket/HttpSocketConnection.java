@@ -106,15 +106,11 @@ public class HttpSocketConnection {
 						if (queue == null) try {
 							// if the disconnect succeeds it should call onDisconnect()
 							socket.disconnect();
-						} catch (Exception e) {
-							// in case of an exception it is not sure whether
-							// onDiscconect() gets called, so call it manually.
-							onDisconnect(-1, e.getMessage());
-						} else {
-							// if this connection was never really established, there cannot be
-							// a disconnect event. trigger it manually...
-							onDisconnect(-1, error.getMessage());
-						}
+						} catch (Exception e) {}
+						// we can never be sure whether onDisconnect() is called, so to be sure we call it at least 
+						// once here.
+						// onDisconnect() is protected against double execution using valid
+						onDisconnect(-1, error.getMessage());
 					}
 					
 					private void reconnect(){
