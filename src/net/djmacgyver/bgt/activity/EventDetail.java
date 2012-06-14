@@ -86,6 +86,8 @@ public class EventDetail extends Activity {
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.event);
         
+        if (savedInstanceState != null) event = savedInstanceState.getParcelable("event");
+        
         CheckBox c = (CheckBox) findViewById(R.id.participateCheckbox);
         c.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
@@ -156,5 +158,11 @@ public class EventDetail extends Activity {
         
         TextView start = (TextView) findViewById(R.id.startView);
         start.setText(event.getStart().toLocaleString());
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putParcelable("event", event);
 	}
 }
