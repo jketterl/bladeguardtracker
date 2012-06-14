@@ -100,13 +100,13 @@ public class EventDetail extends Activity {
 						ServiceConnection conn = new ServiceConnection() {
 							@Override
 							public void onServiceDisconnected(ComponentName name) {
-								unbindService(this);
 							}
 							
 							@Override
 							public void onServiceConnected(ComponentName name, IBinder service) {
 								ControlService s = ((ControlService.LocalBinder) service).getService();
 								s.shutdown();
+								unbindService(this);
 							}
 						};
 						bindService(new Intent(EventDetail.this, ControlService.class), conn, Context.BIND_AUTO_CREATE);
