@@ -44,11 +44,11 @@ public class EventDetail extends Activity {
 		public void onServiceConnected(ComponentName arg0, IBinder arg1) {
 			SocketService s = ((SocketService.LocalBinder) arg1).getService();
 			s.getSharedConnection().sendCommand(command);
+			unbindService(this);
 		}
 
 		@Override
 		public void onServiceDisconnected(ComponentName arg0) {
-			unbindService(this);
 		}
 	}
 	
