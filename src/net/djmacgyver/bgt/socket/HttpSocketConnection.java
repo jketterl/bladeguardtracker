@@ -385,7 +385,7 @@ public class HttpSocketConnection {
 		}
 	}
 	
-	public void sendCommand(String command, JSONObject data) {
+	private void sendCommand(String command, JSONObject data) {
 		synchronized (listeners) {
 			Iterator<HttpSocketListener> i = listeners.iterator();
 			while (i.hasNext()) i.next().receiveCommand(command, data);
