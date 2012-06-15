@@ -48,4 +48,5 @@
     <string name="trigger_pause">Pause event</string>
     <string name="trigger_shutdown">End event</string>
     <string name="admin_commands">Administrator commands</string>
+    <string name="command_executing">Executing command...</string>
 </resources>

@@ -15,7 +15,9 @@ import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.user.User;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +35,9 @@ import android.widget.TextView;
 public class EventDetail extends Activity {
 	private Event event;
 	
+	public static final int DIALOG_CONFIRM = 1;
+	public static final int DIALOG_PERFORMING_COMMAND = 2;
+	
 	private class SingleCommandConnection implements ServiceConnection {
 		private SocketCommand command;
 		
@@ -43,6 +48,12 @@ public class EventDetail extends Activity {
 		@Override
 		public void onServiceConnected(ComponentName arg0, IBinder arg1) {
 			SocketService s = ((SocketService.LocalBinder) arg1).getService();
+			command.addCallback(new Runnable() {
+				@Override
+				public void run() {
+					dismissDialog(DIALOG_PERFORMING_COMMAND);
+				}
+			});
 			s.getSharedConnection().sendCommand(command);
 			unbindService(this);
 		}
@@ -61,19 +72,25 @@ public class EventDetail extends Activity {
 		
 		@Override
 		public void onClick(View v) {
-			try {
-				JSONObject data = new JSONObject();
-				data.put("eventId", event.getId());
-				SocketCommand command = new SocketCommand(this.command, data);
-				bindService(
-						new Intent(EventDetail.this, SocketService.class),
-						new SingleCommandConnection(command),
-						Context.BIND_AUTO_CREATE
-				);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			new Thread(){
+				@Override
+				public void run() {
+					try {
+						JSONObject data = new JSONObject();
+						data.put("eventId", event.getId());
+						SocketCommand c = new SocketCommand(command, data);
+						showDialog(DIALOG_PERFORMING_COMMAND);
+						bindService(
+								new Intent(EventDetail.this, SocketService.class),
+								new SingleCommandConnection(c),
+								Context.BIND_AUTO_CREATE
+						);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}.run();
 		}
 		
 	}
@@ -164,5 +181,17 @@ public class EventDetail extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putParcelable("event", event);
+	}
+
+	@Override
+	protected Dialog onCreateDialog(int id, Bundle args) {
+		switch (id) {
+			//case DIALOG_CONFIRM:
+			case DIALOG_PERFORMING_COMMAND:
+				Dialog d = new ProgressDialog(this);
+				d.setTitle(R.string.command_executing);
+				return d;
+		}
+		return super.onCreateDialog(id, args);
 	}
 }
