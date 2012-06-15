@@ -15,11 +15,13 @@ import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.user.User;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -65,32 +67,19 @@ public class EventDetail extends Activity {
 	
 	private class EventBoundOnClickListener implements View.OnClickListener {
 		private String command;
+		private int message;
 		
-		private EventBoundOnClickListener(String command) {
+		private EventBoundOnClickListener(String command, int message) {
 			this.command = command;
+			this.message = message;
 		}
 		
 		@Override
 		public void onClick(View v) {
-			new Thread(){
-				@Override
-				public void run() {
-					try {
-						JSONObject data = new JSONObject();
-						data.put("eventId", event.getId());
-						SocketCommand c = new SocketCommand(command, data);
-						showDialog(DIALOG_PERFORMING_COMMAND);
-						bindService(
-								new Intent(EventDetail.this, SocketService.class),
-								new SingleCommandConnection(c),
-								Context.BIND_AUTO_CREATE
-						);
-					} catch (JSONException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}.run();
+			Bundle b = new Bundle();
+			b.putString("command", command);
+			b.putInt("message", message);
+			showDialog(DIALOG_CONFIRM, b);
 		}
 		
 	}
@@ -146,13 +135,13 @@ public class EventDetail extends Activity {
 		});
         
         Button start = (Button) findViewById(R.id.startButton);
-        start.setOnClickListener(new EventBoundOnClickListener("startEvent"));
+        start.setOnClickListener(new EventBoundOnClickListener("startEvent", R.string.activating_trackers));
         
         Button pause = (Button) findViewById(R.id.pauseButton);
-        pause.setOnClickListener(new EventBoundOnClickListener("pauseEvent"));
+        pause.setOnClickListener(new EventBoundOnClickListener("pauseEvent", R.string.deactivating_trackers));
         
         Button shutdown = (Button) findViewById(R.id.shutdownButton);
-        shutdown.setOnClickListener(new EventBoundOnClickListener("shutdownEvent"));
+        shutdown.setOnClickListener(new EventBoundOnClickListener("shutdownEvent", R.string.terminating_event));
     }
     
 	@Override
@@ -184,14 +173,66 @@ public class EventDetail extends Activity {
 	}
 
 	@Override
-	protected Dialog onCreateDialog(int id, Bundle args) {
+	protected Dialog onCreateDialog(int id) {
 		switch (id) {
-			//case DIALOG_CONFIRM:
+			case DIALOG_CONFIRM:
+				AlertDialog.Builder b = new AlertDialog.Builder(this);
+				b.setTitle(R.string.are_you_sure)
+				// seems like we have to set some message & listener here... otherwise the corresponding
+				// dialog components will not be shown, even if we configure them lateer on...
+				 .setMessage(R.string.are_you_sure)
+				 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+					}
+				})
+				 .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						dismissDialog(DIALOG_CONFIRM);
+					}
+				});
+				return b.create();
 			case DIALOG_PERFORMING_COMMAND:
 				Dialog d = new ProgressDialog(this);
 				d.setTitle(R.string.command_executing);
 				return d;
 		}
-		return super.onCreateDialog(id, args);
+		return super.onCreateDialog(id);
+	}
+
+	@Override
+	protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
+		switch (id) {
+			case DIALOG_CONFIRM:
+				AlertDialog d = (AlertDialog) dialog;
+				d.setMessage(getResources().getString(args.getInt("message")));
+				final String command = args.getString("command");
+				d.setButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						new Thread(){
+							@Override
+							public void run() {
+								try {
+									JSONObject data = new JSONObject();
+									data.put("eventId", event.getId());
+									SocketCommand c = new SocketCommand(command, data);
+									showDialog(DIALOG_PERFORMING_COMMAND);
+									bindService(
+											new Intent(EventDetail.this, SocketService.class),
+											new SingleCommandConnection(c),
+											Context.BIND_AUTO_CREATE
+									);
+								} catch (JSONException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+						}.run();
+					}
+				});
+		}
+		super.onPrepareDialog(id, dialog, args);
 	}
 }
