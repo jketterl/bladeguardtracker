@@ -87,7 +87,12 @@ public class ControlService extends Service implements HttpSocketListener {
 	
 	public void shutdown() {
 		if (socket != null) {
-			socket.sendCommand("disableControl");
+			JSONObject data = new JSONObject();
+			try {
+				data.put("eventId", event.getId());
+			} catch (JSONException e) {}
+			SocketCommand c = new SocketCommand("disableControl", data);
+			socket.sendCommand(c);
 			socket.removeListener(this);
 		}
 		stopTracking();
