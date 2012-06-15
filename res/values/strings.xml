@@ -49,4 +49,9 @@
     <string name="trigger_shutdown">End event</string>
     <string name="admin_commands">Administrator commands</string>
     <string name="command_executing">Executing command...</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="activating_trackers">This will activate GPS tracking for all participating users.</string>
+    <string name="deactivating_trackers">This will disable GPS tracking for all participating users.</string>
+    <string name="terminating_event">This will deactivate tracking for all users, disconnect all control connections, terminate the current event and remove it from the event list.</string>
 </resources>

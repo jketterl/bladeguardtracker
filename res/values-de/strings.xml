@@ -47,4 +47,9 @@
     <string name="trigger_shutdown">Veranstaltung beenden</string>
     <string name="admin_commands">Admin-Befehle</string>
     <string name="command_executing">Kommando wird ausgeführt...</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+    <string name="activating_trackers">Hiermit wird das GPS-Tracking für alle teilnehmenden Benutzer eingeschaltet.</string>
+    <string name="deactivating_trackers">Hiermit wird das GPS-Tracking für alle teilnehmenden Benutzer deaktiviert</string>
+    <string name="terminating_event">Hiermit wird das GPS-Tracking für alles Benutzer deaktiviert, alle Kontrollverbindungen geschlossen, das Event beendet und aus der Eventliste gelöscht.</string>
 </resources>
