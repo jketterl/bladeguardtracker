@@ -7,9 +7,11 @@ import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.map.MapHandler;
 import net.djmacgyver.bgt.map.RouteOverlay;
 import net.djmacgyver.bgt.map.UserOverlay;
+import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.user.User;
 
 import org.json.JSONObject;
 
@@ -266,6 +268,8 @@ public class Map extends MapActivity implements KeepAliveTarget {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		User u = Session.getUser();
+		if (u == null || !u.isAdmin()) return false;
 		getMenuInflater().inflate(R.menu.map, menu);
 		return true;
 	}
