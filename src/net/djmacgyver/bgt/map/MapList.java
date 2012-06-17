@@ -18,6 +18,10 @@ public class MapList extends ServerList {
 		super(context);
 	}
 	
+	public MapList(Context context, boolean autoLoad) {
+		super(context, autoLoad);
+	}
+	
 	@Override
 	protected String getServerCommand() {
 		return "getMaps";

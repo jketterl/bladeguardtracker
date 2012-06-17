@@ -36,7 +36,7 @@ public class TeamSelection extends ListActivity {
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.teamselection);
         
-        setListAdapter(new TeamList(this));
+        setListAdapter(new TeamList(this, true));
 	}
 	
 	private ServiceConnection conn = new ServiceConnection() {

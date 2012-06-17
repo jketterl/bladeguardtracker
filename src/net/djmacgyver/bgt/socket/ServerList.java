@@ -46,7 +46,12 @@ public abstract class ServerList implements ListAdapter {
 
 	public ServerList(Context context){
 		this.context = context;
-		refresh();
+		//refresh();
+	}
+	
+	public ServerList(Context context, boolean autoLoad)  {
+		this(context);
+		if (autoLoad) refresh();
 	}
 	
 	@Override

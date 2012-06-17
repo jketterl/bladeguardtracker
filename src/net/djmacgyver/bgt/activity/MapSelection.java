@@ -34,7 +34,7 @@ public class MapSelection extends ListActivity {
 	
 	private MapList getMaps() {
 		if (maps == null) {
-			maps = new MapList(getApplicationContext());
+			maps = new MapList(getApplicationContext(), true);
 		}
 		return maps;
 	}
