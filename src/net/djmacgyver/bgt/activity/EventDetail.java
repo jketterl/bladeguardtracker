@@ -25,7 +25,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -40,6 +42,7 @@ public class EventDetail extends Activity {
 	
 	public static final int DIALOG_CONFIRM = 1;
 	public static final int DIALOG_PERFORMING_COMMAND = 2;
+	public static final int DIALOG_ERROR = 3;
 	
 	private class SingleCommandConnection implements ServiceConnection {
 		private SocketCommand command;
@@ -55,6 +58,15 @@ public class EventDetail extends Activity {
 				@Override
 				public void run() {
 					dismissDialog(DIALOG_PERFORMING_COMMAND);
+					if (!command.wasSuccessful()) {
+						String message = "unknown error";
+						try {
+							message = command.getResponseData().getJSONObject(0).getString("message");
+						} catch (JSONException e) {}
+						Message m = new Message();
+						m.obj = message;
+						h.sendMessage(m);
+					}
 				}
 			});
 			s.getSharedConnection().sendCommand(command);
@@ -65,6 +77,15 @@ public class EventDetail extends Activity {
 		public void onServiceDisconnected(ComponentName arg0) {
 		}
 	}
+	
+	private Handler h = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			Bundle b = new Bundle();
+			b.putString("message", (String) msg.obj);
+			showDialog(DIALOG_ERROR, b);
+		}
+	};
 	
 	private class EventBoundOnClickListener implements View.OnClickListener {
 		private String command;
@@ -184,9 +205,9 @@ public class EventDetail extends Activity {
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
+		AlertDialog.Builder b = new AlertDialog.Builder(this);
 		switch (id) {
 			case DIALOG_CONFIRM:
-				AlertDialog.Builder b = new AlertDialog.Builder(this);
 				b.setTitle(R.string.are_you_sure)
 				// seems like we have to set some message & listener here... otherwise the corresponding
 				// dialog components will not be shown, even if we configure them lateer on...
@@ -207,6 +228,15 @@ public class EventDetail extends Activity {
 				Dialog d = new ProgressDialog(this);
 				d.setTitle(R.string.command_executing);
 				return d;
+			case DIALOG_ERROR:
+				b.setMessage(R.string.command_error)
+				 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+					}
+				});
+				return b.create();
 		}
 		return super.onCreateDialog(id);
 	}
@@ -242,6 +272,11 @@ public class EventDetail extends Activity {
 						}.run();
 					}
 				});
+				break;
+			case DIALOG_ERROR:
+				AlertDialog a = (AlertDialog) dialog;
+				a.setMessage(getResources().getString(R.string.command_error) + ":\n\n" + args.getString("message"));
+				break;
 		}
 		super.onPrepareDialog(id, dialog, args);
 	}
