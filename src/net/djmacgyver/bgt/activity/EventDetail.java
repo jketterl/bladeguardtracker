@@ -2,9 +2,6 @@ package net.djmacgyver.bgt.activity;
 
 import java.util.Date;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.alarm.AlarmReceiver;
 import net.djmacgyver.bgt.control.ControlService;
@@ -13,6 +10,10 @@ import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.user.User;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -24,13 +25,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -120,6 +123,8 @@ public class EventDetail extends Activity {
         c.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				participate(isChecked);
+		        
 				Date start = event.getControlConnectionStartTime();
 				if (start.before(new Date())) {
 					if (isChecked) {
@@ -195,6 +200,9 @@ public class EventDetail extends Activity {
         
         TextView start = (TextView) findViewById(R.id.startView);
         start.setText(event.getStart().toLocaleString());
+        
+        CheckBox c = (CheckBox) findViewById(R.id.participateCheckbox);
+		c.setChecked(isParticipating());
 	}
 
 	@Override
@@ -279,5 +287,42 @@ public class EventDetail extends Activity {
 				break;
 		}
 		super.onPrepareDialog(id, dialog, args);
+	}
+	
+	private boolean isParticipating() {
+        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(EventDetail.this);
+    	JSONObject participating;
+        try {
+        	participating = new JSONObject(p.getString("participating", "{}"));
+        } catch (JSONException e) {
+        	participating = new JSONObject();
+        }
+    	String id = Integer.toString(event.getId());
+    	try {
+			return participating.has(id) && participating.getBoolean(id);
+		} catch (JSONException e) {
+			return false;
+		} 
+	}
+	
+	private void participate(boolean value) {
+        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(EventDetail.this);
+        JSONObject participating;
+        try {
+        	participating = new JSONObject(p.getString("participating", "{}"));
+        } catch (JSONException e) {
+        	participating = new JSONObject();
+        }
+        String id = Integer.toString(event.getId());
+    	try {
+    		if (value) {
+    			participating.put(id, true);
+    		} else {
+    			participating.remove(id);
+    		}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+    	p.edit().putString("participating", participating.toString()).commit();
 	}
 }
