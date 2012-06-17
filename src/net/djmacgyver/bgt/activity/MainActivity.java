@@ -147,9 +147,9 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		super.onResume();
+        events.refresh();
 		showDialog(DIALOG_CONNECTING);
         bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
-        events.refresh();
+		super.onResume();
 	}
 }
