@@ -3,62 +3,21 @@ package net.djmacgyver.bgt.activity;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
-import net.djmacgyver.bgt.gps.GPSTrackingListener;
-import net.djmacgyver.bgt.gps.GPSTrackingService;
 
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
-	private GPSTrackingService service;
-	private boolean bound = false;
-    ServiceConnection conn = new ServiceConnection() {
-    	private GPSTrackingListener l = new GPSTrackingListener() {
-			@Override
-			public void trackingEnabled() {
-		        ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
-				b.setChecked(true);
-			}
-			
-			@Override
-			public void trackingDisabled() {
-		        ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
-				b.setChecked(false);
-			}
-		};
-    	
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			service.removeListener(l);
-			service = null;
-		}
-		
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder binder) {
-			service = ((GPSTrackingService.LocalBinder) binder).getService();
-	        final ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
-	        b.setChecked(service.isEnabled());
-	        
-	        service.addListener(l);
-		}
-	};
-	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,22 +26,6 @@ public class MainActivity extends Activity {
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.app_name);
-        
-        startService(new Intent(this, GPSTrackingService.class));
-        bindService(new Intent(this, GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
-        bound = true;
-        
-        ToggleButton b = (ToggleButton) findViewById(R.id.toggleButton1);
-        b.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (((ToggleButton) v).isChecked()) {
-					service.enable();
-				} else {
-					service.disable();
-				}
-			}
-		});
         
         final EventList events = new EventList(this);
         ListView eventList = (ListView) findViewById(R.id.upcomingEvents);
@@ -116,16 +59,6 @@ public class MainActivity extends Activity {
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
-		}
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (bound) {
-			if (!service.isEnabled()) stopService(new Intent(this, GPSTrackingService.class));
-			unbindService(conn);
-			bound = false;
 		}
 	}
 }

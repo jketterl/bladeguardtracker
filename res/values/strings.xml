@@ -55,4 +55,6 @@
     <string name="deactivating_trackers">This will disable GPS tracking for all participating users.</string>
     <string name="terminating_event">This will deactivate tracking for all users, disconnect all control connections, terminate the current event and remove it from the event list.</string>
     <string name="command_error">There was an error performing your command</string>
+    <string name="upcoming_events">Upcoming bladenight events:</string>
+    <string name="select_events">Please select one of the above events to participate!</string>
 </resources>
