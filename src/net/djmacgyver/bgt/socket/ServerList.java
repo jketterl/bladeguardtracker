@@ -46,7 +46,7 @@ public abstract class ServerList implements ListAdapter {
 
 	public ServerList(Context context){
 		this.context = context;
-		context.bindService(new Intent(context, SocketService.class), conn, Context.BIND_AUTO_CREATE);
+		refresh();
 	}
 	
 	@Override
@@ -125,5 +125,9 @@ public abstract class ServerList implements ListAdapter {
 	
 	public Context getContext() {
 		return context;
+	}
+	
+	public void refresh() {
+		context.bindService(new Intent(context, SocketService.class), conn, Context.BIND_AUTO_CREATE);
 	}
 }
