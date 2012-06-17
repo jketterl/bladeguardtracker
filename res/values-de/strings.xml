@@ -2,7 +2,7 @@
 <resources>
     <string name="cancel">Abbrechen</string>
     <string name="locate">Sende meine Position an den Tracking-Server</string>
-    <string name="map_name">Kartenansicht</string>
+    <string name="map_name">Auf der Karte ansehen</string>
     <string name="settings">Einstellungen</string>
     <string name="user_preferences">Benutzereinstellungen</string>
     <string name="user_name">Benutzername</string>

@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.view.Window;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -142,6 +143,15 @@ public class EventDetail extends Activity {
         
         Button shutdown = (Button) findViewById(R.id.shutdownButton);
         shutdown.setOnClickListener(new EventBoundOnClickListener("shutdownEvent", R.string.terminating_event));
+
+        Button mapButton = (Button) findViewById(R.id.mapButton);
+        mapButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(getApplicationContext(), Map.class);
+				startActivity(i);
+			}
+		});
     }
     
 	@Override
