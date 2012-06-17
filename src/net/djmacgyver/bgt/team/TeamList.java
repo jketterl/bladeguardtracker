@@ -17,9 +17,13 @@ public class TeamList extends ServerList {
 		super(context);
 	}
 	
+	public TeamList(Context context, boolean b) {
+		super(context, b);
+	}
+
 	@Override
 	protected String getServerCommand() {
-		return "getMaps";
+		return "getTeams";
 	}
 	
 	@Override
