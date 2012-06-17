@@ -135,6 +135,7 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	}
 
 	public void enable() {
+		if (enabled) return;
 		enabled = true;
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
 		
