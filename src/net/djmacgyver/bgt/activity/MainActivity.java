@@ -1,13 +1,18 @@
 package net.djmacgyver.bgt.activity;
 
+import net.djmacgyver.bgt.GCMIntentService;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
+import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.google.android.gcm.GCMRegistrar;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -20,6 +25,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -101,6 +107,36 @@ public class MainActivity extends Activity {
 				startActivity(i);
 			}
 		});
+        
+        GCMIntentService.gcmId = getResources().getString(R.string.gcm_id);
+		GCMRegistrar.checkDevice(this);
+		GCMRegistrar.checkManifest(this);
+		final String regId = GCMRegistrar.getRegistrationId(this);
+		if (regId.equals("")) {
+			GCMRegistrar.register(this, GCMIntentService.gcmId);
+		} else {
+			ServiceConnection conn = new ServiceConnection() {
+				@Override
+				public void onServiceDisconnected(ComponentName name) {
+				}
+				
+				@Override
+				public void onServiceConnected(ComponentName name, IBinder service) {
+					SocketService s = ((SocketService.LocalBinder) service).getService();
+					JSONObject data = new JSONObject();
+					try {
+						data.put("regId", regId);
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+					SocketCommand c = new SocketCommand("updateRegistration", data);
+					s.getSharedConnection().sendCommand(c);
+					unbindService(this);
+				}
+			};
+			bindService(new Intent(this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
+			Log.v("GCM registration", "Already registered (id=\"" + regId + "\"");
+		}
     }
 
 	@Override

@@ -9,4 +9,7 @@
     
     <!-- WebSocket for combined up & downstream -->
     <string name="websocket">wss://bgt.justjakob.de/bgt/socket</string>
+    
+    <!-- Project ID / Registration ID for Google Cloud Messaging (GCM) -->
+    <string name="gcm_id">"637105857395"</string>
 </resources>
