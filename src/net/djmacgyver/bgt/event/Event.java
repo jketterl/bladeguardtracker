@@ -17,6 +17,7 @@ public class Event implements Parcelable {
 	private String title;
 	private Date start;
 	private Date controlConnectionStartTime;
+	private Boolean weather = null;
 	
 	public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
 		@Override
@@ -31,6 +32,7 @@ public class Event implements Parcelable {
 	};
 	
 	public Event(JSONObject obj) {
+		System.out.println(obj.toString());
 		try {
 			id = obj.getInt("id");
 			title = obj.getString("title");
@@ -38,6 +40,11 @@ public class Event implements Parcelable {
 			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 			format.setTimeZone(TimeZone.getTimeZone("GMT"));
 			start = format.parse(obj.getString("start"));
+			if (obj.has("weather") && !obj.isNull("weather")) {
+				weather = obj.getInt("weather") != 0;
+			} else {
+				weather = null;
+			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -86,5 +93,13 @@ public class Event implements Parcelable {
 	@Override
 	public int describeContents() {
 		return hashCode();
+	}
+	
+	public boolean hasWeatherDecision() {
+		return weather != null;
+	}
+	
+	public boolean getWeatherDecision() {
+		return weather.booleanValue();
 	}
 }

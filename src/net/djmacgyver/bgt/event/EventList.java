@@ -1,15 +1,16 @@
 package net.djmacgyver.bgt.event;
 
+import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.socket.ServerList;
+
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.socket.ServerList;
 
 public class EventList extends ServerList {
 	public EventList(Context context) {
@@ -31,10 +32,20 @@ public class EventList extends ServerList {
 		LayoutInflater inf = LayoutInflater.from(getContext());
 		View v = inf.inflate(R.layout.eventlistitem, arg2, false);
 		TextView text = (TextView) v.findViewById(R.id.title);
-		JSONObject event;
+		TextView date = (TextView) v.findViewById(R.id.date);
+		ImageView weatherIcon = (ImageView) v.findViewById(R.id.weatherIcon);
+		Event event;
 		try {
-			event = getData().getJSONObject(arg0);
-			text.setText(event.getString("title"));
+			event = new Event(getData().getJSONObject(arg0));
+			text.setText(event.getTitle());
+			date.setText(event.getStart().toLocaleString());
+			if (event.hasWeatherDecision()) {
+				if (event.getWeatherDecision()) {
+					weatherIcon.setImageResource(R.drawable.ampel_gruen);
+				} else {
+					weatherIcon.setImageResource(R.drawable.ampel_rot);
+				}
+			}
 		} catch (JSONException e) {
 			text.setText("undefined");
 		}
