@@ -32,14 +32,28 @@ public class GCMIntentService extends GCMBaseIntentService {
 	}
 
 	@Override
-	protected void onMessage(Context arg0, Intent arg1) {
-		System.out.println("message received: \"" + arg1.getExtras().getString("message") + "\"");
+	protected void onMessage(Context context, Intent intent) {
+		if (!intent.hasExtra("title") || !intent.hasExtra("weather")) return;
+		
 		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		Notification n = new Notification(R.drawable.ampel_gruen, "Server Message received", System.currentTimeMillis());
+		Notification n;
+		PendingIntent i = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(this, MainActivity.class), 0);
+		
+		// somehow, GCM seems to convert the server int to a string
+		int weather = Integer.parseInt(intent.getExtras().getString("weather"));
+		String message = getResources().getString(R.string.bladenight) + ": ";
+		if (weather != 0) {
+			message += getResources().getString(R.string.yes_rolling);
+			n = new Notification(R.drawable.ampel_gruen, message, System.currentTimeMillis());
+			n.setLatestEventInfo(getApplicationContext(), intent.getExtras().getString("title"), message, i);
+		} else {
+			message += getResources().getString(R.string.no_cancelled);
+			n = new Notification(R.drawable.ampel_rot, message, System.currentTimeMillis());
+			n.setLatestEventInfo(getApplicationContext(), intent.getExtras().getString("title"), message, i);
+		}
+		
 		n.defaults |= Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
 		n.flags |= Notification.FLAG_AUTO_CANCEL;
-		PendingIntent i = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(this, MainActivity.class), 0);
-		n.setLatestEventInfo(getApplicationContext(), "Message Received", arg1.getExtras().getString("message"), i);
 		nm.notify(1, n);
 	}
 
