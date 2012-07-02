@@ -178,6 +178,20 @@
             android:layout_height="wrap_content"
             android:text="@string/trigger_shutdown" >
         </Button>
+
+        <TextView
+            android:id="@+id/adminWeatherLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/weather_decision"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <Button
+            android:id="@+id/weatherButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/enter_weather_decision" />
+
     </LinearLayout>
 
 </LinearLayout>

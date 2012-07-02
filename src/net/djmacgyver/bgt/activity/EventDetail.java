@@ -47,6 +47,7 @@ public class EventDetail extends Activity {
 	public static final int DIALOG_CONFIRM = 1;
 	public static final int DIALOG_PERFORMING_COMMAND = 2;
 	public static final int DIALOG_ERROR = 3;
+	public static final int DIALOG_WEATHER_DECISION = 4;
 	
 	private class SingleCommandConnection implements ServiceConnection {
 		private SocketCommand command;
@@ -94,10 +95,16 @@ public class EventDetail extends Activity {
 	private class EventBoundOnClickListener implements View.OnClickListener {
 		private String command;
 		private int message;
+		private String data;
 		
-		private EventBoundOnClickListener(String command, int message) {
+		private EventBoundOnClickListener(String command, int message, String data) {
 			this.command = command;
 			this.message = message;
+			this.data = data;
+		}
+		
+		private EventBoundOnClickListener(String command, int message) {
+			this(command, message, new JSONObject().toString());
 		}
 		
 		@Override
@@ -105,6 +112,11 @@ public class EventDetail extends Activity {
 			Bundle b = new Bundle();
 			b.putString("command", command);
 			b.putInt("message", message);
+			try {
+				JSONObject data = new JSONObject(this.data);
+				data.put("eventId", event.getId());
+				b.putString("data", data.toString());
+			} catch (JSONException e) {}
 			showDialog(DIALOG_CONFIRM, b);
 		}
 		
@@ -177,6 +189,14 @@ public class EventDetail extends Activity {
 			public void onClick(View v) {
 				Intent i = new Intent(getApplicationContext(), Map.class);
 				startActivity(i);
+			}
+		});
+        
+        Button weatherButton = (Button) findViewById(R.id.weatherButton);
+        weatherButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showDialog(DIALOG_WEATHER_DECISION);
 			}
 		});
     }
@@ -264,6 +284,35 @@ public class EventDetail extends Activity {
 					}
 				});
 				return b.create();
+			case DIALOG_WEATHER_DECISION:
+				CharSequence[] items = {
+					getResources().getString(R.string.no_cancelled),
+					getResources().getString(R.string.yes_rolling)
+				};
+				System.out.println(items);
+				b.setTitle(R.string.weather_decision)
+				 .setItems(items, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Bundle b = new Bundle();
+						b.putInt("message", R.string.update_weather);
+						b.putString("command", "updateEvent");
+						JSONObject data = new JSONObject();
+						try {
+							data.put("eventId", event.getId());
+							data.put("weather", which);
+							b.putString("data", data.toString());
+							showDialog(DIALOG_CONFIRM, b);
+						} catch (JSONException e) {}
+					}
+				})
+				 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				});
+				return b.create();
 		}
 		return super.onCreateDialog(id);
 	}
@@ -275,15 +324,15 @@ public class EventDetail extends Activity {
 				AlertDialog d = (AlertDialog) dialog;
 				d.setMessage(getResources().getString(args.getInt("message")));
 				final String command = args.getString("command");
-				d.setButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						new Thread(){
-							@Override
-							public void run() {
-								try {
-									JSONObject data = new JSONObject();
-									data.put("eventId", event.getId());
+
+				try {
+					final JSONObject data = new JSONObject(args.getString("data"));
+					d.setButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface arg0, int arg1) {
+							new Thread(){
+								@Override
+								public void run() {
 									SocketCommand c = new SocketCommand(command, data);
 									showDialog(DIALOG_PERFORMING_COMMAND);
 									bindService(
@@ -291,14 +340,11 @@ public class EventDetail extends Activity {
 											new SingleCommandConnection(c),
 											Context.BIND_AUTO_CREATE
 									);
-								} catch (JSONException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
 								}
-							}
-						}.run();
-					}
-				});
+							}.run();
+						}
+					});
+				} catch (JSONException e1) {}
 				break;
 			case DIALOG_ERROR:
 				AlertDialog a = (AlertDialog) dialog;

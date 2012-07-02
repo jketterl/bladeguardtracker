@@ -59,4 +59,6 @@
     <string name="yes_rolling">Ja, wir fahren!</string>
     <string name="no_cancelled">Fällt leider aus</string>
     <string name="undecided">Noch keine Entscheidung</string>
+    <string name="enter_weather_decision">Wetterentscheidung aktualisieren</string>
+    <string name="update_weather">Hiermit wird eine Wetterbenachrichtigung an alle Benutzer geschickt.</string>
 </resources>

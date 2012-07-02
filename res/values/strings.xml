@@ -61,4 +61,6 @@
     <string name="yes_rolling">Yes, we\'re rolling!</string>
     <string name="no_cancelled">Event cancelled</string>
     <string name="undecided">No decision yet</string>
+    <string name="enter_weather_decision">Update weather decision</string>
+    <string name="update_weather">This will send a weather notification to all users.</string>
 </resources>
