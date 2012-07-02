@@ -26,6 +26,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -37,7 +38,6 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -203,19 +203,21 @@ public class EventDetail extends Activity {
         start.setText(event.getStart().toLocaleString());
         
         TextView weatherView = (TextView) findViewById(R.id.weatherView);
-        ImageView weatherIcon = (ImageView) findViewById(R.id.weatherIcon);
         if (event.hasWeatherDecision()) {
-        	weatherIcon.setVisibility(View.VISIBLE);
+        	Drawable ampel;
         	if (event.getWeatherDecision()) {
         		weatherView.setText("Ja, wir fahren");
-        		weatherIcon.setImageResource(R.drawable.ampel_gruen);
+        		ampel = getResources().getDrawable(R.drawable.ampel_gruen);
         	} else {
         		weatherView.setText("Fällt leider aus");
-        		weatherIcon.setImageResource(R.drawable.ampel_rot);
+        		ampel = getResources().getDrawable(R.drawable.ampel_rot);
         	}
+    		ampel.setBounds(0, 0, 18, 18);
+    		weatherView.setCompoundDrawablePadding(5);
+    		weatherView.setCompoundDrawables(ampel, null, null, null);
         } else {
-        	weatherIcon.setVisibility(View.GONE);
         	weatherView.setText("noch keine Entscheidung");
+        	weatherView.setCompoundDrawables(null, null, null, null);
         }
         
         CheckBox c = (CheckBox) findViewById(R.id.participateCheckbox);
