@@ -1,8 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="match_parent"
-	android:layout_height="wrap_content">
-	<TextView android:text="bla" android:textAppearance="?android:attr/textAppearanceMedium"
-		android:id="@+id/title" android:layout_height="wrap_content"
-		android:layout_width="wrap_content" android:padding="10dip" android:textColor="#000000"></TextView>
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+
+	<LinearLayout
+	    android:id="@+id/texts"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical" >
+
+		<TextView
+		    android:id="@+id/title"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:padding="10dip"
+		    android:text="Event title"
+		    android:textAppearance="?android:attr/textAppearanceMedium"
+		    android:textColor="#000000" />
+
+		<TextView
+		    android:id="@+id/date"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:paddingLeft="10dip"
+		    android:text="Event date"
+		    android:textAppearance="?android:attr/textAppearanceSmall" android:paddingBottom="10dip"/>
+
+	</LinearLayout>
+
+	<LinearLayout
+	    android:id="@+id/linearLayout1"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:gravity="center|right"
+	    android:orientation="vertical" >
+
+		<ImageView
+		    android:id="@+id/weatherIcon"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:padding="10dip" />
+
+	</LinearLayout>
+
 </LinearLayout>

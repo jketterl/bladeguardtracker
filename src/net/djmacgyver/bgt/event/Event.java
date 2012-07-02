@@ -17,6 +17,7 @@ public class Event implements Parcelable {
 	private String title;
 	private Date start;
 	private Date controlConnectionStartTime;
+	private Boolean weather = null;
 	
 	public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
 		@Override
@@ -38,6 +39,11 @@ public class Event implements Parcelable {
 			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 			format.setTimeZone(TimeZone.getTimeZone("GMT"));
 			start = format.parse(obj.getString("start"));
+			if (obj.has("weather") && !obj.isNull("weather")) {
+				weather = obj.getInt("weather") != 0;
+			} else {
+				weather = null;
+			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -51,6 +57,11 @@ public class Event implements Parcelable {
 		id = source.readInt();
 		start = new Date(source.readLong());
 		title = source.readString();
+		if (source.readInt() != 0) {
+			weather = source.readInt() != 0;
+		} else {
+			weather = null;
+		}
 	}
 
 	@Override
@@ -58,6 +69,8 @@ public class Event implements Parcelable {
 		dest.writeInt(id);
 		dest.writeLong(start.getTime());
 		dest.writeString(title);
+		dest.writeInt(hasWeatherDecision() ? 1 : 0);
+		if (hasWeatherDecision()) dest.writeInt(getWeatherDecision() ? 1 : 0);
 	}
 
 	public int getId() {
@@ -86,5 +99,13 @@ public class Event implements Parcelable {
 	@Override
 	public int describeContents() {
 		return hashCode();
+	}
+	
+	public boolean hasWeatherDecision() {
+		return weather != null;
+	}
+	
+	public boolean getWeatherDecision() {
+		return weather.booleanValue();
 	}
 }
