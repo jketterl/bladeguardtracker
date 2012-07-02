@@ -37,6 +37,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -202,13 +203,18 @@ public class EventDetail extends Activity {
         start.setText(event.getStart().toLocaleString());
         
         TextView weatherView = (TextView) findViewById(R.id.weatherView);
+        ImageView weatherIcon = (ImageView) findViewById(R.id.weatherIcon);
         if (event.hasWeatherDecision()) {
+        	weatherIcon.setVisibility(View.VISIBLE);
         	if (event.getWeatherDecision()) {
         		weatherView.setText("Ja, wir fahren");
+        		weatherIcon.setImageResource(R.drawable.ampel_gruen);
         	} else {
         		weatherView.setText("Fällt leider aus");
+        		weatherIcon.setImageResource(R.drawable.ampel_rot);
         	}
         } else {
+        	weatherIcon.setVisibility(View.GONE);
         	weatherView.setText("noch keine Entscheidung");
         }
         
