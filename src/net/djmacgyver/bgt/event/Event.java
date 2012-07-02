@@ -32,7 +32,6 @@ public class Event implements Parcelable {
 	};
 	
 	public Event(JSONObject obj) {
-		System.out.println(obj.toString());
 		try {
 			id = obj.getInt("id");
 			title = obj.getString("title");
