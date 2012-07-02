@@ -57,6 +57,11 @@ public class Event implements Parcelable {
 		id = source.readInt();
 		start = new Date(source.readLong());
 		title = source.readString();
+		if (source.readInt() != 0) {
+			weather = source.readInt() != 0;
+		} else {
+			weather = null;
+		}
 	}
 
 	@Override
@@ -64,6 +69,8 @@ public class Event implements Parcelable {
 		dest.writeInt(id);
 		dest.writeLong(start.getTime());
 		dest.writeString(title);
+		dest.writeInt(hasWeatherDecision() ? 1 : 0);
+		if (hasWeatherDecision()) dest.writeInt(getWeatherDecision() ? 1 : 0);
 	}
 
 	public int getId() {
