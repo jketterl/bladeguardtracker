@@ -201,6 +201,17 @@ public class EventDetail extends Activity {
         TextView start = (TextView) findViewById(R.id.startView);
         start.setText(event.getStart().toLocaleString());
         
+        TextView weatherView = (TextView) findViewById(R.id.weatherView);
+        if (event.hasWeatherDecision()) {
+        	if (event.getWeatherDecision()) {
+        		weatherView.setText("Ja, wir fahren");
+        	} else {
+        		weatherView.setText("Fällt leider aus");
+        	}
+        } else {
+        	weatherView.setText("noch keine Entscheidung");
+        }
+        
         CheckBox c = (CheckBox) findViewById(R.id.participateCheckbox);
 		c.setChecked(isParticipating());
 	}
