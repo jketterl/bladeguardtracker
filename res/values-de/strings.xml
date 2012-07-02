@@ -61,4 +61,5 @@
     <string name="undecided">Noch keine Entscheidung</string>
     <string name="enter_weather_decision">Wetterentscheidung aktualisieren</string>
     <string name="update_weather">Hiermit wird eine Wetterbenachrichtigung an alle Benutzer geschickt.</string>
+    <string name="map">Strecke</string>
 </resources>

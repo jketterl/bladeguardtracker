@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -232,8 +233,9 @@ public class EventDetail extends Activity {
         		weatherView.setText(R.string.no_cancelled);
         		ampel = getResources().getDrawable(R.drawable.ampel_rot);
         	}
-    		ampel.setBounds(0, 0, 18, 18);
-    		weatherView.setCompoundDrawablePadding(5);
+        	int dips = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
+    		ampel.setBounds(0, 0, dips, dips);
+    		weatherView.setCompoundDrawablePadding(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics())));
     		weatherView.setCompoundDrawables(ampel, null, null, null);
         } else {
         	weatherView.setText(R.string.undecided);
@@ -242,6 +244,9 @@ public class EventDetail extends Activity {
         
         CheckBox c = (CheckBox) findViewById(R.id.participateCheckbox);
 		c.setChecked(isParticipating());
+		
+		TextView mapView = (TextView) findViewById(R.id.mapView);
+		mapView.setText(event.getMapName());
 	}
 
 	@Override

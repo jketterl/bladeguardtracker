@@ -18,6 +18,7 @@ public class Event implements Parcelable {
 	private Date start;
 	private Date controlConnectionStartTime;
 	private Boolean weather = null;
+	private String mapName;
 	
 	public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
 		@Override
@@ -44,6 +45,7 @@ public class Event implements Parcelable {
 			} else {
 				weather = null;
 			}
+			mapName = obj.getString("mapName");
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -62,6 +64,7 @@ public class Event implements Parcelable {
 		} else {
 			weather = null;
 		}
+		mapName = source.readString();
 	}
 
 	@Override
@@ -71,6 +74,7 @@ public class Event implements Parcelable {
 		dest.writeString(title);
 		dest.writeInt(hasWeatherDecision() ? 1 : 0);
 		if (hasWeatherDecision()) dest.writeInt(getWeatherDecision() ? 1 : 0);
+		dest.writeString(mapName);
 	}
 
 	public int getId() {
@@ -107,5 +111,9 @@ public class Event implements Parcelable {
 	
 	public boolean getWeatherDecision() {
 		return weather.booleanValue();
+	}
+
+	public String getMapName() {
+		return mapName;
 	}
 }
