@@ -206,17 +206,17 @@ public class EventDetail extends Activity {
         if (event.hasWeatherDecision()) {
         	Drawable ampel;
         	if (event.getWeatherDecision()) {
-        		weatherView.setText("Ja, wir fahren");
+        		weatherView.setText(R.string.yes_rolling);
         		ampel = getResources().getDrawable(R.drawable.ampel_gruen);
         	} else {
-        		weatherView.setText("Fällt leider aus");
+        		weatherView.setText(R.string.no_cancelled);
         		ampel = getResources().getDrawable(R.drawable.ampel_rot);
         	}
     		ampel.setBounds(0, 0, 18, 18);
     		weatherView.setCompoundDrawablePadding(5);
     		weatherView.setCompoundDrawables(ampel, null, null, null);
         } else {
-        	weatherView.setText("noch keine Entscheidung");
+        	weatherView.setText(R.string.undecided);
         	weatherView.setCompoundDrawables(null, null, null, null);
         }
         

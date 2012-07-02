@@ -56,4 +56,7 @@
     <string name="upcoming_events">Die nächsten Bladenights:</string>
     <string name="select_events">Bitte wähle einen der gezeigten Termine aus, um teilzunehmen!</string>
     <string name="weather_decision">Wetter</string>
+    <string name="yes_rolling">Ja, wir fahren!</string>
+    <string name="no_cancelled">Fällt leider aus</string>
+    <string name="undecided">Noch keine Entscheidung</string>
 </resources>

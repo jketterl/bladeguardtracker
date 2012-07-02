@@ -58,4 +58,7 @@
     <string name="upcoming_events">Upcoming bladenight events:</string>
     <string name="select_events">Please select one of the above events to participate!</string>
     <string name="weather_decision">Weather</string>
+    <string name="yes_rolling">Yes, we\'re rolling!</string>
+    <string name="no_cancelled">Event cancelled</string>
+    <string name="undecided">No decision yet</string>
 </resources>
