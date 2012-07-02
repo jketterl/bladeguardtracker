@@ -32,13 +32,13 @@ public class EventList extends ServerList {
 		LayoutInflater inf = LayoutInflater.from(getContext());
 		View v = inf.inflate(R.layout.eventlistitem, arg2, false);
 		TextView text = (TextView) v.findViewById(R.id.title);
-		TextView date = (TextView) v.findViewById(R.id.date);
+		TextView map = (TextView) v.findViewById(R.id.map);
 		ImageView weatherIcon = (ImageView) v.findViewById(R.id.weatherIcon);
 		Event event;
 		try {
 			event = new Event(getData().getJSONObject(arg0));
 			text.setText(event.getTitle());
-			date.setText(event.getStart().toLocaleString());
+			map.setText(event.getStart().toLocaleString() + " " + event.getMapName());
 			if (event.hasWeatherDecision()) {
 				if (event.getWeatherDecision()) {
 					weatherIcon.setImageResource(R.drawable.ampel_gruen);
