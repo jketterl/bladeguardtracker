@@ -12,8 +12,6 @@ import net.djmacgyver.bgt.socket.SocketService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.android.gcm.GCMRegistrar;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -33,6 +31,8 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.google.android.gcm.GCMRegistrar;
 
 public class MainActivity extends Activity {
 	public static final int DIALOG_CONNECTING = 1;
@@ -126,9 +126,7 @@ public class MainActivity extends Activity {
 					JSONObject data = new JSONObject();
 					try {
 						data.put("regId", regId);
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
+					} catch (JSONException e) {}
 					SocketCommand c = new SocketCommand("updateRegistration", data);
 					s.getSharedConnection().sendCommand(c);
 					unbindService(this);
