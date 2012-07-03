@@ -141,7 +141,6 @@ public class MainActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
-		menu.setGroupVisible(R.id.adminGroup, Session.hasUser() && Session.getUser().isAdmin());
 		return true;
 	}
 
@@ -198,5 +197,11 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {
 		GCMRegistrar.onDestroy(this);
 		super.onDestroy();
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		menu.setGroupVisible(R.id.adminGroup, Session.hasUser() && Session.getUser().isAdmin());
+		return super.onPrepareOptionsMenu(menu);
 	}
 }
