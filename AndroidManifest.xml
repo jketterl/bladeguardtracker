@@ -37,6 +37,7 @@
         	</intent-filter>
         </receiver>
         <service android:name="GCMIntentService"></service>
+        <activity android:name=".activity.Admin"></activity>
 
     </application>
 </manifest>

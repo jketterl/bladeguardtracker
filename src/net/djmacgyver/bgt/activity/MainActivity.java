@@ -141,15 +141,20 @@ public class MainActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
-		menu.setGroupVisible(R.id.adminGroup, Session.getUser().isAdmin());
+		menu.setGroupVisible(R.id.adminGroup, Session.hasUser() && Session.getUser().isAdmin());
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		Intent i;
 		switch (item.getItemId()) {
 			case R.id.config:
-				Intent i = new Intent(getApplicationContext(), Settings.class);
+				i = new Intent(getApplicationContext(), Settings.class);
+				startActivity(i);
+				return true;
+			case R.id.admin:
+				i = new Intent(getApplicationContext(), Admin.class);
 				startActivity(i);
 				return true;
 			default:

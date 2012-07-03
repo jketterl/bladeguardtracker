@@ -12,4 +12,8 @@ public class Session {
 	public static User getUser() {
 		return user;
 	}
+	
+	public static boolean hasUser() {
+		return user != null;
+	}
 }
