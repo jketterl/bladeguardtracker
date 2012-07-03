@@ -1,11 +1,13 @@
 package net.djmacgyver.bgt;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import net.djmacgyver.bgt.activity.GCMAccountNotification;
 import net.djmacgyver.bgt.activity.MainActivity;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -27,7 +29,11 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	@Override
 	protected void onError(Context context, String message) {
-		System.out.println(message);
+		if (message.equals("ACCOUNT_MISSING")) {
+			Intent i = new Intent(context, GCMAccountNotification.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			context.startActivity(i);
+		}
 	}
 
 	@Override
@@ -80,8 +86,26 @@ public class GCMIntentService extends GCMBaseIntentService {
 	}
 
 	@Override
-	protected void onUnregistered(Context arg0, String arg1) {
-		System.out.println("unregistered");
+	protected void onUnregistered(Context arg0, final String regId) {
+		ServiceConnection conn = new ServiceConnection() {
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+			}
+			
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				SocketService s = ((SocketService.LocalBinder) service).getService();
+				JSONObject data = new JSONObject();
+				try {
+					data.put("regId", regId);
+				} catch (JSONException e) {}
+				SocketCommand c = new SocketCommand("deleteRegistration", data);
+				s.getSharedConnection().sendCommand(c);
+				unbindService(this);
+			}
+		};
+		bindService(new Intent(this, SocketService.class), conn, BIND_AUTO_CREATE);
+		Log.v("GCM registration", "registered (id=\"" + regId + "\"");
 	}
 
 }

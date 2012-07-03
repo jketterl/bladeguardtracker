@@ -63,4 +63,7 @@
     <string name="update_weather">Hiermit wird eine Wetterbenachrichtigung an alle Benutzer geschickt.</string>
     <string name="map">Strecke</string>
     <string name="admin_panel">Admin-Seite</string>
+    <string name="registration_failed">Anmeldung beim Messaging Service fehlgeschlagen</string>
+    <string name="registration_failed_text">Die Anmeldung beim Google Cloud Messaging Dienst ist fehlgeschlagen, da auf Ihrem Gerät kein registriertes Google-Konto zur Verfügung steht. Um die Wetterentscheidung per Push auf Ihr Gerät zu bekommen zu können, benötigen Sie einen gültiges Google-Konto.</string>
+    <string name="account_settings">Konto-Einstellungen öffnen&#8230;</string>
 </resources>

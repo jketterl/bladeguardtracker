@@ -38,6 +38,7 @@
         </receiver>
         <service android:name="GCMIntentService"></service>
         <activity android:name=".activity.Admin"></activity>
+        <activity android:name=".activity.GCMAccountNotification"></activity>
 
     </application>
 </manifest>
