@@ -26,9 +26,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 	}
 
 	@Override
-	protected void onError(Context arg0, String arg1) {
-		// TODO Auto-generated method stub
-		
+	protected void onError(Context context, String message) {
+		System.out.println(message);
 	}
 
 	@Override
@@ -82,8 +81,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	@Override
 	protected void onUnregistered(Context arg0, String arg1) {
-		// TODO Auto-generated method stub
-		
+		System.out.println("unregistered");
 	}
 
 }
