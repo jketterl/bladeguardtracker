@@ -3,4 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/config" android:titleCondensed="@string/settings" android:title="@string/settings"></item>
     
+    <group android:id="@+id/adminGroup" android:visible="false"><item android:id="@+id/admin" android:title="@string/admin_panel" android:titleCondensed="@string/admin_panel"></item>
+    </group>
+    
 </menu>

@@ -4,6 +4,7 @@ import net.djmacgyver.bgt.GCMIntentService;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
+import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketCommand;
@@ -140,6 +141,7 @@ public class MainActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
+		menu.setGroupVisible(R.id.adminGroup, Session.getUser().isAdmin());
 		return true;
 	}
 

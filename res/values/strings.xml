@@ -65,4 +65,5 @@
     <string name="update_weather">This will send a weather notification to all users.</string>
     <string name="bladenight">Bladenight</string>
     <string name="map">Map</string>
+    <string name="admin_panel">Admin Panel</string>
 </resources>

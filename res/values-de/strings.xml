@@ -62,4 +62,5 @@
     <string name="enter_weather_decision">Wetterentscheidung aktualisieren</string>
     <string name="update_weather">Hiermit wird eine Wetterbenachrichtigung an alle Benutzer geschickt.</string>
     <string name="map">Strecke</string>
+    <string name="admin_panel">Admin-Seite</string>
 </resources>
