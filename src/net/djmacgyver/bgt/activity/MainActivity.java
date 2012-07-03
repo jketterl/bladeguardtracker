@@ -186,4 +186,10 @@ public class MainActivity extends Activity {
         bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
 		super.onResume();
 	}
+
+	@Override
+	protected void onDestroy() {
+		GCMRegistrar.onDestroy(this);
+		super.onDestroy();
+	}
 }
