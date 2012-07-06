@@ -15,7 +15,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.android.gcm.GCMBaseIntentService;
@@ -30,6 +32,9 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onError(Context context, String message) {
 		if (message.equals("ACCOUNT_MISSING")) {
+			SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
+			if (!p.getBoolean("showGCMNotification", true)) return;
+			
 			Intent i = new Intent(context, GCMAccountNotification.class);
 			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			context.startActivity(i);

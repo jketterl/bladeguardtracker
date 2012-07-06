@@ -21,6 +21,14 @@
         android:text="@string/registration_failed_text"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
+    <CheckBox
+        android:id="@+id/dontShowAgain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="10dip"
+        android:text="@string/dont_show_again" />
+
     <Button
         android:id="@+id/settingsButton"
         android:layout_width="match_parent"
