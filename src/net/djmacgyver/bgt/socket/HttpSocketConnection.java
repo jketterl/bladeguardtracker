@@ -23,6 +23,8 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources.NotFoundException;
 import android.location.Location;
 import android.preference.PreferenceManager;
@@ -177,7 +179,8 @@ public class HttpSocketConnection {
 							LinkedList<SocketCommand> q = queue;
 							queue = null;
 							
-							// first things first: send our authentication.
+							// first things first: send handshake & authentication.
+							sendHandshake();
 							authenticate();
 							
 							// send all queued commands
@@ -191,6 +194,7 @@ public class HttpSocketConnection {
 						// check whether this connection is eligible for disconnection
 						checkDisconnect();
 					}
+
 				}, null);
 				WebSocketClient.setTrustManagers(new TrustManager[]{
 						new X509TrustManager() {
@@ -263,6 +267,22 @@ public class HttpSocketConnection {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	private void sendHandshake() {
+		try {
+			JSONObject json = new JSONObject();
+			JSONObject handshake = new JSONObject();
+			handshake.put("platform", "android");
+			PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+			handshake.put("version", info.versionName);
+			json.put("handshake", handshake);
+			getSocket().send(json.toString());
+		} catch (JSONException e) {
+		} catch (NameNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public SocketCommand sendCommand(String command) {
