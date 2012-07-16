@@ -70,4 +70,6 @@
     <string name="registration_failed_text">The registration with the Google Cloud Messaging service failed, because there is no registered Google account available on your device. In order to be able receive push weather notifications you will need a valid google account.</string>
     <string name="account_settings">Open account settings&#8230;</string>
     <string name="dont_show_again">Don\'t show this message again</string>
+    <string name="enable_bridges">Enable bridges</string>
+    <string name="disable_bridges">Disable Bridges</string>
 </resources>

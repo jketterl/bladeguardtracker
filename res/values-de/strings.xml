@@ -67,4 +67,6 @@
     <string name="registration_failed_text">Die Anmeldung beim Google Cloud Messaging Dienst ist fehlgeschlagen, da auf Ihrem Gerät kein registriertes Google-Konto zur Verfügung steht. Um die Wetterentscheidung per Push auf Ihr Gerät zu bekommen zu können, benötigen Sie einen gültiges Google-Konto.</string>
     <string name="account_settings">Konto-Einstellungen öffnen&#8230;</string>
     <string name="dont_show_again">Nachricht nicht mehr anzeigen</string>
+    <string name="enable_bridges">Bridges einschalten</string>
+    <string name="disable_bridges">Bridges ausschalten</string>
 </resources>
