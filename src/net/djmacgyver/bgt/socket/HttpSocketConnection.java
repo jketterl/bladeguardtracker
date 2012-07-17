@@ -289,15 +289,22 @@ public class HttpSocketConnection {
 		return sendCommand(new SocketCommand(command));
 	}
 	
-	public SocketCommand sendCommand(SocketCommand command) {
-		if (queue != null) synchronized (queue) {
-			queue.add(command);
-			return command;
+	public SocketCommand sendCommand(SocketCommand command, boolean doQueue) {
+		if (queue != null) {
+			if (!doQueue) return command;
+			synchronized (queue) {
+				queue.add(command);
+				return command;
+			}
 		}
 		requests.put(requestCount, command);
 		command.setRequestId(requestCount++);
 		getSocket().send(command.getJson());
 		return command;
+	}
+	
+	public SocketCommand sendCommand(SocketCommand command) {
+		return sendCommand(command, true);
 	}
 
 	public void connect() {
@@ -358,11 +365,9 @@ public class HttpSocketConnection {
 				subscribed.add(categories[i]);
 			}
 			if (count == 0) return this;
-			if (queue == null) {
-				JSONObject data = new JSONObject();
-				data.put("category", cats);
-				sendCommand(new SocketCommand("subscribeUpdates", data));
-			}
+			JSONObject data = new JSONObject();
+			data.put("category", cats);
+			sendCommand(new SocketCommand("subscribeUpdates", data), false);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -383,11 +388,9 @@ public class HttpSocketConnection {
 				subscribed.remove(categories[i]);
 			}
 			if (count == 0) return this;
-			if (queue == null) {
-				JSONObject data = new JSONObject();
-				data.put("category", cats);
-				sendCommand(new SocketCommand("unSubscribeUpdates", data));
-			}
+			JSONObject data = new JSONObject();
+			data.put("category", cats);
+			sendCommand(new SocketCommand("unSubscribeUpdates", data), false);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
