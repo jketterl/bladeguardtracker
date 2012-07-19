@@ -49,9 +49,9 @@ public class RouteOverlay extends Overlay {
 		if (trackPaint == null) {
 			trackPaint = new Paint();
 			trackPaint.setAntiAlias(true);
-			trackPaint.setAlpha(64);
-			trackPaint.setStrokeWidth(6);
 			trackPaint.setColor(Color.rgb(255, 192, 0));
+			//trackPaint.setAlpha(192);
+			trackPaint.setStrokeWidth(6);
 		}
 		return trackPaint;
 	}
@@ -61,20 +61,33 @@ public class RouteOverlay extends Overlay {
 		super.draw(canvas, mapView, shadow);
 		if (points == null) return;
 
+		// if the current part of the map is occupied, draw it twice:
+		// once in highlighted, once in regular
+		int i = from;
 		Point previousPoint = null;
+		while (i != to) {
+			Point point = new Point();
+			mapView.getProjection().toPixels(points[i], point);
+			
+			if (previousPoint != null) {
+				canvas.drawLine(previousPoint.x, previousPoint.y, point.x, point.y, getTrackPaint());
+			}
+			previousPoint = point;
+			
+			i++;
+			if (i >= points.length) i = 0;
+		}
 		
-		for (int i = 0; i < points.length; i++) {
+		previousPoint = null;
+		for (i = 0; i < points.length; i++) {
 			Point point = new Point();
 			mapView.getProjection().toPixels(points[i], point);
 			if (previousPoint != null) {
-				// if the current part of the map is occupied, draw it twice:
-				// once in highlighted, once in regular
-				if (i >= from && i <= to)
-					canvas.drawLine(previousPoint.x, previousPoint.y, point.x, point.y, getTrackPaint());
 				canvas.drawLine(previousPoint.x, previousPoint.y, point.x, point.y, getRegularPaint());
 			}
 			previousPoint = point;
 		}
+
 	}
 	
 	public void setBetween(int from, int to) {
