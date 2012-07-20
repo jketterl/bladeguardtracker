@@ -276,6 +276,7 @@ public class HttpSocketConnection {
 			handshake.put("platform", "android");
 			PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
 			handshake.put("version", info.versionName);
+			handshake.put("build", info.versionCode);
 			json.put("handshake", handshake);
 			getSocket().send(json.toString());
 		} catch (JSONException e) {
