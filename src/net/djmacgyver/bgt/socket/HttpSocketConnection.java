@@ -262,7 +262,7 @@ public class HttpSocketConnection {
 					}
 				}
 			});
-			return sendCommand(command);
+			return sendCommand(command, false, true);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -289,8 +289,8 @@ public class HttpSocketConnection {
 		return sendCommand(new SocketCommand(command));
 	}
 	
-	public SocketCommand sendCommand(SocketCommand command, boolean doQueue) {
-		if (queue != null) {
+	protected SocketCommand sendCommand(SocketCommand command, boolean doQueue, boolean bypassQueue) {
+		if (queue != null && !bypassQueue) {
 			if (!doQueue) return command;
 			synchronized (queue) {
 				queue.add(command);
@@ -301,6 +301,10 @@ public class HttpSocketConnection {
 		command.setRequestId(requestCount++);
 		getSocket().send(command.getJson());
 		return command;
+	}
+	
+	public SocketCommand sendCommand(SocketCommand command, boolean doQueue) {
+		return sendCommand(command, doQueue, false);
 	}
 	
 	public SocketCommand sendCommand(SocketCommand command) {
