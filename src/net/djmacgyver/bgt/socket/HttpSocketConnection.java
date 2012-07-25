@@ -175,16 +175,21 @@ public class HttpSocketConnection {
 						System.out.println("connected");
 						
 						synchronized (queue) {
-							// get the current queue
-							LinkedList<SocketCommand> q = queue;
-							queue = null;
-							
 							// first things first: send handshake & authentication.
 							sendHandshake();
-							authenticate();
+							SocketCommand auth = authenticate();
+							auth.addCallback(new Runnable() {
+								@Override
+								public void run() {
+									// get the current queue
+									LinkedList<SocketCommand> q = queue;
+									queue = null;
+									
+									// send all queued commands
+									while (!q.isEmpty()) sendCommand(q.poll());
+								}
+							});
 							
-							// send all queued commands
-							while (!q.isEmpty()) sendCommand(q.poll());
 						}
 						
 						sendSubscriptions();
