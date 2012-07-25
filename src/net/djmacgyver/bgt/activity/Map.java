@@ -21,6 +21,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -133,7 +135,8 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	public UserOverlay getUserOverlay()
 	{
 		if (users == null) {
-	    	Drawable d = this.getResources().getDrawable(R.drawable.map_pin);
+	    	Drawable d = this.getResources().getDrawable(R.drawable.pin);
+	    	d.setColorFilter(Color.rgb(255, 100, 0), Mode.DST);
 	    	users = new UserOverlay(d, this);
 		}
 		return users;
