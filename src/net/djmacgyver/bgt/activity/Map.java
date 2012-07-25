@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -136,7 +138,12 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	{
 		if (users == null) {
 	    	Drawable d = this.getResources().getDrawable(R.drawable.pin);
-	    	d.setColorFilter(Color.rgb(255, 100, 0), Mode.DST);
+	    	d.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(new float[]{
+	    		2,0,0,0,0,
+	    		0,1,0,0,0,
+	    		0,0,0,0,0,
+	    		0,0,0,1,0
+	    	})));
 	    	users = new UserOverlay(d, this);
 		}
 		return users;
