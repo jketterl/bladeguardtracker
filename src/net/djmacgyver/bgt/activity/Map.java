@@ -140,7 +140,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	    	Drawable d = this.getResources().getDrawable(R.drawable.pin);
 	    	d.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(new float[]{
 	    		2,0,0,0,0,
-	    		0,1,0,0,0,
+	    		0,(float)110/127,0,0,0,
 	    		0,0,0,0,0,
 	    		0,0,0,1,0
 	    	})));
