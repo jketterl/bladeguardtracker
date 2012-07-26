@@ -21,10 +21,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -134,21 +132,6 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		return route;
 	}
 	
-	public UserOverlay getUserOverlay()
-	{
-		if (users == null) {
-	    	Drawable d = this.getResources().getDrawable(R.drawable.pin);
-	    	d.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(new float[]{
-	    		2,0,0,0,0,
-	    		0,(float)110/127,0,0,0,
-	    		0,0,0,0,0,
-	    		0,0,0,1,0
-	    	})));
-	    	users = new UserOverlay(d, this);
-		}
-		return users;
-	}
-	
 	private MyLocationOverlay getLocationOverlay() {
 		return myLoc;
 	}
@@ -196,7 +179,6 @@ public class Map extends MapActivity implements KeepAliveTarget {
     	getMap().setBuiltInZoomControls(true);
     	
     	getMap().getOverlays().add(getRoute());
-    	getMap().getOverlays().add(getUserOverlay());
 
         bindService(new Intent(this, GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
         bound = true;
@@ -269,7 +251,6 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	public void onConnect() {
 		socket.addListener(listener);
 		socket.subscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
-		getUserOverlay().reset();
 		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) removeDialog(Map.DIALOG_CONNECTING);
 	}
 	
