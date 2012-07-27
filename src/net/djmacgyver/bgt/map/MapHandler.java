@@ -1,8 +1,6 @@
 package net.djmacgyver.bgt.map;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Iterator;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.Map;
@@ -11,8 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -21,34 +17,26 @@ import com.google.android.maps.GeoPoint;
 
 public class MapHandler extends Handler {
 	private Map map;
-	
-	private float color = 0;
-	private HashMap<String, UserOverlay> overlays = new HashMap<String, UserOverlay>();
+	private UserOverlay userOverlay;
 	
 	public MapHandler(Map map) {
 		this.map = map;
 	}
-	
-	private float getColor(String team) {
-		float nextColor = color;
-		color += 20f;
-		return nextColor;
-	}
-	
+
+	/*
 	private Drawable getDrawable(String team) {
     	Drawable d = map.getResources().getDrawable(R.drawable.map_pin).mutate();
     	d.setColorFilter(new ColorMatrixColorFilter(new HSVManipulationMatrix(getColor(team))));
     	return d;
 	}
+	*/
 	
-	private UserOverlay getOverlay(String team) {
-		if (!overlays.containsKey(team)) {
-	    	UserOverlay overlay = new UserOverlay(getDrawable(team), map);
-			overlays.put(team, overlay);
-			map.getMap().getOverlays().add(overlay);
-			return overlay;
+	private UserOverlay getUserOverlay() {
+		if (userOverlay == null) {
+			userOverlay = new UserOverlay(map.getResources().getDrawable(R.drawable.pin), map);
+			map.getMap().getOverlays().add(userOverlay);
 		}
-		return overlays.get(team);
+		return userOverlay;
 	}
 	
 	@Override
@@ -131,8 +119,7 @@ public class MapHandler extends Handler {
 		JSONArray quits = data.getJSONArray("quit");
 		for (int i = 0; i < quits.length(); i++) {
 			int userId = quits.getJSONObject(i).getJSONObject("user").getInt("id");
-			Iterator<UserOverlay> it = overlays.values().iterator();
-			while (it.hasNext()) it.next().removeUser(userId);
+			getUserOverlay().removeUser(userId);
 		}
 	}
 
@@ -150,13 +137,12 @@ public class MapHandler extends Handler {
 			GeoPoint point = new GeoPoint(lat, lon);
 			int userId = user.getInt("id");
 			String team = user.getString("team");
-			UserOverlay overlay = getOverlay(team);
-			UserOverlayItem o = getOverlay(team).getUser(userId);
+			UserOverlayItem o = getUserOverlay().getUser(userId);
 			if (o != null) {
 				o.setPoint(point);
 			} else {
 				String userName = user.getString("name");
-				overlay.addUser(new UserOverlayItem(point, userId, userName, team));
+				getUserOverlay().addUser(new UserOverlayItem(point, userId, userName, team));
 			}
 		}
 	}
