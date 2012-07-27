@@ -178,7 +178,7 @@ public class HttpSocketConnection {
 							// first things first: send handshake & authentication.
 							sendHandshake();
 							SocketCommand auth = authenticate();
-							auth.addCallback(new Runnable() {
+							Runnable r = new Runnable() {
 								@Override
 								public void run() {
 									// get the current queue
@@ -188,8 +188,8 @@ public class HttpSocketConnection {
 									// send all queued commands
 									while (!q.isEmpty()) sendCommand(q.poll());
 								}
-							});
-							
+							};
+							if (auth != null) auth.addCallback(r); else r.run();
 						}
 						
 						sendSubscriptions();
