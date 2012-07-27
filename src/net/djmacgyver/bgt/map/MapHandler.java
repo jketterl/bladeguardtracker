@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.Map;
+import net.djmacgyver.bgt.socket.HttpSocketListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,7 +16,7 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
-public class MapHandler extends Handler {
+public class MapHandler extends Handler implements HttpSocketListener {
 	private Map map;
 	private UserOverlay userOverlay;
 	
@@ -23,15 +24,7 @@ public class MapHandler extends Handler {
 		this.map = map;
 	}
 
-	/*
-	private Drawable getDrawable(String team) {
-    	Drawable d = map.getResources().getDrawable(R.drawable.map_pin).mutate();
-    	d.setColorFilter(new ColorMatrixColorFilter(new HSVManipulationMatrix(getColor(team))));
-    	return d;
-	}
-	*/
-	
-	private UserOverlay getUserOverlay() {
+	public UserOverlay getUserOverlay() {
 		if (userOverlay == null) {
 			userOverlay = new UserOverlay(map.getResources().getDrawable(R.drawable.pin), map);
 			map.getMap().getOverlays().add(userOverlay);
@@ -142,8 +135,26 @@ public class MapHandler extends Handler {
 				o.setPoint(point);
 			} else {
 				String userName = user.getString("name");
-				getUserOverlay().addUser(new UserOverlayItem(point, userId, userName, team));
+				getUserOverlay().addUser(new UserOverlayItem(point, userId, userName, team, map));
 			}
 		}
+	}
+
+	@Override
+	public void receiveUpdate(JSONObject data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void receiveCommand(String command, JSONObject data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void receiveStateChange(int newState) {
+		// TODO Auto-generated method stub
+		
 	}
 }

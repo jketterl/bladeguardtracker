@@ -6,7 +6,6 @@ import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.map.MapHandler;
 import net.djmacgyver.bgt.map.RouteOverlay;
-import net.djmacgyver.bgt.map.UserOverlay;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
@@ -21,9 +20,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -38,7 +34,6 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 
 public class Map extends MapActivity implements KeepAliveTarget {
-	private UserOverlay users;
 	private MyLocationOverlay myLoc;
 	private KeepAliveThread refresher;
 	private RouteOverlay route;
@@ -250,6 +245,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	
 	public void onConnect() {
 		socket.addListener(listener);
+		socket.addListener(handler);
 		socket.subscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
 		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) removeDialog(Map.DIALOG_CONNECTING);
 	}
