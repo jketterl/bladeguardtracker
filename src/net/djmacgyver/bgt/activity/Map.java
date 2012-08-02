@@ -21,10 +21,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -56,6 +54,10 @@ public class Map extends MapActivity implements KeepAliveTarget {
 				removeDialog(DIALOG_CONNECTING);
 			} else {
 				showDialog(DIALOG_CONNECTING);
+				getUserOverlay().reset();
+				getLengthTextView().setText("n/a");
+				getSpeedTextView().setText("n/a");
+				getCycleTimeTextView().setText("n/a");
 			}
 		}
 	};
