@@ -12,14 +12,14 @@ import android.graphics.drawable.Drawable;
 public class Team {
 	private static Team[] teams = new Team[7];
 	private static Team anonymousTeam;
-	private static float[] teamColors = {
-		-40,
-		0,
-		95,
-		-171,
-		-106,
-		22,
-		145
+	private static float[][] teamColors = {
+		{-30,  .8f},
+		{0,    1},
+		{95,   1},
+		{165,  1},
+		{-106, 1},
+		{22,   1},
+		{-171, .8f}
 	};
 	
 	private String name;
@@ -39,7 +39,8 @@ public class Team {
 		if (teams[teamId -1] != null) return teams[teamId];
 		
 		Drawable d = context.getResources().getDrawable(R.drawable.pin_common).mutate();
-    	d.setColorFilter(new ColorMatrixColorFilter(new HSVManipulationMatrix(teamColors[teamId - 1])));
+		float[] colors = teamColors[teamId - 1];
+    	d.setColorFilter(new ColorMatrixColorFilter(new HSVManipulationMatrix(colors[0], colors[1])));
     	d.setBounds(d.getIntrinsicWidth() / -2, d.getIntrinsicWidth() / -2, d.getIntrinsicWidth() / 2, d.getIntrinsicHeight() / 2);
     	
 		Team team = new Team(name, d);
@@ -50,8 +51,9 @@ public class Team {
 	public static Team getAnonymousTeam(Context context)
 	{
 		if (anonymousTeam == null) {
-			Drawable d = context.getResources().getDrawable(R.drawable.pin);
+			Drawable d = context.getResources().getDrawable(R.drawable.pin).mutate();
 	    	d.setBounds(d.getIntrinsicWidth() / -2, d.getIntrinsicWidth() / -2, d.getIntrinsicWidth() / 2, d.getIntrinsicHeight() / 2);
+	    	d.setAlpha(127);
 			anonymousTeam = new Team("anonymous", d);
 		}
 		return anonymousTeam;
