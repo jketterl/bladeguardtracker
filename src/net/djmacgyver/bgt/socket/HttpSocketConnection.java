@@ -45,6 +45,7 @@ public class HttpSocketConnection {
 	private LinkedList<SocketCommand> queue;
 	private ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
 	private ArrayList<String> subscribed = new ArrayList<String>();
+	private SocketCommand authentication;
 	
 	private int state = STATE_DISCONNECTED;
 	
@@ -149,6 +150,9 @@ public class HttpSocketConnection {
 						// invalidate this handler 
 						valid = false;
 						
+						// invalidate authentication (must be re-sent on the next connect)
+						authentication = null;
+						
 						// send state updates
 						setState(STATE_DISCONNECTED);
 						socket = null;
@@ -177,7 +181,7 @@ public class HttpSocketConnection {
 						synchronized (queue) {
 							// first things first: send handshake & authentication.
 							sendHandshake();
-							SocketCommand auth = authenticate();
+							authentication = authenticate();
 							Runnable r = new Runnable() {
 								@Override
 								public void run() {
@@ -189,7 +193,7 @@ public class HttpSocketConnection {
 									while (!q.isEmpty()) sendCommand(q.poll());
 								}
 							};
-							if (auth != null) auth.addCallback(r); else r.run();
+							if (authentication != null) authentication.addCallback(r); else r.run();
 						}
 						
 						sendSubscriptions();
@@ -244,34 +248,41 @@ public class HttpSocketConnection {
 		}
 		requests.clear();
 	}
-
-	public SocketCommand authenticate() {
-		Session.setUser(null);
-		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
-		if (p.getBoolean("anonymous", true)) return null;
-		try {
-			// send our authentication data as soon as we are connected
-			JSONObject data = new JSONObject();
-			data.put("user", p.getString("username", ""));
-			data.put("pass", p.getString("password", ""));
-			final SocketCommand command = new SocketCommand("auth", data);
-			command.addCallback(new Runnable() {
-				@Override
-				public void run() {
-					if (command.wasSuccessful()) {
-						try {
-							Session.setUser(new User(command.getResponseData().getJSONObject(0)));
-						} catch (JSONException e) {
-							e.printStackTrace();
+	
+	public SocketCommand getAuthentication(){
+		if (authentication == null) {
+			Session.setUser(null);
+			SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
+			if (p.getBoolean("anonymous", true)) return null;
+			try {
+				// send our authentication data as soon as we are connected
+				JSONObject data = new JSONObject();
+				data.put("user", p.getString("username", ""));
+				data.put("pass", p.getString("password", ""));
+				authentication = new SocketCommand("auth", data);
+				authentication.addCallback(new Runnable() {
+					@Override
+					public void run() {
+						if (authentication.wasSuccessful()) {
+							try {
+								Session.setUser(new User(authentication.getResponseData().getJSONObject(0)));
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
 						}
 					}
-				}
-			});
-			return sendCommand(command, false, true);
-		} catch (JSONException e) {
-			e.printStackTrace();
+				});
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
-		return null;
+		return authentication;
+	}
+
+	protected SocketCommand authenticate() {
+		SocketCommand auth = getAuthentication();
+		if (auth == null) return null;
+		return sendCommand(auth, false, true);
 	}
 	
 	private void sendHandshake() {

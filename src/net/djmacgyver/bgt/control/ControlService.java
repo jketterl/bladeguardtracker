@@ -58,6 +58,7 @@ public class ControlService extends Service implements HttpSocketListener {
 
 	@Override
 	public void onDestroy() {
+		shutdown();
 		System.out.println("ControlService destroyed");
 	}
 	
@@ -79,7 +80,7 @@ public class ControlService extends Service implements HttpSocketListener {
 			public void run() {
 				if (command.wasSuccessful()) return;
 				Log.e("ControlService", "Server did not accept control connection; error: " + command.getResponseData());
-				shutdown();
+				stopSelf();
 			}
 		});
 		socket.sendCommand(command);
@@ -98,7 +99,6 @@ public class ControlService extends Service implements HttpSocketListener {
 		stopTracking();
 		conn.s.removeStake(this);
 		unbindService(conn);
-		stopSelf();
 	}
 	
 	private boolean trackingEnabled = false;
@@ -134,6 +134,7 @@ public class ControlService extends Service implements HttpSocketListener {
 				GPSTrackingService l = ((GPSTrackingService.LocalBinder) service).getService();
 				l.disable();
 				unbindService(this);
+				stopService(new Intent(getApplicationContext(), GPSTrackingService.class));
 			}
 		};
 		bindService(new Intent(getApplicationContext(), GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
@@ -144,7 +145,7 @@ public class ControlService extends Service implements HttpSocketListener {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		event = (Event) intent.getExtras().getParcelable("event");
 		bindService(new Intent(getApplicationContext(), SocketService.class), conn, Context.BIND_AUTO_CREATE);
-		return START_NOT_STICKY;
+		return START_STICKY;
 	}
 	
 	@Override
@@ -155,7 +156,7 @@ public class ControlService extends Service implements HttpSocketListener {
 	public void receiveCommand(String command, JSONObject data) {
 		System.out.println("received command: " + command);
 		if (command.equals("shutdown")) {
-			shutdown();
+			stopSelf();
 			return;
 		}
 		if (command.equals("disableGPS")) {
@@ -171,6 +172,12 @@ public class ControlService extends Service implements HttpSocketListener {
 
 	@Override
 	public void receiveStateChange(int newState) {
-		if (newState == HttpSocketConnection.STATE_CONNECTED) enableControlSession();
+		if (newState == HttpSocketConnection.STATE_CONNECTED) {
+			enableControlSession();
+		} else {
+			// stop the tracking if there is no socket connection available. there's no need to track
+			// when the server is gone :)
+			stopTracking();
+		}
 	}
 }
