@@ -146,19 +146,7 @@ public class EventDetail extends Activity {
 						i.putExtra("event", event);
 						startService(i);
 					} else {
-						ServiceConnection conn = new ServiceConnection() {
-							@Override
-							public void onServiceDisconnected(ComponentName name) {
-							}
-							
-							@Override
-							public void onServiceConnected(ComponentName name, IBinder service) {
-								ControlService s = ((ControlService.LocalBinder) service).getService();
-								s.shutdown();
-								unbindService(this);
-							}
-						};
-						bindService(new Intent(EventDetail.this, ControlService.class), conn, Context.BIND_AUTO_CREATE);
+						stopService(new Intent(EventDetail.this, ControlService.class));
 					}
 				} else {
 					AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
