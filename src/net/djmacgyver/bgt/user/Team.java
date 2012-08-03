@@ -43,7 +43,7 @@ public class Team {
 		if (!m.find()) return getAnonymousTeam(context);
 		int teamId = Integer.valueOf(m.group(0));
 		if (teamId > teams.length) return getAnonymousTeam(context);
-		if (teams[teamId -1] != null) return teams[teamId];
+		if (teams[teamId -1] != null) return teams[teamId - 1];
 		
 		Drawable d = context.getResources().getDrawable(R.drawable.pin_common).mutate();
 		float[] colors = teamColors[teamId - 1];
