@@ -13,14 +13,20 @@ public class Team {
 	private static Team[] teams = new Team[7];
 	private static Team anonymousTeam;
 	private static float[][] teamColors = {
-		{-30,  .8f},
-		{0,    1},
-		{95,   1},
-		{165,  1},
-		{-106, 1},
+		// Team 1 gets a nice red
+		{15, 2, 1},
+		// Team 2 gets the original png color, kind of orange
+		{0,    1,    1},
+		// Team 3 gets deep purple
+		{109,  1.4f,   .5f},
+		// Team 4 is bright blue
+		{165,  1,    1.1f},
+		// Team 5 is bright green
+		{-106, 1,    1.1f},
 		// Team 6 wishes to be blue
-		{-171, .8f},
-		{22,   1}
+		{170, 1.6f, .6f},
+		// Team 7 is yellow
+		{-37,   2.2f,    1}
 	};
 	
 	private String name;
@@ -41,7 +47,7 @@ public class Team {
 		
 		Drawable d = context.getResources().getDrawable(R.drawable.pin_common).mutate();
 		float[] colors = teamColors[teamId - 1];
-    	d.setColorFilter(new ColorMatrixColorFilter(new HSVManipulationMatrix(colors[0], colors[1])));
+    	d.setColorFilter(new ColorMatrixColorFilter(new HSVManipulationMatrix(colors[0], colors[1], colors[2])));
     	d.setBounds(d.getIntrinsicWidth() / -2, d.getIntrinsicWidth() / -2, d.getIntrinsicWidth() / 2, d.getIntrinsicHeight() / 2);
     	
 		Team team = new Team(name, d);
