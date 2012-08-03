@@ -18,8 +18,9 @@ public class Team {
 		{95,   1},
 		{165,  1},
 		{-106, 1},
-		{22,   1},
-		{-171, .8f}
+		// Team 6 wishes to be blue
+		{-171, .8f},
+		{22,   1}
 	};
 	
 	private String name;
