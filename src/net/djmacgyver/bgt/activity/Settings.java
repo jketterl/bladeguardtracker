@@ -37,7 +37,7 @@ public class Settings extends PreferenceActivity {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			SocketService sockService = ((SocketService.LocalBinder) service).getService();
-			final SocketCommand command = sockService.getSharedConnection().authenticate();
+			final SocketCommand command = sockService.getSharedConnection().getAuthentication();
 			if (command != null) command.addCallback(new Runnable() {
 				@Override
 				public void run() {
