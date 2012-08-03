@@ -281,7 +281,6 @@ public class HttpSocketConnection {
 
 	protected SocketCommand authenticate() {
 		SocketCommand auth = getAuthentication();
-		System.out.println("authentication? " + (auth != null ? "yes" : "no"));
 		if (auth == null) return null;
 		return sendCommand(auth, false, true);
 	}
