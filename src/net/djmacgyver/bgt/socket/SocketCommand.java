@@ -81,6 +81,7 @@ public class SocketCommand {
 	private void runCallbacks() {
 		Iterator<Runnable> i = callbacks.iterator();
 		while (i.hasNext()) i.next().run();
+		callbacks = null;
 	}
 	
 	public boolean wasSuccessful()
@@ -94,6 +95,10 @@ public class SocketCommand {
 	}
 
 	public void addCallback(Runnable callback) {
-		callbacks.add(callback);
+		if (callbacks != null) {
+			callbacks.add(callback);
+		} else {
+			callback.run();
+		}
 	}
 }
