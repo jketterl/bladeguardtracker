@@ -150,7 +150,6 @@ public class HybiParser {
         }
 
         if (FRAGMENTED_OPCODES.contains(mOpcode) && !mFinal) {
-        	Log.d("error", "opcode: " + mOpcode);
             throw new ProtocolError("Expected non-final packet");
         }
 
