@@ -88,7 +88,7 @@ public class HybiParser {
     );
 
     private static final List<Integer> FRAGMENTED_OPCODES = Arrays.asList(
-        OP_CONTINUATION, OP_TEXT, OP_BINARY
+        OP_CONTINUATION/*, OP_TEXT, OP_BINARY*/
     );
 
     public HybiParser(WebSocketClient client) {
@@ -150,6 +150,7 @@ public class HybiParser {
         }
 
         if (FRAGMENTED_OPCODES.contains(mOpcode) && !mFinal) {
+        	Log.d("error", "opcode: " + mOpcode);
             throw new ProtocolError("Expected non-final packet");
         }
 
