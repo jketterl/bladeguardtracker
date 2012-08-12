@@ -72,4 +72,5 @@
     <string name="dont_show_again">Don\'t show this message again</string>
     <string name="enable_bridges">Enable bridges</string>
     <string name="disable_bridges">Disable Bridges</string>
+    <string name="change_password">Change password</string>
 </resources>

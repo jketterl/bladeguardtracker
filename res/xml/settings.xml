@@ -29,11 +29,12 @@
 
         <Preference android:dependency="anonymous" android:key="team" android:title="@string/team"/>
 
-        <Preference
+        <Preference android:key="change_password" android:title="@string/change_password" android:dependency="@string/anonymous"/><Preference
             android:dependency="anonymous"
             android:key="signup"
             android:title="@string/signup" >
         </Preference>
+        
     </PreferenceCategory>
 
 </PreferenceScreen>

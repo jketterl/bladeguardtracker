@@ -69,4 +69,5 @@
     <string name="dont_show_again">Nachricht nicht mehr anzeigen</string>
     <string name="enable_bridges">Bridges einschalten</string>
     <string name="disable_bridges">Bridges ausschalten</string>
+    <string name="change_passwords">Passwort ändern</string>
 </resources>
