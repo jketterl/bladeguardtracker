@@ -88,7 +88,7 @@ public class HybiParser {
     );
 
     private static final List<Integer> FRAGMENTED_OPCODES = Arrays.asList(
-        OP_CONTINUATION, OP_TEXT, OP_BINARY
+        OP_CONTINUATION/*, OP_TEXT, OP_BINARY*/
     );
 
     public HybiParser(WebSocketClient client) {
