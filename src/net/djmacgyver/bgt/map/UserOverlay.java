@@ -187,7 +187,8 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> implements Use
 	@Override
 	protected boolean onTap(int index) {
 		displayBubble(getItem(index));
-		return super.onTap(index);
+		return true;
+		//return super.onTap(index);
 	}
 	
 	@Override

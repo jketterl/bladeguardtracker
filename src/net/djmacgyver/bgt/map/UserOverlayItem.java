@@ -3,6 +3,10 @@ package net.djmacgyver.bgt.map;
 import java.util.Iterator;
 import java.util.Vector;
 
+import net.djmacgyver.bgt.user.Team;
+
+import android.content.Context;
+
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.OverlayItem;
 
@@ -11,10 +15,13 @@ public class UserOverlayItem extends OverlayItem {
 	private int userId;
 	private Vector<UserOverlayItemListener> listeners = new Vector<UserOverlayItemListener>();
 	
-	public UserOverlayItem(GeoPoint point, int userId, String username, String team) {
-		super(point, username, team);
+	public UserOverlayItem(GeoPoint point, int userId, String username, String teamName, Context context) {
+		super(point, username, teamName);
 		this.point = point;
 		this.userId = userId;
+		
+		Team team = Team.getTeam(teamName, context);
+		this.setMarker(team.getPin());
 	}
 	
 	public void setPoint(GeoPoint point) {

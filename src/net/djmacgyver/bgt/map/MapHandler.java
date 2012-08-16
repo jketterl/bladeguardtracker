@@ -2,7 +2,9 @@ package net.djmacgyver.bgt.map;
 
 import java.text.DecimalFormat;
 
+import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.Map;
+import net.djmacgyver.bgt.socket.HttpSocketListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,11 +16,20 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
-public class MapHandler extends Handler {
+public class MapHandler extends Handler implements HttpSocketListener {
 	private Map map;
+	private UserOverlay userOverlay;
 	
 	public MapHandler(Map map) {
 		this.map = map;
+	}
+
+	public UserOverlay getUserOverlay() {
+		if (userOverlay == null) {
+			userOverlay = new UserOverlay(map.getResources().getDrawable(R.drawable.pin), map);
+			map.getMap().getOverlays().add(userOverlay);
+		}
+		return userOverlay;
 	}
 	
 	@Override
@@ -101,7 +112,7 @@ public class MapHandler extends Handler {
 		JSONArray quits = data.getJSONArray("quit");
 		for (int i = 0; i < quits.length(); i++) {
 			int userId = quits.getJSONObject(i).getJSONObject("user").getInt("id");
-			map.getUserOverlay().removeUser(userId);
+			getUserOverlay().removeUser(userId);
 		}
 	}
 
@@ -118,14 +129,32 @@ public class MapHandler extends Handler {
 				lon = (int) (location.getDouble("lon") * 1E6);
 			GeoPoint point = new GeoPoint(lat, lon);
 			int userId = user.getInt("id");
-			UserOverlayItem o = map.getUserOverlay().getUser(userId);
+			String team = user.getString("team");
+			UserOverlayItem o = getUserOverlay().getUser(userId);
 			if (o != null) {
 				o.setPoint(point);
 			} else {
 				String userName = user.getString("name");
-				String team = user.getString("team");
-				map.getUserOverlay().addUser(new UserOverlayItem(point, userId, userName, team));
+				getUserOverlay().addUser(new UserOverlayItem(point, userId, userName, team, map));
 			}
 		}
+	}
+
+	@Override
+	public void receiveUpdate(JSONObject data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void receiveCommand(String command, JSONObject data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void receiveStateChange(int newState) {
+		// TODO Auto-generated method stub
+		
 	}
 }

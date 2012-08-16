@@ -61,21 +61,24 @@ public class RouteOverlay extends Overlay {
 		super.draw(canvas, mapView, shadow);
 		if (points == null) return;
 
-		// if the current part of the map is occupied, draw it twice:
-		// once in highlighted, once in regular
-		int i = from;
 		Point previousPoint = null;
-		while (i != to) {
-			Point point = new Point();
-			mapView.getProjection().toPixels(points[i], point);
-			
-			if (previousPoint != null) {
-				canvas.drawLine(previousPoint.x, previousPoint.y, point.x, point.y, getTrackPaint());
+		int length = points.length;
+		int i = from;
+		if (from >= 0 && to >= 0 && from < length && to < length) {
+			// if the current part of the map is occupied, draw it twice:
+			// once in highlighted, once in regular
+			while (i != to) {
+				Point point = new Point();
+				mapView.getProjection().toPixels(points[i], point);
+				
+				if (previousPoint != null) {
+					canvas.drawLine(previousPoint.x, previousPoint.y, point.x, point.y, getTrackPaint());
+				}
+				previousPoint = point;
+				
+				i++;
+				if (i >= length) i = 0;
 			}
-			previousPoint = point;
-			
-			i++;
-			if (i >= points.length) i = 0;
 		}
 		
 		previousPoint = null;

@@ -6,7 +6,6 @@ import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.map.MapHandler;
 import net.djmacgyver.bgt.map.RouteOverlay;
-import net.djmacgyver.bgt.map.UserOverlay;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
@@ -38,7 +37,6 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 
 public class Map extends MapActivity implements KeepAliveTarget {
-	private UserOverlay users;
 	private MyLocationOverlay myLoc;
 	private KeepAliveThread refresher;
 	private RouteOverlay route;
@@ -54,7 +52,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 				removeDialog(DIALOG_CONNECTING);
 			} else {
 				showDialog(DIALOG_CONNECTING);
-				getUserOverlay().reset();
+				handler.getUserOverlay().reset();
 				getLengthTextView().setText("n/a");
 				getSpeedTextView().setText("n/a");
 				getCycleTimeTextView().setText("n/a");
@@ -136,21 +134,6 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		return route;
 	}
 	
-	public UserOverlay getUserOverlay()
-	{
-		if (users == null) {
-	    	Drawable d = this.getResources().getDrawable(R.drawable.pin);
-	    	d.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(new float[]{
-	    		2,0,0,0,0,
-	    		0,(float)110/127,0,0,0,
-	    		0,0,0,0,0,
-	    		0,0,0,1,0
-	    	})));
-	    	users = new UserOverlay(d, this);
-		}
-		return users;
-	}
-	
 	private MyLocationOverlay getLocationOverlay() {
 		return myLoc;
 	}
@@ -198,7 +181,6 @@ public class Map extends MapActivity implements KeepAliveTarget {
     	getMap().setBuiltInZoomControls(true);
     	
     	getMap().getOverlays().add(getRoute());
-    	getMap().getOverlays().add(getUserOverlay());
 
         bindService(new Intent(this, GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
         bound = true;
@@ -270,8 +252,8 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	
 	public void onConnect() {
 		socket.addListener(listener);
+		socket.addListener(handler);
 		socket.subscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
-		getUserOverlay().reset();
 		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) removeDialog(Map.DIALOG_CONNECTING);
 	}
 	
