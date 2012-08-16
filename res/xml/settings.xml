@@ -29,7 +29,7 @@
 
         <Preference android:dependency="anonymous" android:key="team" android:title="@string/team"/>
 
-        <!-- <Preference android:key="change_password" android:title="@string/change_password" android:dependency="anonymous"/> -->
+        <Preference android:key="change_password" android:title="@string/change_password" android:dependency="anonymous"/>
         
         <Preference
             android:dependency="anonymous"
