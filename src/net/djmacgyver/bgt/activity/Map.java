@@ -20,9 +20,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -222,10 +219,13 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		if (hasLocationOverlay()) getLocationOverlay().disableMyLocation();
 		getRefresher().terminate();
 		this.refresher = null;
-		socket.unSubscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
-		socket.removeListener(listener);
-		sockService.removeStake(this);
-		unbindService(sconn);
+		
+		if (socket != null) {
+			socket.unSubscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
+			socket.removeListener(listener);
+			sockService.removeStake(this);
+			unbindService(sconn);
+		}
 	}
 
 	@Override
