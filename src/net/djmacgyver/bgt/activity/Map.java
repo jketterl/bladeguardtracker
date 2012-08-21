@@ -221,7 +221,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		this.refresher = null;
 		
 		if (socket != null) {
-			socket.unSubscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
+			handler.disable();
 			socket.removeListener(listener);
 			sockService.removeStake(this);
 			unbindService(sconn);
@@ -252,8 +252,8 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	
 	public void onConnect() {
 		socket.addListener(listener);
-		socket.addListener(handler);
-		socket.subscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
+		handler.setSocket(socket);
+		handler.enable();
 		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) removeDialog(Map.DIALOG_CONNECTING);
 	}
 	

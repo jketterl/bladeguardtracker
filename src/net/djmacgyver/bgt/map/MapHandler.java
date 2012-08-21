@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.Map;
+import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 
 import org.json.JSONArray;
@@ -19,6 +20,7 @@ import com.google.android.maps.GeoPoint;
 public class MapHandler extends Handler implements HttpSocketListener {
 	private Map map;
 	private UserOverlay userOverlay;
+	private HttpSocketConnection socket;
 	
 	public MapHandler(Map map) {
 		this.map = map;
@@ -156,5 +158,22 @@ public class MapHandler extends Handler implements HttpSocketListener {
 	public void receiveStateChange(int newState) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void setSocket(HttpSocketConnection socket) {
+		this.socket = socket;
+		socket.addListener(this);
+	}
+	
+	public void enable() {
+		socket.subscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
+	}
+	
+	public void disable() {
+		socket.unSubscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
+		getUserOverlay().reset();
+		map.getLengthTextView().setText("n/a");
+		map.getSpeedTextView().setText("n/a");
+		map.getCycleTimeTextView().setText("n/a");
 	}
 }
