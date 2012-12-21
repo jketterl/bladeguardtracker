@@ -6,6 +6,7 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.Map;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
+import net.djmacgyver.bgt.socket.SocketCommand;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -166,7 +167,19 @@ public class MapHandler extends Handler implements HttpSocketListener {
 	}
 	
 	public void enable() {
-		socket.subscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
+		JSONObject data = new JSONObject();
+		try {
+			System.out.println(map.getEvent());
+			data.put("eventId", map.getEvent().getId());
+		} catch (JSONException e) {}
+		SocketCommand select = new SocketCommand("selectEvent", data);
+		socket.sendCommand(select);
+		select.addCallback(new Runnable() {
+			@Override
+			public void run() {
+				socket.subscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
+			}
+		});
 	}
 	
 	public void disable() {

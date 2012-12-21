@@ -177,6 +177,7 @@ public class EventDetail extends Activity {
 			@Override
 			public void onClick(View v) {
 				Intent i = new Intent(getApplicationContext(), Map.class);
+				i.putExtra("event", event);
 				startActivity(i);
 			}
 		});

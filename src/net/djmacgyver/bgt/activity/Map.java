@@ -1,6 +1,7 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.gps.GPSTrackingService;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
@@ -24,6 +25,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -116,6 +119,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 			onConnect();
 		}
 	};
+	private Event event;
 	
 	public MapView getMap() {
 		if (map == null) {
@@ -175,7 +179,9 @@ public class Map extends MapActivity implements KeepAliveTarget {
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.map_name);
     	
-    	getMap().setBuiltInZoomControls(true);
+        if (savedInstanceState != null) event = savedInstanceState.getParcelable("event");
+
+        getMap().setBuiltInZoomControls(true);
     	
     	getMap().getOverlays().add(getRoute());
 
@@ -205,6 +211,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	@Override
 	protected void onResume() {
 		super.onResume();
+        event = getIntent().getExtras().getParcelable("event");
 		showDialog(DIALOG_CONNECTING);
         bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
     	getRefresher().start();
@@ -281,5 +288,9 @@ public class Map extends MapActivity implements KeepAliveTarget {
 
 	public void onBeforeConnect() {
 		if (!this.isFinishing()) showDialog(Map.DIALOG_CONNECTING);
+	}
+	
+	public Event getEvent() {
+		return event;
 	}
 }
