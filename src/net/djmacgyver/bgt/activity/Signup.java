@@ -3,10 +3,10 @@ package net.djmacgyver.bgt.activity;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.SignupCommand;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -46,26 +46,21 @@ public class Signup extends PreferenceActivity {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			SocketService s = ((SocketService.LocalBinder) service).getService();
-			try {
-				JSONObject data = new JSONObject();
-				data.put("user", ((EditTextPreference) findPreference("username")).getEditText().getText().toString());
-				data.put("pass", ((EditTextPreference) findPreference("password")).getEditText().getText().toString());
-				final SocketCommand c = new SocketCommand("signup", data);
-				c.addCallback(new Runnable() {
-					@Override
-					public void run() {
-						Message msg = new Message();
-						Result res = new Result();
-						res.success = c.wasSuccessful();
-						res.data = c.getResponseData();
-						msg.obj = res;
-						handler.sendMessage(msg);
-					}
-				});
-				s.getSharedConnection().sendCommand(c);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			String user = ((EditTextPreference) findPreference("username")).getEditText().getText().toString();
+			String pass = ((EditTextPreference) findPreference("password")).getEditText().getText().toString();
+			final SocketCommand c = new SignupCommand(user, pass);
+			c.addCallback(new Runnable() {
+				@Override
+				public void run() {
+					Message msg = new Message();
+					Result res = new Result();
+					res.success = c.wasSuccessful();
+					res.data = c.getResponseData();
+					msg.obj = res;
+					handler.sendMessage(msg);
+				}
+			});
+			s.getSharedConnection().sendCommand(c);
 			unbindService(this);
 		}
 	};
