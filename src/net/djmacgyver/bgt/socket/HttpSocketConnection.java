@@ -17,6 +17,7 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
+import net.djmacgyver.bgt.socket.command.LogCommand;
 import net.djmacgyver.bgt.socket.command.SubscribeUpdatesCommand;
 import net.djmacgyver.bgt.socket.command.UnsubscribeUpdatesCommand;
 import net.djmacgyver.bgt.user.User;
@@ -351,19 +352,7 @@ public class HttpSocketConnection {
 	}
 
 	public SocketCommand sendLocation(Location location) {
-		try {
-			// build a json object to send to the server
-			JSONObject data = new JSONObject();
-			data.put("lat", location.getLatitude());
-			data.put("lon", location.getLongitude());
-			if (location.hasSpeed()) data.put("speed", location.getSpeed());
-			// send it
-			return sendCommand(new SocketCommand("log", data));
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		return sendCommand(new LogCommand(location));
 	}
 
 	public void sendQuit() {
