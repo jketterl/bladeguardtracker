@@ -11,7 +11,6 @@ import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.RegistrationUpdateCommand;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
