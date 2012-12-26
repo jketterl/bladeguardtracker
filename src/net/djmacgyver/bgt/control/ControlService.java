@@ -70,29 +70,16 @@ public class ControlService extends Service implements HttpSocketListener {
 	
 	private void enableControlSession()
 	{
-		JSONObject data = new JSONObject();
-		try {
-			data.put("eventId", event.getId());
-		} catch (JSONException e) {}
-		
-		final SocketCommand select = new SocketCommand("selectEvent", data);
-		
-		select.addCallback(new Runnable() {
+		final SocketCommand enable = new SocketCommand("enableControl");
+		enable.addCallback(new Runnable() {
 			@Override
 			public void run() {
-				final SocketCommand enable = new SocketCommand("enableControl");
-				enable.addCallback(new Runnable() {
-					@Override
-					public void run() {
-						if (enable.wasSuccessful()) return;
-						Log.e("ControlService", "Server did not accept control connection; error: " + enable.getResponseData());
-						stopSelf();
-					}
-				});
-				socket.sendCommand(enable);
+				if (enable.wasSuccessful()) return;
+				Log.e("ControlService", "Server did not accept control connection; error: " + enable.getResponseData());
+				stopSelf();
 			}
 		});
-		socket.sendCommand(select);
+		socket.sendCommand(enable);
 	}
 	
 	public void shutdown() {
