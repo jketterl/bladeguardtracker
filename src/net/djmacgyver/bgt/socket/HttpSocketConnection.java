@@ -16,6 +16,7 @@ import javax.net.ssl.X509TrustManager;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.session.Session;
+import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
 import net.djmacgyver.bgt.socket.command.SubscribeUpdatesCommand;
 import net.djmacgyver.bgt.socket.command.UnsubscribeUpdatesCommand;
 import net.djmacgyver.bgt.user.User;
@@ -257,27 +258,20 @@ public class HttpSocketConnection {
 			Session.setUser(null);
 			SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
 			if (p.getBoolean("anonymous", true)) return null;
-			try {
-				// send our authentication data as soon as we are connected
-				JSONObject data = new JSONObject();
-				data.put("user", p.getString("username", ""));
-				data.put("pass", p.getString("password", ""));
-				authentication = new SocketCommand("auth", data);
-				authentication.addCallback(new Runnable() {
-					@Override
-					public void run() {
-						if (authentication.wasSuccessful()) {
-							try {
-								Session.setUser(new User(authentication.getResponseData().getJSONObject(0)));
-							} catch (JSONException e) {
-								e.printStackTrace();
-							}
+			// send our authentication data as soon as we are connected
+			authentication = new AuthenticationCommand(p.getString("username", ""), p.getString("password", ""));
+			authentication.addCallback(new Runnable() {
+				@Override
+				public void run() {
+					if (authentication.wasSuccessful()) {
+						try {
+							Session.setUser(new User(authentication.getResponseData().getJSONObject(0)));
+						} catch (JSONException e) {
+							e.printStackTrace();
 						}
 					}
-				});
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+				}
+			});
 		}
 		return authentication;
 	}
