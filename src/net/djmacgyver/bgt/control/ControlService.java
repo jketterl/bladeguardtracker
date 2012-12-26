@@ -6,6 +6,8 @@ import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.DisableControlCommand;
+import net.djmacgyver.bgt.socket.command.EnableControlCommand;
 
 import org.json.JSONObject;
 
@@ -70,7 +72,7 @@ public class ControlService extends Service implements HttpSocketListener {
 	
 	private void enableControlSession()
 	{
-		final SocketCommand enable = new SocketCommand("enableControl");
+		final SocketCommand enable = new EnableControlCommand(event);
 		enable.addCallback(new Runnable() {
 			@Override
 			public void run() {
@@ -84,7 +86,7 @@ public class ControlService extends Service implements HttpSocketListener {
 	
 	public void shutdown() {
 		if (socket != null) {
-			SocketCommand c = new SocketCommand("disableControl");
+			SocketCommand c = new DisableControlCommand(event);
 			socket.sendCommand(c);
 			socket.removeListener(this);
 		}
