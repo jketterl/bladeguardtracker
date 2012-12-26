@@ -1,6 +1,7 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.map.MapList;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
@@ -31,6 +32,7 @@ public class MapSelection extends ListActivity {
 	private final static int DIALOG_PROGRESS = 1;
 	private MapList maps;
 	private long selected;
+	private Event event;
 	
 	private MapList getMaps() {
 		if (maps == null) {
@@ -82,6 +84,7 @@ public class MapSelection extends ListActivity {
 						try {
 							JSONObject data = new JSONObject();
 							data.put("id", selected);
+							data.put("eventId", event.getId());
 							SocketCommand command = new SocketCommand("setMap", data);
 							command.addCallback(new Runnable() {
 								@Override
@@ -130,5 +133,11 @@ public class MapSelection extends ListActivity {
 				return d;
 		}
 		return super.onCreateDialog(id);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+        event = getIntent().getExtras().getParcelable("event");
 	}
 }

@@ -280,6 +280,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		switch (item.getItemId()) {
 			case R.id.mapselection:
 				Intent i = new Intent(getApplicationContext(), MapSelection.class);
+				i.putExtra("event", event);
 				startActivity(i);
 				return true;
 		}
