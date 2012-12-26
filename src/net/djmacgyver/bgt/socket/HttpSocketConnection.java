@@ -33,6 +33,7 @@ import android.content.res.Resources.NotFoundException;
 import android.location.Location;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.codebutler.android_websockets.WebSocketClient;
 
@@ -45,7 +46,7 @@ public class HttpSocketConnection {
 	private Context context;
 	private WebSocketClient socket;
 	private int requestCount = 0;
-	private HashMap <Integer, SocketCommand> requests = new HashMap<Integer, SocketCommand>();
+	private SparseArray<SocketCommand> requests = new SparseArray<SocketCommand>();
 	private LinkedList<SocketCommand> queue;
 	private ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
 	//private ArrayList<String> subscribed = new ArrayList<String>();
@@ -80,8 +81,9 @@ public class HttpSocketConnection {
 							JSONObject response = new JSONObject(message);
 							if (response.has("requestId")) {
 								Integer id = response.getInt("requestId");
-								if (requests.containsKey(id)) {
-									((SocketCommand) requests.get(id)).updateResult(response);
+								SocketCommand request = requests.get(id);
+								if (request != null) {
+									request.updateResult(response);
 									requests.remove(id);
 								} else {
 									Log.e("SocketConnection", "received response for unknown command id: " + id);
@@ -246,9 +248,8 @@ public class HttpSocketConnection {
 	
 	protected void cancelRequests() {
 		// outstanding requests will not be answered; update them as false
-		Iterator <SocketCommand> i = requests.values().iterator();
-		while (i.hasNext()) {
-			SocketCommand c = i.next();
+		for (int i = 0; i < requests.size(); i++) {
+			SocketCommand c = requests.get(requests.keyAt(i));
 			c.updateResult(false);
 		}
 		requests.clear();
@@ -343,7 +344,7 @@ public class HttpSocketConnection {
 	private boolean doDisconnect = false;
 	
 	private void checkDisconnect() {
-		if (socket == null | !doDisconnect || queue != null || !requests.isEmpty()) return;
+		if (socket == null | !doDisconnect || queue != null || requests.size() > 0) return;
 		try {
 			getSocket().disconnect();
 		} catch (IOException e) {
