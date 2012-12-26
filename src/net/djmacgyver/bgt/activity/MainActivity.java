@@ -9,6 +9,7 @@ import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.RegistrationUpdateCommand;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -124,11 +125,7 @@ public class MainActivity extends Activity {
 				@Override
 				public void onServiceConnected(ComponentName name, IBinder service) {
 					SocketService s = ((SocketService.LocalBinder) service).getService();
-					JSONObject data = new JSONObject();
-					try {
-						data.put("regId", regId);
-					} catch (JSONException e) {}
-					SocketCommand c = new SocketCommand("updateRegistration", data);
+					SocketCommand c = new RegistrationUpdateCommand(regId);
 					s.getSharedConnection().sendCommand(c);
 					unbindService(this);
 				}
