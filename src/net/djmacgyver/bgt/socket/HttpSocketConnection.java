@@ -14,7 +14,10 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.session.Session;
+import net.djmacgyver.bgt.socket.command.SubscribeUpdatesCommand;
+import net.djmacgyver.bgt.socket.command.UnsubscribeUpdatesCommand;
 import net.djmacgyver.bgt.user.User;
 
 import org.json.JSONArray;
@@ -376,50 +379,28 @@ public class HttpSocketConnection {
 		} catch (NullPointerException e) {}
 	}
 	
-	public HttpSocketConnection subscribeUpdates(String[] categories) {
-		try {
-			JSONArray cats = new JSONArray();
-			int count = 0;
-			for (int i = 0; i < categories.length; i++) {
-				if (subscribed.contains(categories[i])) continue;
-				cats.put(count++, categories[i]);
-				subscribed.add(categories[i]);
-			}
-			if (count == 0) return this;
-			JSONObject data = new JSONObject();
-			data.put("category", cats);
-			sendCommand(new SocketCommand("subscribeUpdates", data), false);
-		} catch (JSONException e) {
-			e.printStackTrace();
+	public HttpSocketConnection subscribeUpdates(Event event, String[] categories) {
+		for (String cat : categories) {
+			if (!subscribed.contains(cat)) subscribed.add(cat);
 		}
+		sendCommand(new SubscribeUpdatesCommand(event, categories));
 		return this;
 	}
 
-	public HttpSocketConnection subscribeUpdates(String category) {
-		return subscribeUpdates(new String[]{category});
+	public HttpSocketConnection subscribeUpdates(Event event, String category) {
+		return subscribeUpdates(event, new String[]{category});
 	}
 	
-	public HttpSocketConnection unSubscribeUpdates(String[] categories) {
-		try {
-			JSONArray cats = new JSONArray();
-			int count = 0;
-			for (int i = 0; i < categories.length; i++) {
-				if (!subscribed.contains(categories[i])) continue;
-				cats.put(count++, categories[i]);
-				subscribed.remove(categories[i]);
-			}
-			if (count == 0) return this;
-			JSONObject data = new JSONObject();
-			data.put("category", cats);
-			sendCommand(new SocketCommand("unSubscribeUpdates", data), false);
-		} catch (JSONException e) {
-			e.printStackTrace();
+	public HttpSocketConnection unSubscribeUpdates(Event event, String[] categories) {
+		for (String cat : categories) {
+			if (subscribed.contains(cat)) subscribed.remove(cat);
 		}
+		sendCommand(new UnsubscribeUpdatesCommand(event, categories));
 		return this;
 	}
 	
-	public HttpSocketConnection unSubscribeUpdates(String category) {
-		return unSubscribeUpdates(new String[]{category});
+	public HttpSocketConnection unSubscribeUpdates(Event event, String category) {
+		return unSubscribeUpdates(event, new String[]{category});
 	}
 	
 	protected void sendUpdate(JSONObject update) {

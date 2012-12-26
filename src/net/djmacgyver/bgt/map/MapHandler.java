@@ -39,12 +39,13 @@ public class MapHandler extends Handler implements HttpSocketListener {
 	public void handleMessage(Message msg) {
 		try {
 			JSONObject data = (JSONObject) msg.obj;
+			Log.d("MapHandler", data.toString());
 			parseUserUpdates(data);
 			parseUserRemovals(data);
 			parseMapData(data);
 			parseStatisticsUpdates(data);
 		} catch (JSONException e) {
-			Log.e("MapHandler", "unable to parse JSON message:\n" + e.getStackTrace());
+			Log.e("MapHandler", "unable to parse JSON message", e);
 		}
 	}
 
@@ -167,11 +168,11 @@ public class MapHandler extends Handler implements HttpSocketListener {
 	}
 	
 	public void enable() {
-		socket.subscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
+		socket.subscribeUpdates(map.getEvent(), new String[]{"movements", "map", "stats", "quit"});
 	}
 	
 	public void disable() {
-		socket.unSubscribeUpdates(new String[]{"movements", "map", "stats", "quit"});
+		socket.unSubscribeUpdates(map.getEvent(), new String[]{"movements", "map", "stats", "quit"});
 		getUserOverlay().reset();
 		map.getLengthTextView().setText("n/a");
 		map.getSpeedTextView().setText("n/a");
