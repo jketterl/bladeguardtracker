@@ -1,11 +1,9 @@
 package net.djmacgyver.bgt.activity;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.SetTeamCommand;
 import net.djmacgyver.bgt.team.TeamList;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -47,21 +45,14 @@ public class TeamSelection extends ListActivity {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			SocketService s = ((SocketService.LocalBinder) service).getService();
-			JSONObject data = new JSONObject();
-			try {
-				data.put("id", selected);
-				final SocketCommand command = s.getSharedConnection().sendCommand(new SocketCommand("setTeam", data));
-				command.addCallback(new Runnable() {
-					@Override
-					public void run() {
-						dismissDialog(DIALOG_SWITCHING);
-						finish();
-					}
-				});
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			final SocketCommand command = s.getSharedConnection().sendCommand(new SetTeamCommand(selected));
+			command.addCallback(new Runnable() {
+				@Override
+				public void run() {
+					dismissDialog(DIALOG_SWITCHING);
+					finish();
+				}
+			});
 			unbindService(this);
 		}
 	};
