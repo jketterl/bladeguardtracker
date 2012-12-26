@@ -22,7 +22,6 @@ import net.djmacgyver.bgt.socket.command.SubscribeUpdatesCommand;
 import net.djmacgyver.bgt.socket.command.UnsubscribeUpdatesCommand;
 import net.djmacgyver.bgt.user.User;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,7 +48,8 @@ public class HttpSocketConnection {
 	private HashMap <Integer, SocketCommand> requests = new HashMap<Integer, SocketCommand>();
 	private LinkedList<SocketCommand> queue;
 	private ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
-	private ArrayList<String> subscribed = new ArrayList<String>();
+	//private ArrayList<String> subscribed = new ArrayList<String>();
+	private HashMap <Event, ArrayList<String>> subscribed = new HashMap<Event, ArrayList<String>>();
 	private SocketCommand authentication;
 	
 	private int state = STATE_DISCONNECTED;
@@ -264,6 +264,7 @@ public class HttpSocketConnection {
 			authentication.addCallback(new Runnable() {
 				@Override
 				public void run() {
+					System.out.println(authentication);
 					if (authentication.wasSuccessful()) {
 						try {
 							Session.setUser(new User(authentication.getResponseData().getJSONObject(0)));
@@ -362,9 +363,19 @@ public class HttpSocketConnection {
 		} catch (NullPointerException e) {}
 	}
 	
+	private ArrayList<String> getEventSubscriptions(Event event) {
+		if (!subscribed.containsKey(event)) {
+			ArrayList<String> list = new ArrayList<String>();
+			subscribed.put(event, list);
+			return list;
+		}
+		return subscribed.get(event);
+	}
+	
 	public HttpSocketConnection subscribeUpdates(Event event, String[] categories) {
+		ArrayList<String> eventSubscriptions = getEventSubscriptions(event);
 		for (String cat : categories) {
-			if (!subscribed.contains(cat)) subscribed.add(cat);
+			if (!eventSubscriptions.contains(cat)) eventSubscriptions.add(cat);
 		}
 		sendCommand(new SubscribeUpdatesCommand(event, categories));
 		return this;
@@ -375,8 +386,9 @@ public class HttpSocketConnection {
 	}
 	
 	public HttpSocketConnection unSubscribeUpdates(Event event, String[] categories) {
+		ArrayList<String> eventSubscriptions = getEventSubscriptions(event);
 		for (String cat : categories) {
-			if (subscribed.contains(cat)) subscribed.remove(cat);
+			if (eventSubscriptions.contains(cat)) eventSubscriptions.remove(cat);
 		}
 		sendCommand(new UnsubscribeUpdatesCommand(event, categories));
 		return this;
@@ -425,21 +437,12 @@ public class HttpSocketConnection {
 
 	private void sendSubscriptions() {
 		// re-subscribe to all categories (in case of a re-connect)
-		try {
-			Iterator<String> i = subscribed.iterator();
-			JSONArray cats = new JSONArray();
-			int count = 0;
-			while (i.hasNext()) {
-				String cat = i.next();
-				cats.put(count++, cat);
-			}
-			if (count == 0) return;
-			JSONObject data = new JSONObject();
-			data.put("category", cats);
-			sendCommand(new SocketCommand("subscribeUpdates", data));
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		Iterator<Event> i = subscribed.keySet().iterator();
+		while (i.hasNext()) {
+			Event event = i.next();
+			ArrayList<String> eventSubscriptions = getEventSubscriptions(event);
+			String[] sub = eventSubscriptions.toArray(new String[eventSubscriptions.size()]);
+			sendCommand(new SubscribeUpdatesCommand(event, sub));
 		}
 	}
 
