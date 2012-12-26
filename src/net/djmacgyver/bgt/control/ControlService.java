@@ -1,14 +1,14 @@
 package net.djmacgyver.bgt.control;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.gps.GPSTrackingService;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+
+import org.json.JSONObject;
+
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -105,7 +105,7 @@ public class ControlService extends Service implements HttpSocketListener {
 			@Override
 			public void onServiceConnected(ComponentName arg0, IBinder arg1) {
 				GPSTrackingService l = ((GPSTrackingService.LocalBinder) arg1).getService();
-				l.enable();
+				l.enable(event);
 				unbindService(this);
 			}
 		};

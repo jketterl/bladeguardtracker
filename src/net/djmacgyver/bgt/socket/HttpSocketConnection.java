@@ -17,7 +17,6 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
-import net.djmacgyver.bgt.socket.command.LogCommand;
 import net.djmacgyver.bgt.socket.command.SubscribeUpdatesCommand;
 import net.djmacgyver.bgt.socket.command.UnsubscribeUpdatesCommand;
 import net.djmacgyver.bgt.user.User;
@@ -30,7 +29,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources.NotFoundException;
-import android.location.Location;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
@@ -351,10 +349,6 @@ public class HttpSocketConnection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	public SocketCommand sendLocation(Location location) {
-		return sendCommand(new LogCommand(location));
 	}
 
 	public void sendQuit() {

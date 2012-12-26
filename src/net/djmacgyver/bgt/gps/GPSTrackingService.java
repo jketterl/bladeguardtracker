@@ -5,10 +5,12 @@ import java.util.Iterator;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.MainActivity;
+import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.LogCommand;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -36,6 +38,7 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	private Location queuedLocation;
 	private Location lastLocation;
 	private ArrayList<GPSTrackingListener> listeners = new ArrayList<GPSTrackingListener>();
+	private Event boundEvent;
 
 	private SocketService sockService;
 	private ServiceConnection sconn = new ServiceConnection() {
@@ -134,9 +137,12 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		}
 	}
 
-	public void enable() {
+	public void enable(Event event) {
 		if (enabled) return;
 		enabled = true;
+		
+		bindEvent(event);
+		
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
 		
 		conn = sockService.getSharedConnection(this);
@@ -206,7 +212,7 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 			return;
 		}
 	
-		conn.sendLocation(location);
+		conn.sendCommand(new LogCommand(boundEvent, location));
 		
 		getLocationReminder().interrupt();
 		lastLocation = location;
@@ -236,5 +242,9 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	private void fireTrackingDisabled() {
 		Iterator<GPSTrackingListener> i = listeners.iterator();
 		while (i.hasNext()) i.next().trackingDisabled();
+	}
+	
+	public void bindEvent(Event event) {
+		this.boundEvent = event;
 	}
 }
