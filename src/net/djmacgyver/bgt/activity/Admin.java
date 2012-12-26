@@ -1,10 +1,12 @@
 package net.djmacgyver.bgt.activity;
 
-import org.json.JSONException;
-
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.BridgeCommand;
+
+import org.json.JSONException;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -49,7 +51,7 @@ public class Admin extends Activity {
         disableButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				fireCommand("disableBridges");
+				fireCommand(new BridgeCommand(false));
 			}
 		});
         
@@ -57,12 +59,12 @@ public class Admin extends Activity {
         enableButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				fireCommand("enableBridges");
+				fireCommand(new BridgeCommand(true));
 			}
 		});
 	}
 	
-	protected void fireCommand(final String command) {
+	protected void fireCommand(final SocketCommand command) {
 		showDialog(DIALOG_PERFORMING_COMMAND);
 		ServiceConnection conn = new ServiceConnection() {
 			@Override
@@ -72,15 +74,14 @@ public class Admin extends Activity {
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				SocketService s = ((SocketService.LocalBinder) service).getService();
-				final SocketCommand c = new SocketCommand(command);
-				c.addCallback(new Runnable() {
+				command.addCallback(new Runnable() {
 					@Override
 					public void run() {
 						dismissDialog(DIALOG_PERFORMING_COMMAND);
-						if (!c.wasSuccessful()) {
+						if (!command.wasSuccessful()) {
 							String message = "unknown error";
 							try {
-								message = c.getResponseData().getJSONObject(0).getString("message");
+								message = command.getResponseData().getJSONObject(0).getString("message");
 							} catch (JSONException e) {}
 							Message m = new Message();
 							m.obj = message;
@@ -88,7 +89,7 @@ public class Admin extends Activity {
 						}
 					}
 				});
-				s.getSharedConnection().sendCommand(c);
+				s.getSharedConnection().sendCommand(command);
 				unbindService(this);
 			}
 		};
