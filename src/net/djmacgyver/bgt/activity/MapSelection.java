@@ -5,6 +5,7 @@ import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.map.MapList;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.SetMapCommand;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,22 +82,14 @@ public class MapSelection extends ListActivity {
 					@Override
 					public void onServiceConnected(ComponentName name, IBinder service) {
 						SocketService s = ((SocketService.LocalBinder) service).getService();
-						try {
-							JSONObject data = new JSONObject();
-							data.put("id", selected);
-							data.put("eventId", event.getId());
-							SocketCommand command = new SocketCommand("setMap", data);
-							command.addCallback(new Runnable() {
-								@Override
-								public void run() {
-									h.sendEmptyMessage(0);
-								}
-							});
-							s.getSharedConnection().sendCommand(command);
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						SocketCommand command = new SetMapCommand(event, (int) selected);
+						command.addCallback(new Runnable() {
+							@Override
+							public void run() {
+								h.sendEmptyMessage(0);
+							}
+						});
+						s.getSharedConnection().sendCommand(command);
 						unbindService(this);
 					}
 				};

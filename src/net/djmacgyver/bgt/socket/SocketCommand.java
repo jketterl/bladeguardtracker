@@ -11,7 +11,7 @@ import android.util.Log;
 
 public class SocketCommand {
 	private String command;
-	private JSONObject data;
+	protected JSONObject data;
 	private ArrayList<Runnable> callbacks = new ArrayList<Runnable>();
 	private int requestId;
 	private JSONArray responseData;
