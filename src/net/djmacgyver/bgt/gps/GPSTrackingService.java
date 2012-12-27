@@ -10,7 +10,9 @@ import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.GPSUnavailableCommand;
 import net.djmacgyver.bgt.socket.command.LogCommand;
+import net.djmacgyver.bgt.socket.command.QuitCommand;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -110,7 +112,11 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		getGpsReminder().terminate();
 		gpsReminder = null;
 		
-		conn.sendQuit();
+		// it is possible that the connection has been closed before we were able so send the "quit" message.
+		try {
+			conn.sendCommand(new QuitCommand());
+		} catch (NullPointerException e) {}
+		
 		sockService.removeStake(this);
 		conn = null;
 		
@@ -220,7 +226,7 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	}
 
 	private void sendGpsUnavailable() {
-		conn.sendGpsUnavailable();
+		conn.sendCommand(new GPSUnavailableCommand());
 		lastLocation = null;
 	}
 	

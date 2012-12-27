@@ -17,8 +17,6 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
-import net.djmacgyver.bgt.socket.command.GPSUnavailableCommand;
-import net.djmacgyver.bgt.socket.command.QuitCommand;
 import net.djmacgyver.bgt.socket.command.SubscribeUpdatesCommand;
 import net.djmacgyver.bgt.socket.command.UnsubscribeUpdatesCommand;
 import net.djmacgyver.bgt.user.User;
@@ -349,13 +347,6 @@ public class HttpSocketConnection {
 		}
 	}
 
-	public void sendQuit() {
-		// it is possible that the connection has been closed before we were able so send the "quit" message.
-		try {
-			sendCommand(new QuitCommand());
-		} catch (NullPointerException e) {}
-	}
-	
 	private ArrayList<String> getEventSubscriptions(Event event) {
 		if (!subscribed.containsKey(event)) {
 			ArrayList<String> list = new ArrayList<String>();
@@ -437,10 +428,6 @@ public class HttpSocketConnection {
 			String[] sub = eventSubscriptions.toArray(new String[eventSubscriptions.size()]);
 			sendCommand(new SubscribeUpdatesCommand(event, sub));
 		}
-	}
-
-	public void sendGpsUnavailable() {
-		sendCommand(new GPSUnavailableCommand());
 	}
 	
 	private void setState(int newState)	{
