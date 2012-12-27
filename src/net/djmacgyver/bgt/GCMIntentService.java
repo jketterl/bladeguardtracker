@@ -4,10 +4,8 @@ import net.djmacgyver.bgt.activity.GCMAccountNotification;
 import net.djmacgyver.bgt.activity.MainActivity;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import net.djmacgyver.bgt.socket.command.RegistrationDeleteCommand;
+import net.djmacgyver.bgt.socket.command.RegistrationUpdateCommand;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -77,11 +75,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				SocketService s = ((SocketService.LocalBinder) service).getService();
-				JSONObject data = new JSONObject();
-				try {
-					data.put("regId", regId);
-				} catch (JSONException e) {}
-				SocketCommand c = new SocketCommand("updateRegistration", data);
+				SocketCommand c = new RegistrationUpdateCommand(regId);
 				s.getSharedConnection().sendCommand(c);
 				unbindService(this);
 			}
@@ -100,11 +94,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				SocketService s = ((SocketService.LocalBinder) service).getService();
-				JSONObject data = new JSONObject();
-				try {
-					data.put("regId", regId);
-				} catch (JSONException e) {}
-				SocketCommand c = new SocketCommand("deleteRegistration", data);
+				SocketCommand c = new RegistrationDeleteCommand(regId);
 				s.getSharedConnection().sendCommand(c);
 				unbindService(this);
 			}
