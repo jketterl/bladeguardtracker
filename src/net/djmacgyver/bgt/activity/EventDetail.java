@@ -1,5 +1,6 @@
 package net.djmacgyver.bgt.activity;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 import net.djmacgyver.bgt.R;
@@ -9,6 +10,10 @@ import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.PauseEventCommand;
+import net.djmacgyver.bgt.socket.command.ShutdownEventCommand;
+import net.djmacgyver.bgt.socket.command.StartEventCommand;
+import net.djmacgyver.bgt.socket.command.UpdateEventCommand;
 import net.djmacgyver.bgt.user.User;
 
 import org.json.JSONException;
@@ -94,30 +99,19 @@ public class EventDetail extends Activity {
 	};
 	
 	private class EventBoundOnClickListener implements View.OnClickListener {
-		private String command;
+		private Class <? extends SocketCommand> command;
 		private int message;
-		private String data;
 		
-		private EventBoundOnClickListener(String command, int message, String data) {
+		private EventBoundOnClickListener(Class <? extends SocketCommand> command, int message) {
 			this.command = command;
 			this.message = message;
-			this.data = data;
-		}
-		
-		private EventBoundOnClickListener(String command, int message) {
-			this(command, message, new JSONObject().toString());
 		}
 		
 		@Override
 		public void onClick(View v) {
 			Bundle b = new Bundle();
-			b.putString("command", command);
+			b.putString("command", command.getCanonicalName());
 			b.putInt("message", message);
-			try {
-				JSONObject data = new JSONObject(this.data);
-				data.put("eventId", event.getId());
-				b.putString("data", data.toString());
-			} catch (JSONException e) {}
 			showDialog(DIALOG_CONFIRM, b);
 		}
 		
@@ -164,13 +158,13 @@ public class EventDetail extends Activity {
 		});
         
         Button start = (Button) findViewById(R.id.startButton);
-        start.setOnClickListener(new EventBoundOnClickListener("startEvent", R.string.activating_trackers));
+        start.setOnClickListener(new EventBoundOnClickListener(StartEventCommand.class, R.string.activating_trackers));
         
         Button pause = (Button) findViewById(R.id.pauseButton);
-        pause.setOnClickListener(new EventBoundOnClickListener("pauseEvent", R.string.deactivating_trackers));
+        pause.setOnClickListener(new EventBoundOnClickListener(PauseEventCommand.class, R.string.deactivating_trackers));
         
         Button shutdown = (Button) findViewById(R.id.shutdownButton);
-        shutdown.setOnClickListener(new EventBoundOnClickListener("shutdownEvent", R.string.terminating_event));
+        shutdown.setOnClickListener(new EventBoundOnClickListener(ShutdownEventCommand.class, R.string.terminating_event));
 
         Button mapButton = (Button) findViewById(R.id.mapButton);
         mapButton.setOnClickListener(new OnClickListener() {
@@ -290,14 +284,9 @@ public class EventDetail extends Activity {
 					public void onClick(DialogInterface dialog, int which) {
 						Bundle b = new Bundle();
 						b.putInt("message", R.string.update_weather);
-						b.putString("command", "updateEvent");
-						JSONObject data = new JSONObject();
-						try {
-							data.put("eventId", event.getId());
-							data.put("weather", which);
-							b.putString("data", data.toString());
-							showDialog(DIALOG_CONFIRM, b);
-						} catch (JSONException e) {}
+						b.putString("command", UpdateEventCommand.class.getCanonicalName());
+						b.putInt("weather", which);
+						showDialog(DIALOG_CONFIRM, b);
 					}
 				})
 				 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -317,28 +306,53 @@ public class EventDetail extends Activity {
 			case DIALOG_CONFIRM:
 				AlertDialog d = (AlertDialog) dialog;
 				d.setMessage(getResources().getString(args.getInt("message")));
-				final String command = args.getString("command");
-
+			
+				final SocketCommand command;
 				try {
-					final JSONObject data = new JSONObject(args.getString("data"));
+					Class<?> commandClass = getClassLoader().loadClass(args.getString("command"));
+					if (args.containsKey("weather")) {
+						command = (SocketCommand) commandClass.getConstructor(new Class[]{Event.class, Integer.class}).newInstance(new Object[]{event, args.getInt("weather")});
+					} else {
+						command = (SocketCommand) commandClass.getConstructor(new Class[]{Event.class}).newInstance(new Object[]{event});
+					}
 					d.setButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface arg0, int arg1) {
 							new Thread(){
 								@Override
 								public void run() {
-									SocketCommand c = new SocketCommand(command, data);
 									showDialog(DIALOG_PERFORMING_COMMAND);
 									bindService(
 											new Intent(EventDetail.this, SocketService.class),
-											new SingleCommandConnection(c),
+											new SingleCommandConnection(command),
 											Context.BIND_AUTO_CREATE
 									);
 								}
 							}.run();
 						}
 					});
-				} catch (JSONException e1) {}
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				break;
 			case DIALOG_ERROR:
 				AlertDialog a = (AlertDialog) dialog;

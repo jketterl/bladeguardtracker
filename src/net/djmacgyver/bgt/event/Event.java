@@ -6,9 +6,19 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import net.djmacgyver.bgt.socket.HttpSocketConnection;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.StartEventCommand;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -115,5 +125,22 @@ public class Event implements Parcelable {
 
 	public String getMapName() {
 		return mapName;
+	}
+	
+	public SocketCommand start(Context c) {
+		final SocketCommand command = new StartEventCommand(this);
+		ServiceConnection s = new ServiceConnection() {
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+			}
+			
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				HttpSocketConnection conn = ((SocketService.LocalBinder) service).getService().getSharedConnection();
+				conn.sendCommand(command);
+			}
+		};
+		c.bindService(new Intent(c, SocketService.class), s, Context.BIND_AUTO_CREATE);
+		return command;
 	}
 }

@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class UpdateEventCommand extends SocketCommand {
-
 	public UpdateEventCommand(Event event, int weather) {
 		super("updateEvent");
 		data = new JSONObject();
@@ -15,5 +14,9 @@ public class UpdateEventCommand extends SocketCommand {
 			data.put("eventId", event.getId());
 			data.put("weather", weather);
 		} catch (JSONException e) {}
+	}
+	
+	public UpdateEventCommand(Event event, Integer weather) {
+		this(event, weather.intValue());
 	}
 }
