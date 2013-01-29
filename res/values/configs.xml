@@ -8,7 +8,7 @@
     <string name="maps_api_key">08cvEnK6frIUm2eoWIjal7KyBmUhpszplHN9mkg</string>
     
     <!-- WebSocket for combined up & downstream -->
-    <string name="websocket">wss://ec2-54-246-73-232.eu-west-1.compute.amazonaws.com/bgt/socket</string>
+    <string name="websocket">wss://ec2-176-34-195-198.eu-west-1.compute.amazonaws.com/bgt/socket</string>
     
     <!-- Project ID / Registration ID for Google Cloud Messaging (GCM) -->
     <string name="gcm_id">"637105857395"</string>
