@@ -74,4 +74,7 @@
     <string name="disable_bridges">Disable Bridges</string>
     <string name="change_password">Change password</string>
     <string name="login_with_facebook">Login with Facebook</string>
+    <string name="with_facebook">with Facebook</string>
+    <string name="login">Login</string>
+    <string name="or">or</string>
 </resources>

@@ -3,6 +3,7 @@ package net.djmacgyver.bgt.activity;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -13,16 +14,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceActivity;
 import android.view.Window;
 import android.widget.TextView;
 
-import com.facebook.Session;
-import com.facebook.SessionState;
-
-public class Settings extends PreferenceActivity {
+public class Settings extends Activity {
 	public static final int DIALOG_LOGGING_IN = 1;
 	public static final int DIALOG_CREDENTIALS_WRONG = 2;
 	
@@ -74,12 +69,17 @@ public class Settings extends PreferenceActivity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         
+        setContentView(R.layout.settings);
+
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.settings);
+
+        
+        /*
         addPreferencesFromResource(R.xml.settings);
 
         Preference signup = findPreference("signup");
@@ -120,6 +120,7 @@ public class Settings extends PreferenceActivity {
 				System.out.println("got active session!");
 			}
 		});
+		*/
 	}
 	
 	@Override

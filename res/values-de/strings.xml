@@ -70,4 +70,7 @@
     <string name="enable_bridges">Bridges einschalten</string>
     <string name="disable_bridges">Bridges ausschalten</string>
     <string name="change_password">Passwort ändern</string>
+    <string name="with_facebook">mit Facebook</string>
+    <string name="login">Anmelden</string>
+    <string name="or">oder</string>
 </resources>
