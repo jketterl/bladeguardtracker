@@ -2,6 +2,8 @@ package net.djmacgyver.bgt.map;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.ServerList;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.command.GetMapsCommand;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,8 +25,8 @@ public class MapList extends ServerList {
 	}
 	
 	@Override
-	protected String getServerCommand() {
-		return "getMaps";
+	protected Class <? extends SocketCommand> getServerCommand() {
+		return GetMapsCommand.class;
 	}
 	
 	@Override

@@ -29,20 +29,29 @@ public abstract class ServerList implements ListAdapter {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			SocketService s = ((SocketService.LocalBinder) service).getService();
-			final SocketCommand command = new SocketCommand(getServerCommand());
-			command.addCallback(new Runnable() {
-				@Override
-				public void run() {
-					data = command.getResponseData();
-					fireChanged();
-				}
-			});
-			s.getSharedConnection().sendCommand(command);
+			//final SocketCommand command = new SocketCommand(getServerCommand());
+			try {
+				final SocketCommand command = getServerCommand().newInstance();
+				command.addCallback(new Runnable() {
+					@Override
+					public void run() {
+						data = command.getResponseData();
+						fireChanged();
+					}
+				});
+				s.getSharedConnection().sendCommand(command);
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			context.unbindService(this);
 		}
 	};
 	
-	abstract protected String getServerCommand();
+	abstract protected Class<? extends SocketCommand> getServerCommand();
 
 	public ServerList(Context context){
 		this.context = context;

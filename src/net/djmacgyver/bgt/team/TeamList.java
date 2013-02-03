@@ -2,6 +2,8 @@ package net.djmacgyver.bgt.team;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.ServerList;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.command.GetTeamsCommand;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,8 +24,8 @@ public class TeamList extends ServerList {
 	}
 
 	@Override
-	protected String getServerCommand() {
-		return "getTeams";
+	protected Class<? extends SocketCommand> getServerCommand() {
+		return GetTeamsCommand.class;
 	}
 	
 	@Override

@@ -2,6 +2,8 @@ package net.djmacgyver.bgt.event;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.ServerList;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.command.GetEventsCommand;
 
 import org.json.JSONException;
 
@@ -18,8 +20,8 @@ public class EventList extends ServerList {
 	}
 	
 	@Override
-	protected String getServerCommand() {
-		return "getEvents";
+	protected Class <? extends SocketCommand> getServerCommand() {
+		return GetEventsCommand.class;
 	}
 
 	@Override

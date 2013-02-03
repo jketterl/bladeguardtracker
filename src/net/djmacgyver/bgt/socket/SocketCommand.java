@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-public class SocketCommand {
+abstract public class SocketCommand {
 	private String command;
 	protected JSONObject data;
 	private ArrayList<Runnable> callbacks = new ArrayList<Runnable>();
