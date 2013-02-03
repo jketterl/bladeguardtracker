@@ -9,12 +9,15 @@
 	    android:id="@+id/texts"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
+	    android:layout_weight="1"
 	    android:orientation="vertical" >
 
 		<TextView
 		    android:id="@+id/title"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
+		    android:ellipsize="end"
+		    android:lines="1"
 		    android:padding="10dip"
 		    android:text="Event title"
 		    android:textAppearance="?android:attr/textAppearanceMedium"
@@ -24,23 +27,29 @@
 		    android:id="@+id/map"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
+		    android:ellipsize="end"
+		    android:lines="1"
+		    android:paddingBottom="10dip"
 		    android:paddingLeft="10dip"
 		    android:text="Event map"
-		    android:textAppearance="?android:attr/textAppearanceSmall" android:paddingBottom="10dip"/>
+		    android:textAppearance="?android:attr/textAppearanceSmall" />
 
 	</LinearLayout>
 
 	<LinearLayout
 	    android:id="@+id/linearLayout1"
-	    android:layout_width="match_parent"
+	    android:layout_width="wrap_content"
 	    android:layout_height="match_parent"
+	    android:layout_weight="0"
 	    android:gravity="center|right"
+	    android:minWidth="72dip"
 	    android:orientation="vertical" >
 
 		<ImageView
 		    android:id="@+id/weatherIcon"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
+		    android:minWidth="72dip"
 		    android:padding="10dip" />
 
 	</LinearLayout>
