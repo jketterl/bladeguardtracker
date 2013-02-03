@@ -12,4 +12,7 @@
     
     <!-- Project ID / Registration ID for Google Cloud Messaging (GCM) -->
     <string name="gcm_id">"637105857395"</string>
+    
+    <!-- Facebook app id -->
+    <string name="app_id">514215418600631</string>
 </resources>

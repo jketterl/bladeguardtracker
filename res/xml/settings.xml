@@ -36,6 +36,7 @@
             android:key="signup"
             android:title="@string/signup" >
         </Preference>
+        <Preference android:title="@string/login_with_facebook" android:key="facebook"/>
         
     </PreferenceCategory>
 

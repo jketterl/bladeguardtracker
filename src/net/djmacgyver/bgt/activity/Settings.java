@@ -19,6 +19,9 @@ import android.preference.PreferenceActivity;
 import android.view.Window;
 import android.widget.TextView;
 
+import com.facebook.Session;
+import com.facebook.SessionState;
+
 public class Settings extends PreferenceActivity {
 	public static final int DIALOG_LOGGING_IN = 1;
 	public static final int DIALOG_CREDENTIALS_WRONG = 2;
@@ -100,6 +103,21 @@ public class Settings extends PreferenceActivity {
 					}
 				});
 				return true;
+			}
+		});
+        
+        Preference facebook = findPreference("facebook");
+        facebook.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+				return false;
+			}
+		});
+        
+        Session.openActiveSession(this, true, new Session.StatusCallback() {
+			@Override
+			public void call(Session session, SessionState state, Exception exception) {
+				System.out.println("got active session!");
 			}
 		});
 	}
