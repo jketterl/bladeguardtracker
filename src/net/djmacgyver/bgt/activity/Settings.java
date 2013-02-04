@@ -14,12 +14,27 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
+
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
 
 public class Settings extends Activity {
 	public static final int DIALOG_LOGGING_IN = 1;
 	public static final int DIALOG_CREDENTIALS_WRONG = 2;
+	
+	private Session.StatusCallback callback = new Session.StatusCallback() {
+	    @Override
+	    public void call(Session session, SessionState state, Exception exception) {
+	        onSessionStateChange(session, state, exception);
+	    }
+	};
+	
+	private UiLifecycleHelper uiHelper;
 	
 	private class CallbackService implements ServiceConnection {
 		private Runnable callback;
@@ -78,6 +93,8 @@ public class Settings extends Activity {
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.settings);
 
+        uiHelper = new UiLifecycleHelper(this, callback);
+        uiHelper.onCreate(savedInstanceState);
         
         /*
         addPreferencesFromResource(R.xml.settings);
@@ -114,13 +131,14 @@ public class Settings extends Activity {
 			}
 		});
         
-        Session.openActiveSession(this, true, new Session.StatusCallback() {
-			@Override
-			public void call(Session session, SessionState state, Exception exception) {
-				System.out.println("got active session!");
-			}
-		});
 		*/
+        
+        /*
+        LoginButton facebook = (LoginButton) findViewById(R.id.facebookButton);
+        facebook.setSessionStatusCallback(this);
+        */
+        
+        Session.openActiveSession(this, false, callback);
 	}
 	
 	@Override
@@ -164,5 +182,55 @@ public class Settings extends Activity {
 				return b.create();
 		}
 		return super.onCreateDialog(id);
+	}
+
+	private void onSessionStateChange(Session session, SessionState state, Exception exception) {
+		View regularLogin = findViewById(R.id.regularLogin);
+	    if (state.isOpened()) {
+	        Log.i("facebook", "Logged in...");
+	        regularLogin.setVisibility(View.GONE);
+	    } else if (state.isClosed()) {
+	        Log.i("facebook", "Logged out...");
+	        regularLogin.setVisibility(View.VISIBLE);
+	    }
+	}
+
+	@Override
+	public void onResume() {
+	    // For scenarios where the main activity is launched and user
+	    // session is not null, the session state change notification
+	    // may not be triggered. Trigger it if it's open/closed.
+	    Session session = Session.getActiveSession();
+	    if (session != null &&
+	           (session.isOpened() || session.isClosed()) ) {
+	        onSessionStateChange(session, session.getState(), null);
+	    }
+
+	    super.onResume();
+	    uiHelper.onResume();
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	    super.onActivityResult(requestCode, resultCode, data);
+	    uiHelper.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
+	public void onPause() {
+	    super.onPause();
+	    uiHelper.onPause();
+	}
+
+	@Override
+	public void onDestroy() {
+	    super.onDestroy();
+	    uiHelper.onDestroy();
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+	    super.onSaveInstanceState(outState);
+	    uiHelper.onSaveInstanceState(outState);
 	}
 }
