@@ -12,8 +12,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -151,6 +154,7 @@ public class Settings extends Activity {
         View anonymousInfo = findViewById(R.id.anonymousInfoText);
         CheckBox anonymousCheckbox = (CheckBox) findViewById(R.id.anonymousCheckbox);
         View loginOptions = findViewById(R.id.loginOptions);
+        
         if (anonymousCheckbox.isChecked()) {
         	loginOptions.setVisibility(View.GONE);
         	anonymousInfo.setVisibility(View.VISIBLE);
@@ -175,6 +179,22 @@ public class Settings extends Activity {
 		});
 	}
 	
+	@Override
+	public void finish() {
+        CheckBox anonymousCheckbox = (CheckBox) findViewById(R.id.anonymousCheckbox);
+        TextView user = (TextView) findViewById(R.id.user);
+        TextView pass = (TextView) findViewById(R.id.pass);
+        
+		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
+		Editor e = p.edit();
+		e.putBoolean("anonymous", anonymousCheckbox.isChecked());
+		e.putString("username", user.getText().toString());
+		e.putString("password", pass.getText().toString());
+		e.commit();
+        
+		super.finish();
+	}
+
 	private void testLogin(Runnable callback)
 	{
 		conn.setCallback(callback);
@@ -230,6 +250,15 @@ public class Settings extends Activity {
 
 	    super.onResume();
 	    uiHelper.onResume();
+	    
+        CheckBox anonymousCheckbox = (CheckBox) findViewById(R.id.anonymousCheckbox);
+        TextView user = (TextView) findViewById(R.id.user);
+        TextView pass = (TextView) findViewById(R.id.pass);
+        
+		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
+		anonymousCheckbox.setChecked(p.getBoolean("anonymous", true));
+		user.setText(p.getString("username", ""));
+		pass.setText(p.getString("password", ""));
 	    
 	    updateUI();
 	}
