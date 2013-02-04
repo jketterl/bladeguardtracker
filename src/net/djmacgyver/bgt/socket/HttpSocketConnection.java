@@ -263,6 +263,7 @@ public class HttpSocketConnection {
 			authentication.addCallback(new Runnable() {
 				@Override
 				public void run() {
+					if (authentication == null) return;
 					System.out.println(authentication);
 					if (authentication.wasSuccessful()) {
 						try {

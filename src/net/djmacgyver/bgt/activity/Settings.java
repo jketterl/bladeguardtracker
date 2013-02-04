@@ -61,6 +61,12 @@ public class Settings extends Activity {
 				@Override
 				public void run() {
 					dismissDialog(DIALOG_LOGGING_IN);
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							setLoggedIn(command.wasSuccessful());
+						}
+					});
 					if (command.wasSuccessful()) {
 						runCallback();
 					} else {
@@ -87,6 +93,8 @@ public class Settings extends Activity {
 	};
 	
 	private CallbackService conn = new CallbackService();
+	
+	private Boolean isLoggedIn = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +138,17 @@ public class Settings extends Activity {
 			}
 		});
         
+        final TextView pass = (TextView) findViewById(R.id.pass);
+        
+        Button logout = (Button) findViewById(R.id.logout);
+        logout.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				pass.setText("");
+				setLoggedIn(false);
+			}
+		});
+        
         /*
         Preference team = findPreference("team");
         team.setOnPreferenceClickListener(new OnPreferenceClickListener() {
@@ -154,6 +173,8 @@ public class Settings extends Activity {
         View anonymousInfo = findViewById(R.id.anonymousInfoText);
         CheckBox anonymousCheckbox = (CheckBox) findViewById(R.id.anonymousCheckbox);
         View loginOptions = findViewById(R.id.loginOptions);
+        View logout = findViewById(R.id.logout);
+        View facebook = findViewById(R.id.facbookLogin);
         
         if (anonymousCheckbox.isChecked()) {
         	loginOptions.setVisibility(View.GONE);
@@ -164,9 +185,22 @@ public class Settings extends Activity {
 	        if (Session.getActiveSession().isOpened()) {
 		        regularLogin.setVisibility(View.GONE);
 	        } else {
-		        regularLogin.setVisibility(View.VISIBLE);
+		        if (isLoggedIn) {
+		            logout.setVisibility(View.VISIBLE);
+			        regularLogin.setVisibility(View.GONE);
+			        facebook.setVisibility(View.GONE);
+		        } else {
+		            logout.setVisibility(View.GONE);
+			        regularLogin.setVisibility(View.VISIBLE);
+			        facebook.setVisibility(View.VISIBLE);
+		        }
 	        }
         }
+	}
+	
+	private void setLoggedIn(Boolean loggedIn) {
+		isLoggedIn = loggedIn;
+		updateUI();
 	}
 	
 	@Override
@@ -259,6 +293,8 @@ public class Settings extends Activity {
 		anonymousCheckbox.setChecked(p.getBoolean("anonymous", true));
 		user.setText(p.getString("username", ""));
 		pass.setText(p.getString("password", ""));
+		
+		testLogin(null);
 	    
 	    updateUI();
 	}

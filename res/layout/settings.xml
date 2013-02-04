@@ -99,6 +99,13 @@
                     android:textAppearance="?android:attr/textAppearanceMedium" />
             </LinearLayout>
 
+            <Button
+                android:id="@+id/logout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/logout" />
+
             <LinearLayout
                 android:id="@+id/facbookLogin"
                 android:layout_width="match_parent"

@@ -72,5 +72,6 @@
     <string name="change_password">Passwort ändern</string>
     <string name="with_facebook">mit Facebook</string>
     <string name="login">Anmelden</string>
+    <string name="logout">Abmelden</string>
     <string name="or">oder</string>
 </resources>
