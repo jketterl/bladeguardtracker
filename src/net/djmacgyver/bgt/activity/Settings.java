@@ -17,6 +17,9 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.facebook.Session;
@@ -96,19 +99,35 @@ public class Settings extends Activity {
         uiHelper = new UiLifecycleHelper(this, callback);
         uiHelper.onCreate(savedInstanceState);
         
-        /*
-        addPreferencesFromResource(R.xml.settings);
-
-        Preference signup = findPreference("signup");
-        signup.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        CheckBox anonymous = (CheckBox) findViewById(R.id.anonymousCheckbox);
+        anonymous.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
-			public boolean onPreferenceClick(Preference preference) {
-				Intent i = new Intent(getApplicationContext(), Signup.class);
-				startActivity(i);
-				return true;
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (isChecked) {
+					Session.getActiveSession().close();
+				}
+				updateUI();
 			}
 		});
         
+        Button signup = (Button) findViewById(R.id.signup);
+        signup.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(getApplicationContext(), Signup.class);
+				startActivity(i);
+			}
+		});
+        
+        Button login = (Button) findViewById(R.id.login);
+        login.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				onBackPressed();
+			}
+		});
+        
+        /*
         Preference team = findPreference("team");
         team.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
@@ -122,23 +141,28 @@ public class Settings extends Activity {
 				return true;
 			}
 		});
-        
-        Preference facebook = findPreference("facebook");
-        facebook.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-			@Override
-			public boolean onPreferenceClick(Preference preference) {
-				return false;
-			}
-		});
-        
-		*/
-        
-        /*
-        LoginButton facebook = (LoginButton) findViewById(R.id.facebookButton);
-        facebook.setSessionStatusCallback(this);
         */
         
         Session.openActiveSession(this, false, callback);
+	}
+	
+	private void updateUI() {
+        View regularLogin = findViewById(R.id.regularLogin);
+        View anonymousInfo = findViewById(R.id.anonymousInfoText);
+        CheckBox anonymousCheckbox = (CheckBox) findViewById(R.id.anonymousCheckbox);
+        View loginOptions = findViewById(R.id.loginOptions);
+        if (anonymousCheckbox.isChecked()) {
+        	loginOptions.setVisibility(View.GONE);
+        	anonymousInfo.setVisibility(View.VISIBLE);
+        } else {
+        	anonymousInfo.setVisibility(View.GONE);
+        	loginOptions.setVisibility(View.VISIBLE);
+	        if (Session.getActiveSession().isOpened()) {
+		        regularLogin.setVisibility(View.GONE);
+	        } else {
+		        regularLogin.setVisibility(View.VISIBLE);
+	        }
+        }
 	}
 	
 	@Override
@@ -185,14 +209,12 @@ public class Settings extends Activity {
 	}
 
 	private void onSessionStateChange(Session session, SessionState state, Exception exception) {
-		View regularLogin = findViewById(R.id.regularLogin);
 	    if (state.isOpened()) {
 	        Log.i("facebook", "Logged in...");
-	        regularLogin.setVisibility(View.GONE);
 	    } else if (state.isClosed()) {
 	        Log.i("facebook", "Logged out...");
-	        regularLogin.setVisibility(View.VISIBLE);
 	    }
+	    updateUI();
 	}
 
 	@Override
@@ -208,6 +230,8 @@ public class Settings extends Activity {
 
 	    super.onResume();
 	    uiHelper.onResume();
+	    
+	    updateUI();
 	}
 
 	@Override
