@@ -1,8 +1,8 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -44,9 +44,16 @@ public class Settings extends Activity {
 	
 	private class CallbackService implements ServiceConnection {
 		private Runnable callback;
+		private String user;
+		private String pass;
 		
 		public void setCallback(Runnable callback) {
 			this.callback = callback;
+		}
+		
+		public void setCredentials(String user, String pass) {
+			this.user = user;
+			this.pass = pass;
 		}
 		
 		@Override
@@ -56,8 +63,10 @@ public class Settings extends Activity {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			SocketService sockService = ((SocketService.LocalBinder) service).getService();
-			final SocketCommand command = sockService.getSharedConnection().getAuthentication();
-			if (command != null) command.addCallback(new Runnable() {
+			//final SocketCommand command = sockService.getSharedConnection().getAuthentication();
+			final AuthenticationCommand command = new AuthenticationCommand(user, pass);
+			sockService.getSharedConnection().sendCommand(command);
+			command.addCallback(new Runnable() {
 				@Override
 				public void run() {
 					dismissDialog(DIALOG_LOGGING_IN);
@@ -78,10 +87,7 @@ public class Settings extends Activity {
 						});
 					}
 				}
-			}); else {
-				dismissDialog(DIALOG_LOGGING_IN);
-				runCallback();
-			}
+			});
 			unbindService(this);
 		}
 		
@@ -134,7 +140,7 @@ public class Settings extends Activity {
         login.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				onBackPressed();
+				testLogin(null);
 			}
 		});
         
@@ -184,6 +190,7 @@ public class Settings extends Activity {
         	loginOptions.setVisibility(View.VISIBLE);
 	        if (Session.getActiveSession().isOpened()) {
 		        regularLogin.setVisibility(View.GONE);
+		        logout.setVisibility(View.GONE);
 	        } else {
 		        if (isLoggedIn) {
 		            logout.setVisibility(View.VISIBLE);
@@ -231,7 +238,15 @@ public class Settings extends Activity {
 
 	private void testLogin(Runnable callback)
 	{
+		CheckBox anonymous = (CheckBox) findViewById(R.id.anonymousCheckbox);
+		if (anonymous.isChecked()) {
+			if (callback != null) callback.run();
+			return;
+		}
 		conn.setCallback(callback);
+		TextView user = (TextView) findViewById(R.id.user);
+		TextView pass = (TextView) findViewById(R.id.pass);
+		conn.setCredentials(user.getText().toString(), pass.getText().toString());
 		// the service is setup to test the credentials provided automatically.
 		// display a progress dialog
 		showDialog(DIALOG_LOGGING_IN);
