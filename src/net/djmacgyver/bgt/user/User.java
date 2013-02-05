@@ -7,11 +7,13 @@ public class User {
 	private int id;
 	private String name;
 	private boolean admin;
+	private String teamName;
 	
 	public User(JSONObject data) throws JSONException {
 		id = data.getInt("uid");
 		name = data.getString("name");
 		admin = data.getBoolean("admin");
+		teamName = data.getString("team_name");
 	}
 	
 	public int getId(){
@@ -24,5 +26,9 @@ public class User {
 	
 	public boolean isAdmin() {
 		return admin;
+	}
+	
+	public String getTeamName() {
+		return teamName;
 	}
 }

@@ -1,8 +1,15 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.socket.HttpSocketConnection;
+import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
+import net.djmacgyver.bgt.socket.command.SetTeamCommand;
+import net.djmacgyver.bgt.user.User;
+
+import org.json.JSONException;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -43,6 +50,8 @@ public class Settings extends Activity {
 	
 	private UiLifecycleHelper uiHelper;
 	
+	private SocketCommand authentication;
+	
 	private class CallbackService implements ServiceConnection {
 		private Runnable callback;
 		private String user;
@@ -65,28 +74,33 @@ public class Settings extends Activity {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			SocketService sockService = ((SocketService.LocalBinder) service).getService();
 			//final SocketCommand command = sockService.getSharedConnection().getAuthentication();
-			final AuthenticationCommand command = new AuthenticationCommand(user, pass);
-			sockService.getSharedConnection().sendCommand(command);
-			command.addCallback(new Runnable() {
+			authentication = new AuthenticationCommand(user, pass);
+			sockService.getSharedConnection().sendCommand(authentication);
+			authentication.addCallback(new Runnable() {
 				@Override
 				public void run() {
+					final SocketCommand command = authentication;
+					authentication = null;
 					dismissDialog(DIALOG_LOGGING_IN);
 					runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
 							setLoggedIn(command.wasSuccessful());
-						}
-					});
-					if (command.wasSuccessful()) {
-						runCallback();
-					} else {
-						runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
+							if (command.wasSuccessful()) {
+								try {
+									User user = new User(command.getResponseData().getJSONObject(0));
+									TextView team = (TextView) findViewById(R.id.teamView);
+									team.setText(user.getTeamName());
+								} catch (JSONException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								runCallback();
+							} else {
 								showDialog(DIALOG_CREDENTIALS_WRONG);
 							}
-						});
-					}
+						}
+					});
 				}
 			});
 			unbindService(this);
@@ -320,8 +334,32 @@ public class Settings extends Activity {
 	    super.onActivityResult(requestCode, resultCode, data);
 	    uiHelper.onActivityResult(requestCode, resultCode, data);
 	    
+	    
 	    if (requestCode == REQUEST_TEAM_SELECTION && resultCode == Activity.RESULT_OK) {
-	    	System.out.println("switch to team " + data.getLongExtra("teamId", -1));
+	    	final long teamId = data.getLongExtra("teamId", -1);
+	    	if (teamId != -1) {
+			    final ServiceConnection conn = new ServiceConnection() {
+					@Override
+					public void onServiceDisconnected(ComponentName name) {}
+					
+					@Override
+					public void onServiceConnected(ComponentName name, IBinder service) {
+						SetTeamCommand command = new SetTeamCommand((int) teamId);
+						HttpSocketConnection socket = ((SocketService.LocalBinder) service).getService().getSharedConnection();
+						socket.sendCommand(command);
+						unbindService(this);
+					}
+				};
+				
+				Runnable callback = new Runnable() {
+					@Override
+					public void run() {
+						bindService(new Intent(Settings.this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
+					}
+				};
+				
+				if (authentication != null) authentication.addCallback(callback); else callback.run();
+	    	}
 	    }
 	}
 
