@@ -144,12 +144,11 @@ public class Settings extends Activity {
 			}
 		});
         
-        final TextView pass = (TextView) findViewById(R.id.pass);
-        
         Button logout = (Button) findViewById(R.id.logout);
         logout.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+		        TextView pass = (TextView) findViewById(R.id.pass);
 				pass.setText("");
 				setLoggedIn(false);
 			}
