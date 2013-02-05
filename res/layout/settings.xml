@@ -124,6 +124,21 @@
                     android:paddingLeft="5dip"
                     android:text="@string/with_facebook" />
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/profileOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/teamButton"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/teamselection" />
+
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

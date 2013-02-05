@@ -17,7 +17,6 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -33,10 +32,12 @@ public class Settings extends Activity {
 	public static final int DIALOG_LOGGING_IN = 1;
 	public static final int DIALOG_CREDENTIALS_WRONG = 2;
 	
+	public static final int REQUEST_TEAM_SELECTION = 1;
+	
 	private Session.StatusCallback callback = new Session.StatusCallback() {
 	    @Override
 	    public void call(Session session, SessionState state, Exception exception) {
-	        onSessionStateChange(session, state, exception);
+	    	updateUI();
 	    }
 	};
 	
@@ -154,21 +155,19 @@ public class Settings extends Activity {
 			}
 		});
         
-        /*
-        Preference team = findPreference("team");
-        team.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        
+        Button team = (Button) findViewById(R.id.teamButton);
+        team.setOnClickListener(new View.OnClickListener() {
 			@Override
-			public boolean onPreferenceClick(Preference preference) {
+			public void onClick(View v) {
 				testLogin(new Runnable() {
 					@Override
 					public void run() {
-						startActivity(new Intent(Settings.this, TeamSelection.class));
+						startActivityForResult(new Intent(Settings.this, TeamSelection.class), REQUEST_TEAM_SELECTION);
 					}
 				});
-				return true;
 			}
 		});
-        */
         
         Session.openActiveSession(this, false, callback);
 	}
@@ -180,25 +179,30 @@ public class Settings extends Activity {
         View loginOptions = findViewById(R.id.loginOptions);
         View logout = findViewById(R.id.logout);
         View facebook = findViewById(R.id.facbookLogin);
+        View profile = findViewById(R.id.profileOptions);
         
         if (anonymousCheckbox.isChecked()) {
         	loginOptions.setVisibility(View.GONE);
         	anonymousInfo.setVisibility(View.VISIBLE);
+        	profile.setVisibility(View.GONE);
         } else {
         	anonymousInfo.setVisibility(View.GONE);
         	loginOptions.setVisibility(View.VISIBLE);
 	        if (Session.getActiveSession().isOpened()) {
 		        regularLogin.setVisibility(View.GONE);
 		        logout.setVisibility(View.GONE);
+		        profile.setVisibility(View.VISIBLE);
 	        } else {
 		        if (isLoggedIn) {
 		            logout.setVisibility(View.VISIBLE);
 			        regularLogin.setVisibility(View.GONE);
 			        facebook.setVisibility(View.GONE);
+			        profile.setVisibility(View.VISIBLE);
 		        } else {
 		            logout.setVisibility(View.GONE);
 			        regularLogin.setVisibility(View.VISIBLE);
 			        facebook.setVisibility(View.VISIBLE);
+			        profile.setVisibility(View.GONE);
 		        }
 	        }
         }
@@ -214,38 +218,42 @@ public class Settings extends Activity {
 		testLogin(new Runnable() {
 			@Override
 			public void run() {
-				finish();
+				Settings.super.onBackPressed();
 			}
 		});
 	}
 	
-	@Override
-	public void finish() {
+	private void storeSettings() {
         CheckBox anonymousCheckbox = (CheckBox) findViewById(R.id.anonymousCheckbox);
-        TextView user = (TextView) findViewById(R.id.user);
-        TextView pass = (TextView) findViewById(R.id.pass);
-        
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
 		Editor e = p.edit();
 		e.putBoolean("anonymous", anonymousCheckbox.isChecked());
-		e.putString("username", user.getText().toString());
-		e.putString("password", pass.getText().toString());
-		e.commit();
+		
+        if (anonymousCheckbox.isChecked()) {
+        	e.remove("username");
+        	e.remove("password");
+        } else {
+	        TextView user = (TextView) findViewById(R.id.user);
+	        TextView pass = (TextView) findViewById(R.id.pass);
+			e.putString("username", user.getText().toString());
+			e.putString("password", pass.getText().toString());
+        }
         
-		super.finish();
+		e.commit();
 	}
 
 	private void testLogin(Runnable callback)
 	{
 		CheckBox anonymous = (CheckBox) findViewById(R.id.anonymousCheckbox);
-		if (anonymous.isChecked()) {
+		if (isLoggedIn || anonymous.isChecked() || Session.getActiveSession().isOpened()) {
 			if (callback != null) callback.run();
 			return;
 		}
-		conn.setCallback(callback);
+		
 		TextView user = (TextView) findViewById(R.id.user);
 		TextView pass = (TextView) findViewById(R.id.pass);
 		conn.setCredentials(user.getText().toString(), pass.getText().toString());
+		conn.setCallback(callback);
 		// the service is setup to test the credentials provided automatically.
 		// display a progress dialog
 		showDialog(DIALOG_LOGGING_IN);
@@ -276,15 +284,6 @@ public class Settings extends Activity {
 		return super.onCreateDialog(id);
 	}
 
-	private void onSessionStateChange(Session session, SessionState state, Exception exception) {
-	    if (state.isOpened()) {
-	        Log.i("facebook", "Logged in...");
-	    } else if (state.isClosed()) {
-	        Log.i("facebook", "Logged out...");
-	    }
-	    updateUI();
-	}
-
 	@Override
 	public void onResume() {
 	    // For scenarios where the main activity is launched and user
@@ -293,7 +292,7 @@ public class Settings extends Activity {
 	    Session session = Session.getActiveSession();
 	    if (session != null &&
 	           (session.isOpened() || session.isClosed()) ) {
-	        onSessionStateChange(session, session.getState(), null);
+	    	updateUI();
 	    }
 
 	    super.onResume();
@@ -308,7 +307,10 @@ public class Settings extends Activity {
 		user.setText(p.getString("username", ""));
 		pass.setText(p.getString("password", ""));
 		
+		isLoggedIn = false;
+		
 		testLogin(null);
+		Session.openActiveSession(this, false, callback);
 	    
 	    updateUI();
 	}
@@ -317,10 +319,15 @@ public class Settings extends Activity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    super.onActivityResult(requestCode, resultCode, data);
 	    uiHelper.onActivityResult(requestCode, resultCode, data);
+	    
+	    if (requestCode == REQUEST_TEAM_SELECTION && resultCode == Activity.RESULT_OK) {
+	    	System.out.println("switch to team " + data.getLongExtra("teamId", -1));
+	    }
 	}
 
 	@Override
 	public void onPause() {
+		storeSettings();
 	    super.onPause();
 	    uiHelper.onPause();
 	}
