@@ -17,6 +17,7 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
+import net.djmacgyver.bgt.socket.command.FacebookLoginCommand;
 import net.djmacgyver.bgt.socket.command.SubscribeUpdatesCommand;
 import net.djmacgyver.bgt.socket.command.UnsubscribeUpdatesCommand;
 import net.djmacgyver.bgt.user.User;
@@ -29,11 +30,16 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources.NotFoundException;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.codebutler.android_websockets.WebSocketClient;
+import com.facebook.Request;
+import com.facebook.Request.GraphUserCallback;
+import com.facebook.Response;
+import com.facebook.model.GraphUser;
 
 public class HttpSocketConnection {
 	public static final int STATE_DISCONNECTED = 0;
@@ -185,11 +191,12 @@ public class HttpSocketConnection {
 						
 						synchronized (queue) {
 							// first things first: send handshake & authentication.
+							Log.d("lifecycle", "sending handshake");
 							sendHandshake();
-							authentication = authenticate();
 							Runnable r = new Runnable() {
 								@Override
 								public void run() {
+									Log.d("lifecycle", "sending queued commands");
 									// get the current queue
 									LinkedList<SocketCommand> q = queue;
 									queue = null;
@@ -198,7 +205,8 @@ public class HttpSocketConnection {
 									while (!q.isEmpty()) sendCommand(q.poll());
 								}
 							};
-							if (authentication != null) authentication.addCallback(r); else r.run();
+							authenticate(r);
+							//if (authentication != null) authentication.addCallback(r); else r.run();
 						}
 						
 						sendSubscriptions();
@@ -253,35 +261,72 @@ public class HttpSocketConnection {
 		requests.clear();
 	}
 	
-	public SocketCommand getAuthentication(){
+	public void getAuthentication(final Runnable callback){
+		if (authentication != null) callback.run();
 		if (authentication == null) {
 			Session.setUser(null);
 			SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
-			if (p.getBoolean("anonymous", true)) return null;
-			// send our authentication data as soon as we are connected
-			authentication = new AuthenticationCommand(p.getString("username", ""), p.getString("password", ""));
-			authentication.addCallback(new Runnable() {
-				@Override
-				public void run() {
-					if (authentication == null) return;
-					System.out.println(authentication);
-					if (authentication.wasSuccessful()) {
-						try {
-							Session.setUser(new User(authentication.getResponseData().getJSONObject(0)));
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
+			if (p.getBoolean("anonymous", true)) {
+				callback.run();
+				return;
+			}
+			
+			final com.facebook.Session fbSession = com.facebook.Session.openActiveSessionFromCache(context);
+			if (fbSession != null) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						Looper.prepare();
+						Request.executeMeRequestAsync(fbSession, new GraphUserCallback() {					
+							@Override
+							public void onCompleted(GraphUser user, Response response) {
+								Log.d("user details", user.getId());
+								authentication = new FacebookLoginCommand(user);
+								addSessionCallback(authentication);
+								callback.run();
+							}
+						});
+						Looper.loop();
+					}
+				}).start();
+			} else {
+				authentication = new AuthenticationCommand(p.getString("username", ""), p.getString("password", ""));
+				addSessionCallback(authentication);
+				callback.run();
+			}
+		}
+	}
+	
+	private void addSessionCallback(SocketCommand command) {
+		command.addCallback(new Runnable() {
+			@Override
+			public void run() {
+				if (authentication == null) return;
+				if (authentication.wasSuccessful()) {
+					try {
+						Session.setUser(new User(authentication.getResponseData().getJSONObject(0)));
+					} catch (JSONException e) {
+						e.printStackTrace();
 					}
 				}
-			});
-		}
-		return authentication;
+			}
+		});
 	}
 
-	protected SocketCommand authenticate() {
-		SocketCommand auth = getAuthentication();
-		if (auth == null) return null;
-		return sendCommand(auth, false, true);
+	protected void authenticate(final Runnable r) {
+		Log.d("lifecycle", "authenticate()");
+		getAuthentication(new Runnable() {			
+			@Override
+			public void run() {
+				if (authentication == null) {
+					Log.d("lifecycle", "no authentication available...");
+				} else {
+					Log.d("lifecycle", "sending authentication");
+					sendCommand(authentication, false, true);
+				}
+				r.run();
+			}
+		});
 	}
 	
 	private void sendHandshake() {
