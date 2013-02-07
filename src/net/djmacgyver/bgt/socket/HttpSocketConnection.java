@@ -191,12 +191,10 @@ public class HttpSocketConnection {
 						
 						synchronized (queue) {
 							// first things first: send handshake & authentication.
-							Log.d("lifecycle", "sending handshake");
 							sendHandshake();
 							Runnable r = new Runnable() {
 								@Override
 								public void run() {
-									Log.d("lifecycle", "sending queued commands");
 									// get the current queue
 									LinkedList<SocketCommand> q = queue;
 									queue = null;
@@ -280,9 +278,8 @@ public class HttpSocketConnection {
 						Request.executeMeRequestAsync(fbSession, new GraphUserCallback() {					
 							@Override
 							public void onCompleted(GraphUser user, Response response) {
-								Log.d("user details", user.getId());
 								authentication = new FacebookLoginCommand(user);
-								addSessionCallback(authentication);
+								authentication.addCallback(getSessionCallback());
 								callback.run();
 							}
 						});
@@ -291,14 +288,14 @@ public class HttpSocketConnection {
 				}).start();
 			} else {
 				authentication = new AuthenticationCommand(p.getString("username", ""), p.getString("password", ""));
-				addSessionCallback(authentication);
+				authentication.addCallback(getSessionCallback());
 				callback.run();
 			}
 		}
 	}
 	
-	private void addSessionCallback(SocketCommand command) {
-		command.addCallback(new Runnable() {
+	private Runnable getSessionCallback() {
+		return new Runnable(){
 			@Override
 			public void run() {
 				if (authentication == null) return;
@@ -310,18 +307,14 @@ public class HttpSocketConnection {
 					}
 				}
 			}
-		});
+		};
 	}
 
 	protected void authenticate(final Runnable r) {
-		Log.d("lifecycle", "authenticate()");
 		getAuthentication(new Runnable() {			
 			@Override
 			public void run() {
-				if (authentication == null) {
-					Log.d("lifecycle", "no authentication available...");
-				} else {
-					Log.d("lifecycle", "sending authentication");
+				if (authentication != null) {
 					sendCommand(authentication, false, true);
 				}
 				r.run();
