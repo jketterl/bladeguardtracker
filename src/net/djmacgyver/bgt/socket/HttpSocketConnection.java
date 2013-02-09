@@ -292,11 +292,12 @@ public class HttpSocketConnection {
 		
 		final com.facebook.Session fbSession = com.facebook.Session.openActiveSessionFromCache(context);
 		if (fbSession != null) {
-			final GraphUserCallback c = new GraphUserCallback() {					
+			final GraphUserCallback c = new GraphUserCallback() {
+				private int retries = 0;
 				@Override
 				public void onCompleted(GraphUser user, Response response) {
 					if (user == null) {
-						Log.w("fbsesion", "/me request returned null");
+						Log.w("fbsession", "/me request returned null");
 						
 						// this is a known bug with older android versions: the request returns
 						// null, caused by an empty http response (indicated by a JSONException).
@@ -305,8 +306,13 @@ public class HttpSocketConnection {
 						if (error != null) {
 							Throwable cause = error.getException().getCause();
 							if (cause != null && cause instanceof JSONException) {
-								Log.d("fbsession", "appears to be caused by know bug, retrying...");
-								Request.executeMeRequestAsync(fbSession, this);
+								if (++retries <= 5) {
+									Log.d("fbsession", "appears to be caused by know bug, retrying...");
+									Request.executeMeRequestAsync(fbSession, this);
+									return;
+								}
+								Log.e("fbsession", "retries count exhausted. giving up...");
+								callback.run();
 								return;
 							}
 						}
