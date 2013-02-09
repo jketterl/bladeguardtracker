@@ -36,9 +36,12 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.codebutler.android_websockets.WebSocketClient;
+import com.facebook.FacebookRequestError;
 import com.facebook.Request;
 import com.facebook.Request.GraphUserCallback;
 import com.facebook.Response;
+import com.facebook.Session.StatusCallback;
+import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 
 public class HttpSocketConnection {
@@ -259,41 +262,6 @@ public class HttpSocketConnection {
 		requests.clear();
 	}
 	
-	public void getAuthentication(final Runnable callback){
-		if (authentication != null) callback.run();
-		if (authentication == null) {
-			Session.setUser(null);
-			SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
-			if (p.getBoolean("anonymous", true)) {
-				callback.run();
-				return;
-			}
-			
-			final com.facebook.Session fbSession = com.facebook.Session.openActiveSessionFromCache(context);
-			if (fbSession != null) {
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						Looper.prepare();
-						Request.executeMeRequestAsync(fbSession, new GraphUserCallback() {					
-							@Override
-							public void onCompleted(GraphUser user, Response response) {
-								authentication = new FacebookLoginCommand(user);
-								authentication.addCallback(getSessionCallback());
-								callback.run();
-							}
-						});
-						Looper.loop();
-					}
-				}).start();
-			} else {
-				authentication = new AuthenticationCommand(p.getString("username", ""), p.getString("password", ""));
-				authentication.addCallback(getSessionCallback());
-				callback.run();
-			}
-		}
-	}
-	
 	private Runnable getSessionCallback() {
 		return new Runnable(){
 			@Override
@@ -310,16 +278,74 @@ public class HttpSocketConnection {
 		};
 	}
 
-	protected void authenticate(final Runnable r) {
-		getAuthentication(new Runnable() {			
-			@Override
-			public void run() {
-				if (authentication != null) {
+	protected void authenticate(final Runnable callback) {
+		if (authentication != null)  {
+			authentication.addCallback(callback);
+			return;
+		}
+		Session.setUser(null);
+		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
+		if (p.getBoolean("anonymous", true)) {
+			callback.run();
+			return;
+		}
+		
+		final com.facebook.Session fbSession = com.facebook.Session.openActiveSessionFromCache(context);
+		if (fbSession != null) {
+			final GraphUserCallback c = new GraphUserCallback() {					
+				@Override
+				public void onCompleted(GraphUser user, Response response) {
+					if (user == null) {
+						Log.w("fbsesion", "/me request returned null");
+						
+						// this is a known bug with older android versions: the request returns
+						// null, caused by an empty http response (indicated by a JSONException).
+						// in that case: repeat the request...
+						FacebookRequestError error = response.getError();
+						if (error != null) {
+							Throwable cause = error.getException().getCause();
+							if (cause != null && cause instanceof JSONException) {
+								Log.d("fbsession", "appears to be caused by know bug, retrying...");
+								Request.executeMeRequestAsync(fbSession, this);
+								return;
+							}
+						}
+						
+						Log.w("fbsession", "no typical indication for the known sdk bug...");
+						callback.run();
+						return;
+					}
+					authentication = new FacebookLoginCommand(user);
+					authentication.addCallback(getSessionCallback());
+					authentication.addCallback(callback);
 					sendCommand(authentication, false, true);
 				}
-				r.run();
+			};
+			if (fbSession.isOpened()) {
+				new Thread(){
+					public void run() {
+						Looper.prepare();
+						Request.executeMeRequestAsync(fbSession, c);
+						Looper.loop();
+					}
+				}.start();
+			} else {
+				fbSession.addCallback(new StatusCallback() {
+					@Override
+					public void call(com.facebook.Session session, SessionState state,
+							Exception exception) {
+						if (session.isOpened()) {
+							Request.executeMeRequestAsync(fbSession, c);
+						}
+					}
+				});
 			}
-		});
+		} else {
+			authentication = new AuthenticationCommand(p.getString("username", ""), p.getString("password", ""));
+			authentication.addCallback(getSessionCallback());
+			authentication.addCallback(callback);
+			sendCommand(authentication, false, true);
+		}
 	}
 	
 	private void sendHandshake() {
