@@ -2,6 +2,7 @@ package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.SignupCommand;
 
@@ -49,9 +50,9 @@ public class Signup extends PreferenceActivity {
 			String user = ((EditTextPreference) findPreference("username")).getEditText().getText().toString();
 			String pass = ((EditTextPreference) findPreference("password")).getEditText().getText().toString();
 			final SocketCommand c = new SignupCommand(user, pass);
-			c.addCallback(new Runnable() {
+			c.addCallback(new SocketCommandCallback() {
 				@Override
-				public void run() {
+				public void run(SocketCommand command) {
 					Message msg = new Message();
 					Result res = new Result();
 					res.success = c.wasSuccessful();

@@ -9,6 +9,7 @@ import net.djmacgyver.bgt.control.ControlService;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.PauseEventCommand;
 import net.djmacgyver.bgt.socket.command.ShutdownEventCommand;
@@ -65,9 +66,9 @@ public class EventDetail extends Activity {
 		@Override
 		public void onServiceConnected(ComponentName arg0, IBinder arg1) {
 			SocketService s = ((SocketService.LocalBinder) arg1).getService();
-			command.addCallback(new Runnable() {
+			command.addCallback(new SocketCommandCallback() {
 				@Override
-				public void run() {
+				public void run(SocketCommand command) {
 					dismissDialog(DIALOG_PERFORMING_COMMAND);
 					if (!command.wasSuccessful()) {
 						String message = "unknown error";

@@ -12,12 +12,12 @@ import android.util.Log;
 abstract public class SocketCommand {
 	private String command;
 	protected JSONObject data;
-	private ArrayList<Runnable> callbacks = new ArrayList<Runnable>();
+	private ArrayList<SocketCommandCallback> callbacks = new ArrayList<SocketCommandCallback>();
 	private int requestId;
 	private JSONArray responseData;
 	private boolean result = false;
 	
-	public SocketCommand(String command, JSONObject data, Runnable callback) {
+	public SocketCommand(String command, JSONObject data, SocketCommandCallback callback) {
 		this(command, data);
 		addCallback(callback);
 	}
@@ -82,8 +82,8 @@ abstract public class SocketCommand {
 	}
 	
 	private void runCallbacks() {
-		Iterator<Runnable> i = callbacks.iterator();
-		while (i.hasNext()) i.next().run();
+		Iterator<SocketCommandCallback> i = callbacks.iterator();
+		while (i.hasNext()) i.next().run(this);
 		callbacks = null;
 	}
 	
@@ -97,11 +97,11 @@ abstract public class SocketCommand {
 		return responseData;
 	}
 
-	public void addCallback(Runnable callback) {
+	public void addCallback(SocketCommandCallback callback) {
 		if (callbacks != null) {
 			callbacks.add(callback);
 		} else {
-			callback.run();
+			callback.run(this);
 		}
 	}
 }

@@ -195,9 +195,9 @@ public class HttpSocketConnection {
 						synchronized (queue) {
 							// first things first: send handshake & authentication.
 							sendHandshake();
-							Runnable r = new Runnable() {
+							SocketCommandCallback r = new SocketCommandCallback() {
 								@Override
-								public void run() {
+								public void run(SocketCommand command) {
 									// get the current queue
 									LinkedList<SocketCommand> q = queue;
 									queue = null;
@@ -262,10 +262,10 @@ public class HttpSocketConnection {
 		requests.clear();
 	}
 	
-	private Runnable getSessionCallback() {
-		return new Runnable(){
+	private SocketCommandCallback getSessionCallback() {
+		return new SocketCommandCallback() {
 			@Override
-			public void run() {
+			public void run(SocketCommand authentication) {
 				if (authentication == null) return;
 				if (authentication.wasSuccessful()) {
 					try {
@@ -278,7 +278,7 @@ public class HttpSocketConnection {
 		};
 	}
 
-	protected void authenticate(final Runnable callback) {
+	protected void authenticate(final SocketCommandCallback callback) {
 		if (authentication != null)  {
 			authentication.addCallback(callback);
 			return;
@@ -286,7 +286,7 @@ public class HttpSocketConnection {
 		Session.setUser(null);
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
 		if (p.getBoolean("anonymous", true)) {
-			callback.run();
+			callback.run(null);
 			return;
 		}
 		
@@ -312,13 +312,13 @@ public class HttpSocketConnection {
 									return;
 								}
 								Log.e("fbsession", "retries count exhausted. giving up...");
-								callback.run();
+								callback.run(null);
 								return;
 							}
 						}
 						
 						Log.w("fbsession", "no typical indication for the known sdk bug...");
-						callback.run();
+						callback.run(null);
 						return;
 					}
 					authentication = new FacebookLoginCommand(user);

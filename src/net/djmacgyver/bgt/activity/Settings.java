@@ -1,15 +1,14 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.session.UserChangeListener;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
 import net.djmacgyver.bgt.socket.command.SetTeamCommand;
 import net.djmacgyver.bgt.user.User;
-
-import org.json.JSONException;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -35,7 +34,7 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
 
-public class Settings extends Activity {
+public class Settings extends Activity implements UserChangeListener {
 	public static final int DIALOG_LOGGING_IN = 1;
 	public static final int DIALOG_CREDENTIALS_WRONG = 2;
 	
@@ -76,10 +75,10 @@ public class Settings extends Activity {
 			//final SocketCommand command = sockService.getSharedConnection().getAuthentication();
 			authentication = new AuthenticationCommand(user, pass);
 			sockService.getSharedConnection().sendCommand(authentication);
-			authentication.addCallback(new Runnable() {
+			authentication.addCallback(new SocketCommandCallback() {
 				@Override
-				public void run() {
-					final SocketCommand command = authentication;
+				public void run(final SocketCommand command) {
+					//final SocketCommand command = authentication;
 					authentication = null;
 					dismissDialog(DIALOG_LOGGING_IN);
 					runOnUiThread(new Runnable() {
@@ -87,14 +86,6 @@ public class Settings extends Activity {
 						public void run() {
 							setLoggedIn(command.wasSuccessful());
 							if (command.wasSuccessful()) {
-								try {
-									User user = new User(command.getResponseData().getJSONObject(0));
-									TextView team = (TextView) findViewById(R.id.teamView);
-									team.setText(user.getTeamName());
-								} catch (JSONException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
 								runCallback();
 							} else {
 								showDialog(DIALOG_CREDENTIALS_WRONG);
@@ -206,12 +197,24 @@ public class Settings extends Activity {
 		        regularLogin.setVisibility(View.GONE);
 		        logout.setVisibility(View.GONE);
 		        profile.setVisibility(View.VISIBLE);
+
+				User user = net.djmacgyver.bgt.session.Session.getUser();
+				if (user != null) {
+					TextView team = (TextView) findViewById(R.id.teamView);
+					team.setText(user.getTeamName());
+				}
 	        } else {
 		        if (isLoggedIn) {
 		            logout.setVisibility(View.VISIBLE);
 			        regularLogin.setVisibility(View.GONE);
 			        facebook.setVisibility(View.GONE);
 			        profile.setVisibility(View.VISIBLE);
+			        
+					User user = net.djmacgyver.bgt.session.Session.getUser();
+					if (user != null) {
+						TextView team = (TextView) findViewById(R.id.teamView);
+						team.setText(user.getTeamName());
+					}
 		        } else {
 		            logout.setVisibility(View.GONE);
 			        regularLogin.setVisibility(View.VISIBLE);
@@ -323,6 +326,8 @@ public class Settings extends Activity {
 		
 		isLoggedIn = false;
 		
+		net.djmacgyver.bgt.session.Session.addUserChangeListener(this);
+		
 		testLogin(null);
 		Session.openActiveSession(this, false, callback);
 	    
@@ -351,20 +356,22 @@ public class Settings extends Activity {
 					}
 				};
 				
-				Runnable callback = new Runnable() {
+				SocketCommandCallback callback = new SocketCommandCallback() {
 					@Override
-					public void run() {
+					public void run(SocketCommand command) {
 						bindService(new Intent(Settings.this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
 					}
 				};
 				
-				if (authentication != null) authentication.addCallback(callback); else callback.run();
+				if (authentication != null) authentication.addCallback(callback); else callback.run(null);
 	    	}
 	    }
 	}
 
 	@Override
 	public void onPause() {
+		net.djmacgyver.bgt.session.Session.removeUserChangeListener(this);
+		
 		storeSettings();
 	    super.onPause();
 	    uiHelper.onPause();
@@ -380,5 +387,15 @@ public class Settings extends Activity {
 	public void onSaveInstanceState(Bundle outState) {
 	    super.onSaveInstanceState(outState);
 	    uiHelper.onSaveInstanceState(outState);
+	}
+
+	@Override
+	public void onUserChange(User user) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				updateUI();
+			}
+		});
 	}
 }

@@ -2,6 +2,7 @@ package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.BridgeCommand;
 
@@ -74,9 +75,9 @@ public class Admin extends Activity {
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				SocketService s = ((SocketService.LocalBinder) service).getService();
-				command.addCallback(new Runnable() {
+				command.addCallback(new SocketCommandCallback() {
 					@Override
-					public void run() {
+					public void run(SocketCommand command) {
 						dismissDialog(DIALOG_PERFORMING_COMMAND);
 						if (!command.wasSuccessful()) {
 							String message = "unknown error";

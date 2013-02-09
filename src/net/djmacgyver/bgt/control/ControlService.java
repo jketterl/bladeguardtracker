@@ -5,6 +5,7 @@ import net.djmacgyver.bgt.gps.GPSTrackingService;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.DisableControlCommand;
 import net.djmacgyver.bgt.socket.command.EnableControlCommand;
@@ -72,10 +73,10 @@ public class ControlService extends Service implements HttpSocketListener {
 	
 	private void enableControlSession()
 	{
-		final SocketCommand enable = new EnableControlCommand(event);
-		enable.addCallback(new Runnable() {
+		SocketCommand enable = new EnableControlCommand(event);
+		enable.addCallback(new SocketCommandCallback() {
 			@Override
-			public void run() {
+			public void run(SocketCommand enable) {
 				if (enable.wasSuccessful()) return;
 				Log.e("ControlService", "Server did not accept control connection; error: " + enable.getResponseData());
 				stopSelf();

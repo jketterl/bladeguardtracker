@@ -4,6 +4,7 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.map.MapList;
 import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.SetMapCommand;
 import android.app.AlertDialog;
@@ -79,9 +80,9 @@ public class MapSelection extends ListActivity {
 					public void onServiceConnected(ComponentName name, IBinder service) {
 						SocketService s = ((SocketService.LocalBinder) service).getService();
 						SocketCommand command = new SetMapCommand(event, (int) selected);
-						command.addCallback(new Runnable() {
+						command.addCallback(new SocketCommandCallback() {
 							@Override
-							public void run() {
+							public void run(SocketCommand command) {
 								h.sendEmptyMessage(0);
 							}
 						});

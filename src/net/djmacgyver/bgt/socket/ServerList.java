@@ -31,10 +31,10 @@ public abstract class ServerList implements ListAdapter {
 			SocketService s = ((SocketService.LocalBinder) service).getService();
 			//final SocketCommand command = new SocketCommand(getServerCommand());
 			try {
-				final SocketCommand command = getServerCommand().newInstance();
-				command.addCallback(new Runnable() {
+				SocketCommand command = getServerCommand().newInstance();
+				command.addCallback(new SocketCommandCallback() {
 					@Override
-					public void run() {
+					public void run(SocketCommand command) {
 						data = command.getResponseData();
 						fireChanged();
 					}
