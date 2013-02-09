@@ -1,12 +1,13 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.session.UserChangeListener;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.AbstractAuthCommand;
 import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
+import net.djmacgyver.bgt.socket.command.FacebookLoginCommand;
 import net.djmacgyver.bgt.socket.command.SetTeamCommand;
 import net.djmacgyver.bgt.user.User;
 import android.app.Activity;
@@ -34,7 +35,7 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
 
-public class Settings extends Activity implements UserChangeListener {
+public class Settings extends Activity {
 	public static final int DIALOG_LOGGING_IN = 1;
 	public static final int DIALOG_CREDENTIALS_WRONG = 2;
 	
@@ -43,70 +44,15 @@ public class Settings extends Activity implements UserChangeListener {
 	private Session.StatusCallback callback = new Session.StatusCallback() {
 	    @Override
 	    public void call(Session session, SessionState state, Exception exception) {
+	    	if (session.isClosed()) authentication = null;
 	    	updateUI();
 	    }
 	};
 	
 	private UiLifecycleHelper uiHelper;
 	
-	private SocketCommand authentication;
-	
-	private class CallbackService implements ServiceConnection {
-		private Runnable callback;
-		private String user;
-		private String pass;
-		
-		public void setCallback(Runnable callback) {
-			this.callback = callback;
-		}
-		
-		public void setCredentials(String user, String pass) {
-			this.user = user;
-			this.pass = pass;
-		}
-		
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-		}
-		
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			SocketService sockService = ((SocketService.LocalBinder) service).getService();
-			//final SocketCommand command = sockService.getSharedConnection().getAuthentication();
-			authentication = new AuthenticationCommand(user, pass);
-			sockService.getSharedConnection().sendCommand(authentication);
-			authentication.addCallback(new SocketCommandCallback() {
-				@Override
-				public void run(final SocketCommand command) {
-					//final SocketCommand command = authentication;
-					authentication = null;
-					dismissDialog(DIALOG_LOGGING_IN);
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							setLoggedIn(command.wasSuccessful());
-							if (command.wasSuccessful()) {
-								runCallback();
-							} else {
-								showDialog(DIALOG_CREDENTIALS_WRONG);
-							}
-						}
-					});
-				}
-			});
-			unbindService(this);
-		}
-		
-		private void runCallback(){
-			if (callback == null) return;
-			callback.run();
-			callback = null;
-		}
-	};
-	
-	private CallbackService conn = new CallbackService();
-	
-	private Boolean isLoggedIn = false;
+	//private Boolean isLoggedIn = false;
+	private AbstractAuthCommand authentication;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +102,9 @@ public class Settings extends Activity implements UserChangeListener {
 			public void onClick(View v) {
 		        TextView pass = (TextView) findViewById(R.id.pass);
 				pass.setText("");
-				setLoggedIn(false);
+				authentication = null;
+				updateUI();
+				//setLoggedIn(false);
 			}
 		});
         
@@ -165,9 +113,9 @@ public class Settings extends Activity implements UserChangeListener {
         team.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				testLogin(new Runnable() {
+				testLogin(new SocketCommandCallback() {
 					@Override
-					public void run() {
+					public void run(SocketCommand command) {
 						startActivityForResult(new Intent(Settings.this, TeamSelection.class), REQUEST_TEAM_SELECTION);
 					}
 				});
@@ -185,6 +133,7 @@ public class Settings extends Activity implements UserChangeListener {
         View logout = findViewById(R.id.logout);
         View facebook = findViewById(R.id.facbookLogin);
         View profile = findViewById(R.id.profileOptions);
+		TextView team = (TextView) findViewById(R.id.teamView);
         
         if (anonymousCheckbox.isChecked()) {
         	loginOptions.setVisibility(View.GONE);
@@ -193,48 +142,41 @@ public class Settings extends Activity implements UserChangeListener {
         } else {
         	anonymousInfo.setVisibility(View.GONE);
         	loginOptions.setVisibility(View.VISIBLE);
-	        if (Session.getActiveSession().isOpened()) {
-		        regularLogin.setVisibility(View.GONE);
-		        logout.setVisibility(View.GONE);
-		        profile.setVisibility(View.VISIBLE);
-
-				User user = net.djmacgyver.bgt.session.Session.getUser();
-				if (user != null) {
-					TextView team = (TextView) findViewById(R.id.teamView);
-					team.setText(user.getTeamName());
-				}
-	        } else {
-		        if (isLoggedIn) {
+        	
+        	if (authentication != null) {
+        		if (authentication instanceof AuthenticationCommand) {
 		            logout.setVisibility(View.VISIBLE);
 			        regularLogin.setVisibility(View.GONE);
 			        facebook.setVisibility(View.GONE);
-			        profile.setVisibility(View.VISIBLE);
-			        
-					User user = net.djmacgyver.bgt.session.Session.getUser();
-					if (user != null) {
-						TextView team = (TextView) findViewById(R.id.teamView);
-						team.setText(user.getTeamName());
-					}
-		        } else {
-		            logout.setVisibility(View.GONE);
-			        regularLogin.setVisibility(View.VISIBLE);
-			        facebook.setVisibility(View.VISIBLE);
-			        profile.setVisibility(View.GONE);
-		        }
-	        }
+        		} else if (authentication instanceof FacebookLoginCommand) {
+    		        regularLogin.setVisibility(View.GONE);
+    		        logout.setVisibility(View.GONE);
+    		        facebook.setVisibility(View.VISIBLE);
+        		}
+		        profile.setVisibility(View.VISIBLE);
+        		User user = authentication.getUser();
+        		if (user != null) team.setText(user.getTeamName());
+        	} else {
+	            logout.setVisibility(View.GONE);
+		        regularLogin.setVisibility(View.VISIBLE);
+		        facebook.setVisibility(View.VISIBLE);
+		        profile.setVisibility(View.GONE);
+        	}
         }
 	}
 	
+	/*
 	private void setLoggedIn(Boolean loggedIn) {
 		isLoggedIn = loggedIn;
 		updateUI();
 	}
+	*/
 	
 	@Override
 	public void onBackPressed() {
-		testLogin(new Runnable() {
+		testLogin(new SocketCommandCallback() {
 			@Override
-			public void run() {
+			public void run(SocketCommand command) {
 				Settings.super.onBackPressed();
 			}
 		});
@@ -259,22 +201,42 @@ public class Settings extends Activity implements UserChangeListener {
 		e.commit();
 	}
 
-	private void testLogin(Runnable callback)
+	private void testLogin(final SocketCommandCallback callback)
 	{
-		CheckBox anonymous = (CheckBox) findViewById(R.id.anonymousCheckbox);
-		if (isLoggedIn || anonymous.isChecked() || Session.getActiveSession().isOpened()) {
-			if (callback != null) callback.run();
-			return;
-		}
-		
-		TextView user = (TextView) findViewById(R.id.user);
-		TextView pass = (TextView) findViewById(R.id.pass);
-		conn.setCredentials(user.getText().toString(), pass.getText().toString());
-		conn.setCallback(callback);
-		// the service is setup to test the credentials provided automatically.
-		// display a progress dialog
 		showDialog(DIALOG_LOGGING_IN);
-		// that way, we only have to bind the service and prevent the parent function. that's all
+		
+		storeSettings();
+		
+		ServiceConnection conn = new ServiceConnection() {
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+			}
+			
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				SocketService s = ((SocketService.LocalBinder) service).getService();
+				final ServiceConnection conn = this;
+				
+				SocketCommandCallback c = new SocketCommandCallback() {
+					@Override
+					public void run(final SocketCommand command) {
+						unbindService(conn);
+						dismissDialog(DIALOG_LOGGING_IN);
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								if (command.wasSuccessful()) authentication = (AbstractAuthCommand) command;
+								updateUI();
+								//setLoggedIn(command.wasSuccessful());
+							}
+						});
+						if (callback != null) callback.run(command);
+					}
+				};
+				
+				s.getSharedConnection().addAuthCallback(c);
+			}
+		};
 		bindService(new Intent(this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
 	}
 
@@ -324,9 +286,8 @@ public class Settings extends Activity implements UserChangeListener {
 		user.setText(p.getString("username", ""));
 		pass.setText(p.getString("password", ""));
 		
-		isLoggedIn = false;
-		
-		net.djmacgyver.bgt.session.Session.addUserChangeListener(this);
+		//isLoggedIn = false;
+		authentication = null;
 		
 		testLogin(null);
 		Session.openActiveSession(this, false, callback);
@@ -350,28 +311,30 @@ public class Settings extends Activity implements UserChangeListener {
 					@Override
 					public void onServiceConnected(ComponentName name, IBinder service) {
 						SetTeamCommand command = new SetTeamCommand((int) teamId);
+						command.addCallback(new SocketCommandCallback() {
+							@Override
+							public void run(SocketCommand command) {
+								if (command.wasSuccessful()) runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										testLogin(null);
+									}
+								});
+							}
+						});
 						HttpSocketConnection socket = ((SocketService.LocalBinder) service).getService().getSharedConnection();
 						socket.sendCommand(command);
 						unbindService(this);
 					}
 				};
 				
-				SocketCommandCallback callback = new SocketCommandCallback() {
-					@Override
-					public void run(SocketCommand command) {
-						bindService(new Intent(Settings.this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
-					}
-				};
-				
-				if (authentication != null) authentication.addCallback(callback); else callback.run(null);
+				bindService(new Intent(Settings.this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
 	    	}
 	    }
 	}
 
 	@Override
 	public void onPause() {
-		net.djmacgyver.bgt.session.Session.removeUserChangeListener(this);
-		
 		storeSettings();
 	    super.onPause();
 	    uiHelper.onPause();
@@ -387,15 +350,5 @@ public class Settings extends Activity implements UserChangeListener {
 	public void onSaveInstanceState(Bundle outState) {
 	    super.onSaveInstanceState(outState);
 	    uiHelper.onSaveInstanceState(outState);
-	}
-
-	@Override
-	public void onUserChange(User user) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				updateUI();
-			}
-		});
 	}
 }

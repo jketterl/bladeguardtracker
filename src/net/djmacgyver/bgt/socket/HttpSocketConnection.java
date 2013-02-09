@@ -16,11 +16,11 @@ import javax.net.ssl.X509TrustManager;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.session.Session;
+import net.djmacgyver.bgt.socket.command.AbstractAuthCommand;
 import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
 import net.djmacgyver.bgt.socket.command.FacebookLoginCommand;
 import net.djmacgyver.bgt.socket.command.SubscribeUpdatesCommand;
 import net.djmacgyver.bgt.socket.command.UnsubscribeUpdatesCommand;
-import net.djmacgyver.bgt.user.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,7 +58,8 @@ public class HttpSocketConnection {
 	private ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
 	//private ArrayList<String> subscribed = new ArrayList<String>();
 	private HashMap <Event, ArrayList<String>> subscribed = new HashMap<Event, ArrayList<String>>();
-	private SocketCommand authentication;
+	private AbstractAuthCommand authentication;
+	private ArrayList<SocketCommandCallback> authCallbacks = new ArrayList<SocketCommandCallback>();
 	
 	private int state = STATE_DISCONNECTED;
 	
@@ -266,18 +267,17 @@ public class HttpSocketConnection {
 		return new SocketCommandCallback() {
 			@Override
 			public void run(SocketCommand authentication) {
-				if (authentication == null) return;
 				if (authentication.wasSuccessful()) {
-					try {
-						Session.setUser(new User(authentication.getResponseData().getJSONObject(0)));
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
+					Session.setUser(((AbstractAuthCommand) authentication).getUser());
 				}
+				for (SocketCommandCallback c : authCallbacks) {
+					c.run(authentication);
+				}
+				authCallbacks = new ArrayList<SocketCommandCallback>();
 			}
 		};
 	}
-
+	
 	protected void authenticate(final SocketCommandCallback callback) {
 		if (authentication != null)  {
 			authentication.addCallback(callback);
@@ -292,6 +292,7 @@ public class HttpSocketConnection {
 		
 		final com.facebook.Session fbSession = com.facebook.Session.openActiveSessionFromCache(context);
 		if (fbSession != null) {
+			authentication = new FacebookLoginCommand();
 			final GraphUserCallback c = new GraphUserCallback() {
 				private int retries = 0;
 				@Override
@@ -321,7 +322,8 @@ public class HttpSocketConnection {
 						callback.run(null);
 						return;
 					}
-					authentication = new FacebookLoginCommand(user);
+					//authentication = new FacebookLoginCommand(user);
+					((FacebookLoginCommand) authentication).setUser(user);
 					authentication.addCallback(getSessionCallback());
 					authentication.addCallback(callback);
 					sendCommand(authentication, false, true);
@@ -508,5 +510,13 @@ public class HttpSocketConnection {
 	
 	public int getState() {
 		return state;
+	}
+	
+	public void addAuthCallback(SocketCommandCallback c) {
+		if (authentication != null) {
+			authentication.addCallback(c);
+		} else {
+			authCallbacks.add(c);
+		}
 	}
 }

@@ -3,9 +3,7 @@ package net.djmacgyver.bgt.socket.command;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import net.djmacgyver.bgt.socket.SocketCommand;
-
-public class AuthenticationCommand extends SocketCommand {
+public class AuthenticationCommand extends AbstractAuthCommand {
 
 	public AuthenticationCommand(String user, String pass) {
 		super("auth");
