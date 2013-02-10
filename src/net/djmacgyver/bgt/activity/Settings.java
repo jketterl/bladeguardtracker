@@ -8,6 +8,7 @@ import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.AbstractAuthCommand;
 import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
 import net.djmacgyver.bgt.socket.command.FacebookLoginCommand;
+import net.djmacgyver.bgt.socket.command.PasswordChangeCommand;
 import net.djmacgyver.bgt.socket.command.SetTeamCommand;
 import net.djmacgyver.bgt.user.User;
 
@@ -44,6 +45,9 @@ import com.facebook.UiLifecycleHelper;
 public class Settings extends Activity {
 	public static final int DIALOG_LOGGING_IN = 1;
 	public static final int DIALOG_CREDENTIALS_WRONG = 2;
+	public static final int DIALOG_PASSWORDCHANGE = 3;
+	public static final int DIALOG_PASSWORDCHANGE_FAILED = 4;
+	public static final int DIALOG_PASSWORDCHANGE_RUNNING = 5;
 	
 	public static final int REQUEST_TEAM_SELECTION = 1;
 	
@@ -162,6 +166,14 @@ public class Settings extends Activity {
         
         EditText pass = (EditText) findViewById(R.id.pass);
         pass.addTextChangedListener(invalidateWatcher);
+        
+        Button passwordButton = (Button) findViewById(R.id.passwordButton);
+        passwordButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showDialog(DIALOG_PASSWORDCHANGE);
+			}
+		});
         
         Session.openActiveSession(this, false, callback);
 	}
@@ -304,6 +316,7 @@ public class Settings extends Activity {
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		Dialog d;
+		AlertDialog.Builder b = new AlertDialog.Builder(this);
 		switch (id) {
 			case DIALOG_LOGGING_IN:
 				d = new ProgressDialog(this);
@@ -311,7 +324,6 @@ public class Settings extends Activity {
 				d.setTitle(R.string.logging_in);
 				return d;
 			case DIALOG_CREDENTIALS_WRONG:
-				AlertDialog.Builder b = new AlertDialog.Builder(this);
 				b.setMessage(R.string.credentials_wrong)
 			     .setPositiveButton(R.string.ok, new Dialog.OnClickListener() {
 					@Override
@@ -320,9 +332,95 @@ public class Settings extends Activity {
 					}
 				});
 				return b.create();
+			case DIALOG_PASSWORDCHANGE:
+				b.setView(getLayoutInflater().inflate(R.layout.passworddialog, null))
+				 .setPositiveButton(R.string.ok, new Dialog.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Dialog d = (Dialog) dialog;
+						EditText passView = (EditText) d.findViewById(R.id.password);
+						EditText confirmView = (EditText) d.findViewById(R.id.password_confirm);
+						final String pass = passView.getText().toString();
+						String confirm = confirmView.getText().toString();
+						
+						Bundle b = new Bundle();
+						if (!pass.equals(confirm)) {
+							b.putString("message", getResources().getString(R.string.password_mismatch));
+							showDialog(DIALOG_PASSWORDCHANGE_FAILED, b);
+							return;
+						}
+						
+						if (pass.equals("")) {
+							b.putString("message", getResources().getString(R.string.password_must_not_be_empty));
+							showDialog(DIALOG_PASSWORDCHANGE_FAILED, b);
+							return;
+						}
+						
+						showDialog(DIALOG_PASSWORDCHANGE_RUNNING);
+						ServiceConnection conn = new ServiceConnection() {
+							@Override
+							public void onServiceDisconnected(ComponentName name) {
+							}
+							
+							@Override
+							public void onServiceConnected(ComponentName name, IBinder service) {
+								SocketService s = ((SocketService.LocalBinder) service).getService();
+								PasswordChangeCommand command = new PasswordChangeCommand(pass);
+								final ServiceConnection conn = this;
+								command.addCallback(new SocketCommandCallback() {
+									@Override
+									public void run(SocketCommand command) {
+										dismissDialog(DIALOG_PASSWORDCHANGE_RUNNING);
+										if (!command.wasSuccessful()) {
+											final Bundle b = new Bundle();
+											String message = "unknown error";
+											try {
+												message = command.getResponseData().getJSONObject(0).getString("message");
+											} catch (JSONException e) {}
+											b.putString("message", message);
+											runOnUiThread(new Runnable() {
+												@Override
+												public void run() {
+													showDialog(DIALOG_PASSWORDCHANGE_FAILED, b);
+												}
+											});
+										}
+										unbindService(conn);
+									}
+								});
+								s.getSharedConnection().sendCommand(command);
+							}
+						};
+						
+						bindService(new Intent(Settings.this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
+					}
+				})
+				 .setNegativeButton(R.string.cancel, new Dialog.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+				});
+				return b.create();
+			case DIALOG_PASSWORDCHANGE_FAILED:
+				b.setMessage(R.string.passwordchange_failed)
+				 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+					 	@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+				});
+				return b.create();
+			case DIALOG_PASSWORDCHANGE_RUNNING:
+				d = new ProgressDialog(this);
+				d.setCancelable(false);
+				d.setTitle(R.string.password_change_running);
+				return d;
 		}
 		return super.onCreateDialog(id);
 	}
+	
+	
 
 	@Override
 	public void onResume() {
@@ -415,5 +513,16 @@ public class Settings extends Activity {
 	public void onSaveInstanceState(Bundle outState) {
 	    super.onSaveInstanceState(outState);
 	    uiHelper.onSaveInstanceState(outState);
+	}
+
+	@Override
+	protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
+		switch (id) {
+			case DIALOG_PASSWORDCHANGE_FAILED:
+				AlertDialog d = (AlertDialog) dialog;
+				String message = getResources().getString(R.string.passwordchange_failed);
+				d.setMessage(message.concat("\n\n" + args.getString("message")));
+		}
+		super.onPrepareDialog(id, dialog, args);
 	}
 }
