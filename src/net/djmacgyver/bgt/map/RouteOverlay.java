@@ -1,5 +1,6 @@
 package net.djmacgyver.bgt.map;
 
+import net.djmacgyver.bgt.R;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -40,7 +41,7 @@ public class RouteOverlay extends Overlay {
 			paint.setAntiAlias(true);
 			paint.setColor(Color.BLUE);
 			paint.setAlpha(64);
-			paint.setStrokeWidth(2);
+			paint.setStrokeWidth(view.getResources().getDimensionPixelSize(R.dimen.mapStrokeWidth));
 		}
 		return paint;
 	}
@@ -51,7 +52,7 @@ public class RouteOverlay extends Overlay {
 			trackPaint.setAntiAlias(true);
 			trackPaint.setColor(Color.rgb(255, 192, 0));
 			//trackPaint.setAlpha(192);
-			trackPaint.setStrokeWidth(6);
+			trackPaint.setStrokeWidth(view.getResources().getDimension(R.dimen.trackStrokeWidth));
 		}
 		return trackPaint;
 	}

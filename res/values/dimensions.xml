@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="mapStrokeWidth">2dp</dimen>
+    <dimen name="trackStrokeWidth">6dp</dimen>
+    
+</resources>
