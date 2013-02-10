@@ -159,6 +159,10 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		return (TextView) findViewById(R.id.bladeNightCycleTime);
 	}
 	
+	public TextView getTimeToEndView() {
+		return (TextView) findViewById(R.id.timeToEnd);
+	}
+	
 	public TextView getTitleTextView() {
 		return (TextView) findViewById(R.id.title);
 	}

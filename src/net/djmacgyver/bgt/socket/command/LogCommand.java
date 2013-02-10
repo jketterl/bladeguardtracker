@@ -11,6 +11,8 @@ import android.location.Location;
 
 public class LogCommand extends SocketCommand {
 	private int position;
+	private double distanceToFront;
+	private double distanceToEnd;
 
 	public LogCommand(Event event, Location location) {
 		super("log");
@@ -27,6 +29,8 @@ public class LogCommand extends SocketCommand {
 	public void updateResult(boolean success) {
 		if (success) {
 			position = extractPosition(getResponseData());
+			distanceToEnd = extractDistanceToEnd(getResponseData());
+			distanceToFront = extractDistanceToFront(getResponseData());
 		}
 		super.updateResult(success);
 	}
@@ -37,17 +41,47 @@ public class LogCommand extends SocketCommand {
 			if (result.has("locked") && result.getBoolean("locked")) {
 				return result.getInt("index");
 			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+		} catch (JSONException e) {}
+		return -1;
+	}
+	
+	protected double extractDistanceToFront(JSONArray resultArray) {
+		try {
+			JSONObject result = resultArray.getJSONObject(0);
+			if (result.has("distanceToFront")) return result.getDouble("distanceToFront");
+		} catch (JSONException e) {}
+		return -1;
+	}
+	
+	protected double extractDistanceToEnd(JSONArray resultArray) {
+		try {
+			JSONObject result = resultArray.getJSONObject(0);
+			if (result.has("distanceToEnd")) return result.getDouble("distanceToEnd");
+		} catch (JSONException e) {}
 		return -1;
 	}
 	
 	public boolean hasPosition() {
-		return position > 0;
+		return position >= 0;
 	}
 	
 	public int getPosition() {
 		return position;
+	}
+	
+	public boolean hasDistanceToFront() {
+		return distanceToFront >= 0;
+	}
+	
+	public double getDistanceToFront() {
+		return distanceToFront;
+	}
+	
+	public boolean hasDistanceToEnd() {
+		return distanceToEnd >= 0;
+	}
+	
+	public double getDistanceToEnd() {
+		return distanceToEnd;
 	}
 }

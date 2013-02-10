@@ -230,6 +230,16 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 				} else {
 					firePositionLost();
 				}
+				if (log.hasDistanceToFront()) {
+					fireDistanceToFront(log.getDistanceToFront());
+				} else {
+					fireDistanceToFrontLost();
+				}
+				if (log.hasDistanceToEnd()) {
+					fireDistanceToEnd(log.getDistanceToEnd());
+				} else {
+					fireDistanceToEndLost();
+				}
 			}
 		});
 		conn.sendCommand(log);
@@ -248,10 +258,32 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		Iterator<GPSTrackingListener> i = listeners.iterator();
 		while (i.hasNext()) i.next().onPositionLock(position);
 	}
+	
+	protected void fireDistanceToEnd(double distance) {
+		Iterator<GPSTrackingListener> i = listeners.iterator();
+		while (i.hasNext()) i.next().onDistanceToEnd(distance);
+	}
+
+	protected void fireDistanceToFront(double distance) {
+		Iterator<GPSTrackingListener> i = listeners.iterator();
+		while (i.hasNext()) i.next().onDistanceToFront(distance);
+	}
+	
+	protected void fireDistanceToEndLost() {
+		Iterator<GPSTrackingListener> i = listeners.iterator();
+		while (i.hasNext()) i.next().onDistanceToEndLost();
+	}
+
+	protected void fireDistanceToFrontLost() {
+		Iterator<GPSTrackingListener> i = listeners.iterator();
+		while (i.hasNext()) i.next().onDistanceToFrontLost();
+	}
 
 	private void sendGpsUnavailable() {
 		conn.sendCommand(new GPSUnavailableCommand(boundEvent));
 		lastLocation = null;
+		fireDistanceToEndLost();
+		fireDistanceToFrontLost();
 	}
 	
 	public void addListener(GPSTrackingListener l) {

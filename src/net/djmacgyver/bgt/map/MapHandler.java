@@ -24,6 +24,8 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 	private UserOverlay userOverlay;
 	private HttpSocketConnection socket;
 	private GPSTrackingService tracker;
+	private double speed;
+	private double distanceToEnd = -1;
 	
 	public MapHandler(Map map) {
 		this.map = map;
@@ -65,7 +67,7 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 		}
 		map.getLengthTextView().setText(text);
 		
-		double speed = -1;
+		speed = -1;
 		text = "n/a";
 		if (stats.has("bladeNightSpeed")) {
 			try {
@@ -75,6 +77,7 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 			} catch (NumberFormatException e) {}
 		}
 		map.getSpeedTextView().setText(text);
+		updateTimeToEnd();
 		
 		text = "n/a";
 		if (length > 0 && speed > 0) {
@@ -90,6 +93,22 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 		} else {
 			map.getRoute().setBetween(-1, -1);
 		}
+	}
+	
+	private void updateTimeToEnd() {
+		String text = "n/a";
+		if (speed > 0 && distanceToEnd >= 0) {
+			double time = (distanceToEnd * 1000 / speed) / 60;
+			DecimalFormat df = new DecimalFormat("0");
+			text = df.format(time) + " min";
+		}
+		final String finalText = text;
+		map.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				map.getTimeToEndView().setText(finalText);
+			}
+		});
 	}
 
 	private void parseMapData(JSONObject data) throws JSONException {
@@ -196,11 +215,28 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 
 	@Override
 	public void onPositionLock(int position) {
-		Log.d("mapHandler", "got position: " + position);
 	}
 
 	@Override
 	public void onPositionLost() {
-		Log.d("mapHandler", "lost position");
+	}
+
+	@Override
+	public void onDistanceToEnd(double distance) {
+		distanceToEnd = distance;
+		updateTimeToEnd();
+	}
+
+	@Override
+	public void onDistanceToFront(double distance) {
+	}
+
+	@Override
+	public void onDistanceToEndLost() {
+		distanceToEnd = -1;
+	}
+
+	@Override
+	public void onDistanceToFrontLost() {
 	}
 }

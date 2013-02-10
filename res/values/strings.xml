@@ -31,6 +31,7 @@
     <string name="track_length">Track length</string>
     <string name="average_speed">Speed</string>
     <string name="cycle_time">Cycle time</string>
+    <string name="time_to_end">Time to End</string>
     <string name="connect_progress">Connecting to server...</string>
     <string name="map_selection">Route Selection</string>
     <string name="switching_map">Switching Route...</string>
