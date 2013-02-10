@@ -77,4 +77,6 @@
     <string name="or">oder</string>
     <string name="my_team">Mein Team</string>
     <string name="password_change_running">Ändere Password…</string>
+    <string name="app_request">Lade Deine Freunde ein!</string>
+    <string name="join_me">Fahre mit mir zusammen!</string>
 </resources>

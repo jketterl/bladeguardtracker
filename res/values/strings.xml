@@ -81,4 +81,6 @@
     <string name="or">or</string>
     <string name="my_team">My Team</string>
     <string name="password_change_running">Changing password…</string>
+    <string name="app_request">Invite your Friends!</string>
+    <string name="join_me">Ride with me!</string>
 </resources>

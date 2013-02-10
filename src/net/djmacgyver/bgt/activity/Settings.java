@@ -37,10 +37,15 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.facebook.FacebookException;
+import com.facebook.FacebookOperationCanceledException;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
+import com.facebook.widget.WebDialog;
+import com.facebook.widget.WebDialog.OnCompleteListener;
 
 public class Settings extends Activity {
 	public static final int DIALOG_LOGGING_IN = 1;
@@ -175,6 +180,40 @@ public class Settings extends Activity {
 			}
 		});
         
+        Button requestButton = (Button) findViewById(R.id.requestButton);
+        requestButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Bundle params = new Bundle();
+				params.putString("message", getResources().getString(R.string.join_me));
+				
+				WebDialog requestDialog = (new WebDialog.RequestsDialogBuilder(Settings.this,
+						                       Session.getActiveSession(),
+						                       params))
+						                       .setOnCompleteListener(new OnCompleteListener() {
+												@Override
+												public void onComplete(Bundle values, FacebookException error) {
+								                    if (error != null) {
+								                        if (!(error instanceof FacebookOperationCanceledException)) {
+								                            Toast.makeText(getApplicationContext(), 
+								                                "Network Error", 
+								                                Toast.LENGTH_SHORT).show();
+								                        }
+								                    } else {
+								                        final String requestId = values.getString("request");
+								                        if (requestId != null) {
+								                            Toast.makeText(getApplicationContext(), 
+								                                "Request sent",  
+								                                Toast.LENGTH_SHORT).show();
+								                        }
+								                    }   
+												}
+											})
+						                       .build();
+				requestDialog.show();
+			}
+		});
+        
         Session.openActiveSession(this, false, callback);
 	}
 	
@@ -187,11 +226,13 @@ public class Settings extends Activity {
         View facebook = findViewById(R.id.facbookLogin);
         View profile = findViewById(R.id.profileOptions);
 		TextView team = (TextView) findViewById(R.id.teamView);
+		View facebookOptions = findViewById(R.id.facebookOptions);
         
         if (anonymousCheckbox.isChecked()) {
         	loginOptions.setVisibility(View.GONE);
         	anonymousInfo.setVisibility(View.VISIBLE);
         	profile.setVisibility(View.GONE);
+        	facebookOptions.setVisibility(View.GONE);
         } else {
         	anonymousInfo.setVisibility(View.GONE);
         	loginOptions.setVisibility(View.VISIBLE);
@@ -201,10 +242,12 @@ public class Settings extends Activity {
 		            logout.setVisibility(View.VISIBLE);
 			        regularLogin.setVisibility(View.GONE);
 			        facebook.setVisibility(View.GONE);
+			        facebookOptions.setVisibility(View.GONE);
         		} else if (authentication instanceof FacebookLoginCommand) {
     		        regularLogin.setVisibility(View.GONE);
     		        logout.setVisibility(View.GONE);
     		        facebook.setVisibility(View.VISIBLE);
+    		        facebookOptions.setVisibility(View.VISIBLE);
         		}
 		        profile.setVisibility(View.VISIBLE);
         		User user = authentication.getUser();
@@ -214,6 +257,7 @@ public class Settings extends Activity {
 		        regularLogin.setVisibility(View.VISIBLE);
 		        facebook.setVisibility(View.VISIBLE);
 		        profile.setVisibility(View.GONE);
+		        facebookOptions.setVisibility(View.GONE);
         	}
         }
 	}
