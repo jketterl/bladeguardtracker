@@ -84,6 +84,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			service = null;
+			handler.setGPSTrackingService(null);
 			if (!hasLocationOverlay()) return;
 	    	getMap().getOverlays().remove(getLocationOverlay());
 	    	getLocationOverlay().disableMyLocation();
@@ -93,6 +94,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder binder) {
 			service = ((GPSTrackingService.LocalBinder) binder).getService();
+			handler.setGPSTrackingService(service);
 			if (!service.isEnabled()) return;
 			setLocationOverlay(new MyLocationOverlay(getApplicationContext(), getMap()));
 			getLocationOverlay().enableMyLocation();

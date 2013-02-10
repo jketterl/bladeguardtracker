@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.Map;
+import net.djmacgyver.bgt.gps.GPSTrackingListener;
+import net.djmacgyver.bgt.gps.GPSTrackingService;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 
@@ -17,10 +19,11 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
-public class MapHandler extends Handler implements HttpSocketListener {
+public class MapHandler extends Handler implements HttpSocketListener, GPSTrackingListener {
 	private Map map;
 	private UserOverlay userOverlay;
 	private HttpSocketConnection socket;
+	private GPSTrackingService tracker;
 	
 	public MapHandler(Map map) {
 		this.map = map;
@@ -175,5 +178,29 @@ public class MapHandler extends Handler implements HttpSocketListener {
 		map.getLengthTextView().setText("n/a");
 		map.getSpeedTextView().setText("n/a");
 		map.getCycleTimeTextView().setText("n/a");
+	}
+	
+	public void setGPSTrackingService(GPSTrackingService service) {
+		if (tracker != null) tracker.removeListener(this);
+		tracker = service;
+		if (tracker != null) tracker.addListener(this);
+	}
+
+	@Override
+	public void trackingEnabled() {
+	}
+
+	@Override
+	public void trackingDisabled() {
+	}
+
+	@Override
+	public void onPositionLock(int position) {
+		Log.d("mapHandler", "got position: " + position);
+	}
+
+	@Override
+	public void onPositionLost() {
+		Log.d("mapHandler", "lost position");
 	}
 }

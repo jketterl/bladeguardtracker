@@ -9,6 +9,8 @@ import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.GPSUnavailableCommand;
 import net.djmacgyver.bgt.socket.command.LogCommand;
@@ -218,11 +220,33 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 			return;
 		}
 	
-		conn.sendCommand(new LogCommand(boundEvent, location));
+		LogCommand log = new LogCommand(boundEvent, location);
+		log.addCallback(new SocketCommandCallback() {
+			@Override
+			public void run(SocketCommand command) {
+				LogCommand log = (LogCommand) command;
+				if (log.hasPosition()) {
+					firePositionLock(log.getPosition());
+				} else {
+					firePositionLost();
+				}
+			}
+		});
+		conn.sendCommand(log);
 		
 		getLocationReminder().interrupt();
 		lastLocation = location;
 		updateBlocked = true;
+	}
+
+	protected void firePositionLost() {
+		Iterator<GPSTrackingListener> i = listeners.iterator();
+		while (i.hasNext()) i.next().onPositionLost();
+	}
+
+	protected void firePositionLock(int position) {
+		Iterator<GPSTrackingListener> i = listeners.iterator();
+		while (i.hasNext()) i.next().onPositionLock(position);
 	}
 
 	private void sendGpsUnavailable() {
