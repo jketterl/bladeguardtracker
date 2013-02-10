@@ -287,6 +287,10 @@ public class HttpSocketConnection {
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
 		if (p.getBoolean("anonymous", true)) {
 			callback.run(null);
+			for (SocketCommandCallback c : authCallbacks) {
+				c.run(null);
+			}
+			authCallbacks = new ArrayList<SocketCommandCallback>();
 			return;
 		}
 		

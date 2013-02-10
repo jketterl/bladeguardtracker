@@ -10,6 +10,9 @@ import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
 import net.djmacgyver.bgt.socket.command.FacebookLoginCommand;
 import net.djmacgyver.bgt.socket.command.SetTeamCommand;
 import net.djmacgyver.bgt.user.User;
+
+import org.json.JSONException;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -24,11 +27,14 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.facebook.Session;
@@ -44,7 +50,7 @@ public class Settings extends Activity {
 	private Session.StatusCallback callback = new Session.StatusCallback() {
 	    @Override
 	    public void call(Session session, SessionState state, Exception exception) {
-	    	if (session.isClosed()) authentication = null;
+	    	authentication = null;
 	    	updateUI();
 	    }
 	};
@@ -72,9 +78,8 @@ public class Settings extends Activity {
         anonymous.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if (isChecked) {
-					Session.getActiveSession().close();
-				}
+				if (isChecked) Session.getActiveSession().closeAndClearTokenInformation();
+				authentication = null;
 				updateUI();
 			}
 		});
@@ -92,7 +97,19 @@ public class Settings extends Activity {
         login.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				testLogin(null);
+				testLogin(new SocketCommandCallback() {
+					@Override
+					public void run(SocketCommand command) {
+						if (!command.wasSuccessful()) {
+							runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									showDialog(DIALOG_CREDENTIALS_WRONG);
+								}
+							});
+						}
+					}
+				});
 			}
 		});
         
@@ -104,7 +121,6 @@ public class Settings extends Activity {
 				pass.setText("");
 				authentication = null;
 				updateUI();
-				//setLoggedIn(false);
 			}
 		});
         
@@ -121,6 +137,31 @@ public class Settings extends Activity {
 				});
 			}
 		});
+        
+        
+        // this does nothing but invalidate the authentication object when an input field
+        // changes its value.
+        TextWatcher invalidateWatcher = new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				authentication = null;
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		};
+        
+        EditText user = (EditText) findViewById(R.id.user);
+        user.addTextChangedListener(invalidateWatcher);
+        
+        EditText pass = (EditText) findViewById(R.id.pass);
+        pass.addTextChangedListener(invalidateWatcher);
         
         Session.openActiveSession(this, false, callback);
 	}
@@ -177,7 +218,16 @@ public class Settings extends Activity {
 		testLogin(new SocketCommandCallback() {
 			@Override
 			public void run(SocketCommand command) {
-				Settings.super.onBackPressed();
+				if (command == null || command.wasSuccessful()) {
+					Settings.super.onBackPressed();
+				} else {
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							showDialog(DIALOG_CREDENTIALS_WRONG);
+						}
+					});
+				}
 			}
 		});
 	}
@@ -203,9 +253,20 @@ public class Settings extends Activity {
 
 	private void testLogin(final SocketCommandCallback callback)
 	{
-		showDialog(DIALOG_LOGGING_IN);
-		
 		storeSettings();
+		
+		if (authentication != null) {
+			if (callback != null) authentication.addCallback(callback);
+			return;
+		}
+
+		CheckBox anonymous = (CheckBox) findViewById(R.id.anonymousCheckbox);
+		if (anonymous.isChecked()) {
+			if (callback != null) callback.run(null);
+			return;
+		}
+		
+		showDialog(DIALOG_LOGGING_IN);
 		
 		ServiceConnection conn = new ServiceConnection() {
 			@Override
@@ -225,7 +286,7 @@ public class Settings extends Activity {
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								if (command.wasSuccessful()) authentication = (AbstractAuthCommand) command;
+								if (command != null && command.wasSuccessful()) authentication = (AbstractAuthCommand) command;
 								updateUI();
 								//setLoggedIn(command.wasSuccessful());
 							}
@@ -286,7 +347,6 @@ public class Settings extends Activity {
 		user.setText(p.getString("username", ""));
 		pass.setText(p.getString("password", ""));
 		
-		//isLoggedIn = false;
 		authentication = null;
 		
 		testLogin(null);
@@ -313,11 +373,16 @@ public class Settings extends Activity {
 						SetTeamCommand command = new SetTeamCommand((int) teamId);
 						command.addCallback(new SocketCommandCallback() {
 							@Override
-							public void run(SocketCommand command) {
+							public void run(final SocketCommand command) {
 								if (command.wasSuccessful()) runOnUiThread(new Runnable() {
 									@Override
 									public void run() {
-										testLogin(null);
+										TextView team = (TextView) findViewById(R.id.teamView);
+										try {
+											team.setText(command.getResponseData().getJSONObject(0).getString("name"));
+										} catch (JSONException e) {
+											e.printStackTrace();
+										}
 									}
 								});
 							}
