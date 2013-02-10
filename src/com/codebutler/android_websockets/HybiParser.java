@@ -30,11 +30,15 @@
 
 package com.codebutler.android_websockets;
 
-import android.util.Log;
-
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
+
+import android.util.Log;
 
 public class HybiParser {
     private static final String TAG = "HybiParser";
@@ -192,7 +196,7 @@ public class HybiParser {
     private byte[] frame(Object data, int opcode, int errorCode) {
         if (mClosed) return null;
 
-        Log.d(TAG, "Creating frame for: " + data + " op: " + opcode + " err: " + errorCode);
+        //Log.d(TAG, "Creating frame for: " + data + " op: " + opcode + " err: " + errorCode);
 
         byte[] buffer = (data instanceof String) ? decode((String) data) : (byte[]) data;
         int insert = (errorCode > 0) ? 2 : 0;

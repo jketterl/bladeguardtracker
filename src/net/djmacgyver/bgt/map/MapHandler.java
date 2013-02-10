@@ -6,7 +6,6 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.Map;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
-import net.djmacgyver.bgt.socket.SocketCommand;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,7 +38,6 @@ public class MapHandler extends Handler implements HttpSocketListener {
 	public void handleMessage(Message msg) {
 		try {
 			JSONObject data = (JSONObject) msg.obj;
-			Log.d("MapHandler", data.toString());
 			parseUserUpdates(data);
 			parseUserRemovals(data);
 			parseMapData(data);

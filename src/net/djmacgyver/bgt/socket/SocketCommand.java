@@ -7,8 +7,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 abstract public class SocketCommand {
 	private String command;
 	protected JSONObject data;
@@ -57,7 +55,6 @@ abstract public class SocketCommand {
 	
 	public void updateResult(JSONObject response)
 	{
-		Log.d("commandResult", response.toString());
 		try {
 			if (response.has("data")) {
 				Object data = response.get("data");
