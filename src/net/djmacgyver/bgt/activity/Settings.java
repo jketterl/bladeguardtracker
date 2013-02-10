@@ -171,7 +171,7 @@ public class Settings extends Activity {
         View anonymousInfo = findViewById(R.id.anonymousInfoText);
         CheckBox anonymousCheckbox = (CheckBox) findViewById(R.id.anonymousCheckbox);
         View loginOptions = findViewById(R.id.loginOptions);
-        View logout = findViewById(R.id.logout);
+        View logout = findViewById(R.id.regularLogout);
         View facebook = findViewById(R.id.facbookLogin);
         View profile = findViewById(R.id.profileOptions);
 		TextView team = (TextView) findViewById(R.id.teamView);

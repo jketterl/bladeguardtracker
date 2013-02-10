@@ -99,12 +99,26 @@
                     android:textAppearance="?android:attr/textAppearanceMedium" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/logout"
-                android:layout_width="fill_parent"
+            <LinearLayout
+                android:id="@+id/regularLogout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:text="@string/logout" />
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/passwordButton"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/change_password" />
+
+                <Button
+                    android:id="@+id/logout"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/logout" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/facbookLogin"
