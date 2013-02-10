@@ -371,7 +371,16 @@ public class Settings extends Activity {
 									@Override
 									public void run(SocketCommand command) {
 										dismissDialog(DIALOG_PASSWORDCHANGE_RUNNING);
-										if (!command.wasSuccessful()) {
+										if (command.wasSuccessful()) {
+											runOnUiThread(new Runnable() {
+												@Override
+												public void run() {
+													EditText passView = (EditText) findViewById(R.id.pass);
+													passView.setText(pass);
+													testLogin(null);
+												}
+											});
+										} else {
 											final Bundle b = new Bundle();
 											String message = "unknown error";
 											try {
