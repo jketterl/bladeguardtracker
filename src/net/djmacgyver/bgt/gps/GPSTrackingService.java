@@ -114,7 +114,7 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		
 		// it is possible that the connection has been closed before we were able so send the "quit" message.
 		try {
-			conn.sendCommand(new QuitCommand());
+			conn.sendCommand(new QuitCommand(boundEvent));
 		} catch (NullPointerException e) {}
 		
 		sockService.removeStake(this);
@@ -226,7 +226,7 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	}
 
 	private void sendGpsUnavailable() {
-		conn.sendCommand(new GPSUnavailableCommand());
+		conn.sendCommand(new GPSUnavailableCommand(boundEvent));
 		lastLocation = null;
 	}
 	
