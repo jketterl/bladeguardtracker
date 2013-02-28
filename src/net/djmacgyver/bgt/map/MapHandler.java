@@ -202,7 +202,10 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 	public void setGPSTrackingService(GPSTrackingService service) {
 		if (tracker != null) tracker.removeListener(this);
 		tracker = service;
-		if (tracker != null) tracker.addListener(this);
+		if (tracker != null) {
+			tracker.addListener(this);
+			onDistanceToEnd(tracker.getDistanceToEnd());
+		}
 	}
 
 	@Override
@@ -234,6 +237,7 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 	@Override
 	public void onDistanceToEndLost() {
 		distanceToEnd = -1;
+		updateTimeToEnd();
 	}
 
 	@Override

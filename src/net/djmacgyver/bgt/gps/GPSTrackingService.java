@@ -43,6 +43,10 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	private Location lastLocation;
 	private ArrayList<GPSTrackingListener> listeners = new ArrayList<GPSTrackingListener>();
 	private Event boundEvent;
+	
+	private int position = -1;
+	private double distanceToFront = -1;
+	private double distanceToEnd = -1;
 
 	private SocketService sockService;
 	private ServiceConnection sconn = new ServiceConnection() {
@@ -119,12 +123,31 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 			conn.sendCommand(new QuitCommand(boundEvent));
 		} catch (NullPointerException e) {}
 		
+		this.setPosition(-1);
+		this.setDistanceToEnd(-1);
+		this.setDistanceToFront(-1);
+		
 		sockService.removeStake(this);
 		conn = null;
 		
 		enabled = false;
 	}
 	
+	private void setDistanceToFront(double distance) {
+		this.distanceToFront = distance;
+		if (distance >= 0) fireDistanceToFront(distance); else fireDistanceToFrontLost();
+	}
+
+	private void setDistanceToEnd(double distance) {
+		this.distanceToEnd = distance;
+		if (distance >= 0) fireDistanceToEnd(distance); else fireDistanceToEndLost();
+	}
+
+	private void setPosition(int position) {
+		this.position = position;
+		if (position >= 0) firePositionLock(position); else firePositionLost();
+	}
+
 	private KeepAliveThread getGpsReminder() {
 		if (gpsReminder == null) {
 			gpsReminder = new KeepAliveThread(this, 60);
@@ -225,21 +248,9 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 			@Override
 			public void run(SocketCommand command) {
 				LogCommand log = (LogCommand) command;
-				if (log.hasPosition()) {
-					firePositionLock(log.getPosition());
-				} else {
-					firePositionLost();
-				}
-				if (log.hasDistanceToFront()) {
-					fireDistanceToFront(log.getDistanceToFront());
-				} else {
-					fireDistanceToFrontLost();
-				}
-				if (log.hasDistanceToEnd()) {
-					fireDistanceToEnd(log.getDistanceToEnd());
-				} else {
-					fireDistanceToEndLost();
-				}
+				setPosition(log.hasPosition() ? log.getPosition() : -1);
+				setDistanceToFront(log.hasDistanceToFront() ? log.getDistanceToFront() : -1);
+				setDistanceToEnd(log.hasDistanceToEnd() ? log.getDistanceToEnd() : -1);
 			}
 		});
 		conn.sendCommand(log);
@@ -282,8 +293,9 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	private void sendGpsUnavailable() {
 		conn.sendCommand(new GPSUnavailableCommand(boundEvent));
 		lastLocation = null;
-		fireDistanceToEndLost();
-		fireDistanceToFrontLost();
+		setPosition(-1);
+		setDistanceToEnd(-1);
+		setDistanceToFront(-1);
 	}
 	
 	public void addListener(GPSTrackingListener l) {
@@ -308,5 +320,17 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	
 	public void bindEvent(Event event) {
 		this.boundEvent = event;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public double getDistanceToFront() {
+		return distanceToFront;
+	}
+
+	public double getDistanceToEnd() {
+		return distanceToEnd;
 	}
 }

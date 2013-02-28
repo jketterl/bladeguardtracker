@@ -30,19 +30,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources.NotFoundException;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.codebutler.android_websockets.WebSocketClient;
-import com.facebook.FacebookRequestError;
-import com.facebook.Request;
-import com.facebook.Request.GraphUserCallback;
-import com.facebook.Response;
-import com.facebook.Session.StatusCallback;
-import com.facebook.SessionState;
-import com.facebook.model.GraphUser;
 
 public class HttpSocketConnection {
 	public static final int STATE_DISCONNECTED = 0;
@@ -296,68 +288,13 @@ public class HttpSocketConnection {
 		
 		final com.facebook.Session fbSession = com.facebook.Session.openActiveSessionFromCache(context);
 		if (fbSession != null) {
-			authentication = new FacebookLoginCommand();
-			final GraphUserCallback c = new GraphUserCallback() {
-				private int retries = 0;
-				@Override
-				public void onCompleted(GraphUser user, Response response) {
-					if (user == null) {
-						Log.w("fbsession", "/me request returned null");
-						
-						// this is a known bug with older android versions: the request returns
-						// null, caused by an empty http response (indicated by a JSONException).
-						// in that case: repeat the request...
-						FacebookRequestError error = response.getError();
-						if (error != null) {
-							Throwable cause = error.getException().getCause();
-							if (cause != null && cause instanceof JSONException) {
-								if (++retries <= 5) {
-									Log.d("fbsession", "appears to be caused by know bug, retrying...");
-									Request.executeMeRequestAsync(fbSession, this);
-									return;
-								}
-								Log.e("fbsession", "retries count exhausted. giving up...");
-								callback.run(null);
-								return;
-							}
-						}
-						
-						Log.w("fbsession", "no typical indication for the known sdk bug...");
-						callback.run(null);
-						return;
-					}
-					//authentication = new FacebookLoginCommand(user);
-					((FacebookLoginCommand) authentication).setUser(user);
-					authentication.addCallback(getSessionCallback());
-					authentication.addCallback(callback);
-					sendCommand(authentication, false, true);
-				}
-			};
-			if (fbSession.isOpened()) {
-				new Thread(){
-					public void run() {
-						Looper.prepare();
-						Request.executeMeRequestAsync(fbSession, c);
-						Looper.loop();
-					}
-				}.start();
-			} else {
-				fbSession.addCallback(new StatusCallback() {
-					@Override
-					public void call(com.facebook.Session session, SessionState state,
-							Exception exception) {
-						if (session.isOpened()) {
-							Request.executeMeRequestAsync(fbSession, c);
-						}
-					}
-				});
-			}
+			authentication = new FacebookLoginCommand(fbSession.getAccessToken());
 		} else {
 			authentication = new AuthenticationCommand(p.getString("username", ""), p.getString("password", ""));
-			authentication.addCallback(getSessionCallback());
-			authentication.addCallback(callback);
-			sendCommand(authentication, false, true);
 		}
+		authentication.addCallback(getSessionCallback());
+		authentication.addCallback(callback);
+		sendCommand(authentication, false, true);
 	}
 	
 	private void sendHandshake() {
