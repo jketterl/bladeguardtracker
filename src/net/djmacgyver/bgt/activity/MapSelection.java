@@ -6,7 +6,11 @@ import net.djmacgyver.bgt.map.MapList;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
-import net.djmacgyver.bgt.socket.command.SetMapCommand;
+import net.djmacgyver.bgt.socket.command.UpdateEventCommand;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -79,7 +83,11 @@ public class MapSelection extends ListActivity {
 					@Override
 					public void onServiceConnected(ComponentName name, IBinder service) {
 						SocketService s = ((SocketService.LocalBinder) service).getService();
-						SocketCommand command = new SetMapCommand(event, (int) selected);
+						JSONObject data = new JSONObject();
+						try {
+							data.put("map", selected);
+						} catch (JSONException e) {}
+						SocketCommand command = new UpdateEventCommand(event, data);
 						command.addCallback(new SocketCommandCallback() {
 							@Override
 							public void run(SocketCommand command) {

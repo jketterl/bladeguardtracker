@@ -312,7 +312,11 @@ public class EventDetail extends Activity {
 				try {
 					Class<?> commandClass = getClassLoader().loadClass(args.getString("command"));
 					if (args.containsKey("weather")) {
-						command = (SocketCommand) commandClass.getConstructor(new Class[]{Event.class, Integer.class}).newInstance(new Object[]{event, args.getInt("weather")});
+						JSONObject data = new JSONObject();
+						try {
+							data.put("weather", args.getInt("weather"));
+						} catch (JSONException e) {}
+						command = (SocketCommand) commandClass.getConstructor(new Class[]{Event.class, JSONObject.class}).newInstance(new Object[]{event, data});
 					} else {
 						command = (SocketCommand) commandClass.getConstructor(new Class[]{Event.class}).newInstance(new Object[]{event});
 					}
