@@ -84,4 +84,5 @@
     <string name="password_change_running">Changing password…</string>
     <string name="app_request">Invite your Friends!</string>
     <string name="join_me">Ride with me!</string>
+    <string name="change">change...</string>
 </resources>
