@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="net.djmacgyver.bgt.style" parent="@style/Theme.AppCompat.Light">
-        <item name="android:windowTitleSize">48dip</item>
     </style>
 </resources>
