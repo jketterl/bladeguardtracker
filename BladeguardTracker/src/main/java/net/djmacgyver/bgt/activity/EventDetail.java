@@ -4,9 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.alarm.AlarmReceiver;
 import net.djmacgyver.bgt.control.ControlService;
 import net.djmacgyver.bgt.event.Event;
+import net.djmacgyver.bgt.event.ParticipationStore;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketCommandCallback;
@@ -21,10 +21,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -73,7 +71,7 @@ public class EventDetail extends Activity {
 						String message = "unknown error";
 						try {
 							message = command.getResponseData().getJSONObject(0).getString("message");
-						} catch (JSONException e) {}
+						} catch (JSONException ignored) {}
 						Message m = new Message();
 						m.obj = message;
 						h.sendMessage(m);
@@ -127,29 +125,16 @@ public class EventDetail extends Activity {
         c.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				participate(isChecked);
-		        
-				Date start = event.getControlConnectionStartTime();
-				if (start.before(new Date())) {
-					if (isChecked) {
-						Intent i = new Intent(EventDetail.this, ControlService.class);
-						i.putExtra("event", event);
-						startService(i);
-					} else {
-						stopService(new Intent(EventDetail.this, ControlService.class));
-					}
-				} else {
-					AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-					Intent i = new Intent(EventDetail.this, AlarmReceiver.class);
-					i.putExtra("event", event);
-					PendingIntent sender = PendingIntent.getBroadcast(EventDetail.this, 113124, i, PendingIntent.FLAG_UPDATE_CURRENT);
-					// set up a system alarm that will wake us up when the time has come
-					if (isChecked) {
-						am.set(AlarmManager.RTC_WAKEUP, start.getTime(), sender);
-					} else {
-						am.cancel(sender);
-					}
-				}
+                ParticipationStore ps = new ParticipationStore(EventDetail.this);
+                ps.participate(event, isChecked);
+
+                if (isChecked) {
+                    Intent i = new Intent(EventDetail.this, ControlService.class);
+                    i.putExtra("event", event);
+                    startService(i);
+                } else {
+                    stopService(new Intent(EventDetail.this, ControlService.class));
+                }
 			}
 		});
         
@@ -376,26 +361,5 @@ public class EventDetail extends Activity {
 		} catch (JSONException e) {
 			return false;
 		} 
-	}
-	
-	private void participate(boolean value) {
-        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(EventDetail.this);
-        JSONObject participating;
-        try {
-        	participating = new JSONObject(p.getString("participating", "{}"));
-        } catch (JSONException e) {
-        	participating = new JSONObject();
-        }
-        String id = Integer.toString(event.getId());
-    	try {
-    		if (value) {
-    			participating.put(id, true);
-    		} else {
-    			participating.remove(id);
-    		}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-    	p.edit().putString("participating", participating.toString()).commit();
 	}
 }

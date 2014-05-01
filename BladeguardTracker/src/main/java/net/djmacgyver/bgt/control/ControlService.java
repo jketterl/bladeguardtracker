@@ -1,6 +1,9 @@
 package net.djmacgyver.bgt.control;
 
 import net.djmacgyver.bgt.event.Event;
+import net.djmacgyver.bgt.event.EventList;
+import net.djmacgyver.bgt.event.EventNotFoundException;
+import net.djmacgyver.bgt.event.ParticipationStore;
 import net.djmacgyver.bgt.gps.GPSTrackingService;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
@@ -17,11 +20,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.DataSetObserver;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 public class ControlService extends Service implements HttpSocketListener {
+    private static final String TAG = "ControlService";
+
 	private HttpSocketConnection socket;
 	private Event event;
 	
@@ -86,15 +92,17 @@ public class ControlService extends Service implements HttpSocketListener {
 	}
 	
 	public void shutdown() {
-		if (socket != null) {
-			SocketCommand c = new DisableControlCommand(event);
-			socket.sendCommand(c);
-			socket.removeListener(this);
-		}
-		stopTracking();
-		conn.s.removeStake(this);
-		unbindService(conn);
-	}
+        if (socket != null) {
+            SocketCommand c = new DisableControlCommand(event);
+            socket.sendCommand(c);
+            socket.removeListener(this);
+        }
+        stopTracking();
+        if (conn.s != null) {
+            conn.s.removeStake(this);
+            unbindService(conn);
+        }
+    }
 	
 	private boolean trackingEnabled = false;
 	
@@ -138,10 +146,37 @@ public class ControlService extends Service implements HttpSocketListener {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		event = intent.getExtras().getParcelable("event");
-		bindService(new Intent(getApplicationContext(), SocketService.class), conn, Context.BIND_AUTO_CREATE);
-		return START_STICKY;
+        final EventList list = new EventList(getApplicationContext(), true);
+        if (intent.hasExtra("event")) {
+            startOnEvent(intent.<Event>getParcelableExtra("event"));
+        } else {
+            final int eventId = intent.getIntExtra("eventId", -1);
+            list.registerDataSetObserver(new DataSetObserver() {
+                @Override
+                public void onChanged() {
+                    try {
+                        startOnEvent(list.findById(eventId));
+                    } catch (EventNotFoundException e) {
+                        Log.e(TAG, "could not start control service for event id " + eventId + ": event not found");
+                        stopSelf();
+                    }
+                }
+            });
+        }
+
+        return START_STICKY;
 	}
+
+    private void startOnEvent(Event event) {
+        this.event = event;
+        ParticipationStore store = new ParticipationStore(getApplicationContext());
+        if (store.doesParticipate(event)) {
+            bindService(new Intent(getApplicationContext(), SocketService.class), conn, Context.BIND_AUTO_CREATE);
+        } else {
+            Log.i(TAG, "not starting because we are not participating.");
+            stopSelf();
+        }
+    }
 	
 	@Override
 	public void receiveUpdate(JSONObject data) {

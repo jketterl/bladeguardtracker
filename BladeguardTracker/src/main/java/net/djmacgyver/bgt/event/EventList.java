@@ -20,6 +20,10 @@ public class EventList extends ServerList {
 	public EventList(Context context) {
 		super(context);
 	}
+
+    public EventList(Context context, boolean autoload) {
+        super(context, autoload);
+    }
 	
 	@Override
 	protected Class <? extends SocketCommand> getServerCommand() {
@@ -56,6 +60,16 @@ public class EventList extends ServerList {
 		}
 		return v;
 	}
+
+    public Event findById(int id) throws EventNotFoundException {
+        for (int i = 0; i < getCount(); i++) {
+            try {
+                Event e = new Event(getData().getJSONObject(i));
+                if (e.getId() == id) return e;
+            } catch (JSONException ignored) {}
+        }
+        throw new EventNotFoundException();
+    }
 
 	@Override
 	public int getViewTypeCount() {

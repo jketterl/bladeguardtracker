@@ -10,6 +10,7 @@ import android.util.Log;
 import android.support.v4.app.NotificationCompat.Builder;
 
 import net.djmacgyver.bgt.activity.MainActivity;
+import net.djmacgyver.bgt.control.ControlService;
 
 public class GcmIntentService extends IntentService {
     private static final String TAG = "GcmIntentService";
@@ -40,20 +41,28 @@ public class GcmIntentService extends IntentService {
             Log.d(TAG, "received message of type '" + type + "'");
             if (type.equals("weather")) {
                 buildWeatherNotification(intent);
+            } else if (type.equals("eventstart")) {
+                startControlService(intent);
+            /*
             } else if (type.equals("test")) {
-                /*
                 // this should not get into production. production versions should silently
                 // ignore test messages
                 Intent i = new Intent();
                 i.putExtra("title", "Blade Night test");
                 i.putExtra("weather", "0");
                 buildWeatherNotification(i);
-                */
+            */
             } else {
                 Log.w(TAG, "unable to handle message of type '" + type + "'");
             }
         }
 	}
+
+    private void startControlService(Intent intent) {
+        Intent start = new Intent(getApplicationContext(), ControlService.class);
+        start.putExtra("eventId", Integer.parseInt(intent.getStringExtra("eventId")));
+        getApplicationContext().startService(start);
+    }
 
     private void buildWeatherNotification(Intent intent) {
         if (!intent.hasExtra("title") || !intent.hasExtra("weather")) return;
