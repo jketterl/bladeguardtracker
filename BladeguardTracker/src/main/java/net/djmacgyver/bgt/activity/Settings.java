@@ -31,7 +31,6 @@ import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -74,11 +73,6 @@ public class Settings extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.settings);
-
-        /*
-        TextView t = (TextView) findViewById(R.id.title);
-        t.setText(R.string.settings);
-        */
 
         uiHelper = new UiLifecycleHelper(this, callback);
         uiHelper.onCreate(savedInstanceState);

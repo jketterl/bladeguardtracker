@@ -25,8 +25,6 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
-import android.view.Window;
-import android.widget.TextView;
 
 public class Signup extends PreferenceActivity {
 	static final int DIALOG_SIGNUP_RUNNING = 0;
@@ -89,10 +87,6 @@ public class Signup extends PreferenceActivity {
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /*
-        TextView t = (TextView) findViewById(R.id.title);
-        t.setText(R.string.new_user);
-        */
         addPreferencesFromResource(R.xml.signup);
 
         Preference signup = findPreference("signup");

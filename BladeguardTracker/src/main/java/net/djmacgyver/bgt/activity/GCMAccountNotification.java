@@ -7,22 +7,16 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.TextView;
 
 public class GCMAccountNotification extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.gcmaccountnotification);
-        /*
-        TextView t = (TextView) findViewById(R.id.title);
-        t.setText(R.string.app_name);
-        */
-        
+
 		final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(GCMAccountNotification.this);
 		CheckBox dontShowAgain = (CheckBox) findViewById(R.id.dontShowAgain);
         dontShowAgain.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

@@ -7,9 +7,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class TeamSelection extends ListActivity {
 	@Override
@@ -17,11 +15,7 @@ public class TeamSelection extends ListActivity {
 		super.onCreate(savedInstanceState);
 	
 		setContentView(R.layout.fullscreenlist);
-        /*
-        TextView t = (TextView) findViewById(R.id.title);
-        t.setText(R.string.teamselection);
-        */
-        
+
         setListAdapter(new TeamList(this, true));
 	}
 	

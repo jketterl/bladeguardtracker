@@ -25,9 +25,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.view.View;
-import android.view.Window;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class MapSelection extends ListActivity {
 	private final static int DIALOG_CONFIRM = 0;
@@ -47,11 +45,7 @@ public class MapSelection extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.fullscreenlist);
-        /*
-        TextView t = (TextView) findViewById(R.id.title);
-        t.setText(R.string.map_selection);
-        */
-        
+
         setListAdapter(getMaps());
 	}
 

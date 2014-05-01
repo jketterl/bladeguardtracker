@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="net.djmacgyver.bgt" android:versionName="0.6.0" android:versionCode="15">
     <uses-sdk android:minSdkVersion="9" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"></uses-permission>
-    <permission android:protectionLevel="signature" android:name="net.djmacgyver.bgt.permission.C2D_MESSAGE"></permission>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <permission android:protectionLevel="signature" android:name="net.djmacgyver.bgt.permission.C2D_MESSAGE" />
     <uses-permission android:name="net.djmacgyver.bgt.permission.C2D_MESSAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -18,17 +18,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.Map" android:label="@string/map_name"/>
-        <uses-library android:required="true" android:name="com.google.android.maps"></uses-library>
-        <activity android:name=".activity.Settings" android:label="@string/settings"></activity>
-        <activity android:name=".activity.Signup"></activity>
-        <service android:name=".gps.GPSTrackingService"></service>
-        <activity android:name=".activity.MapSelection"></activity>
-        <service android:name=".socket.SocketService"></service>
-        <activity android:name=".activity.TeamSelection"></activity>
-        <receiver android:name=".alarm.AlarmReceiver" android:process=":remote"></receiver>
-        <service android:name=".control.ControlService"></service>
-        <activity android:name=".activity.EventDetail"></activity>
+        <activity android:name=".activity.Map" android:label="@string/map_name" />
+        <activity android:name=".activity.Settings" android:label="@string/settings" />
+        <activity android:name=".activity.Signup" android:label="@string/new_user" />
+        <activity android:name=".activity.MapSelection" android:label="@string/map_selection" />
+        <activity android:name=".activity.TeamSelection" android:label="@string/teamselection" />
+        <activity android:name=".activity.EventDetail" android:label="@string/event" />
+        <activity android:name=".activity.Admin" android:label="@string/admin_commands" />
+        <activity android:name=".activity.GCMAccountNotification" android:label="@string/app_name" />
+        <activity android:name="com.facebook.LoginActivity" />
+
+        <service android:name=".gps.GPSTrackingService" />
+        <service android:name=".socket.SocketService" />
+        <service android:name=".control.ControlService" />
+        <service android:name=".GCMIntentService" />
+        <uses-library android:required="true" android:name="com.google.android.maps" />
+
+        <receiver android:name=".alarm.AlarmReceiver" android:process=":remote" />
         <receiver android:name=".GCMBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND">
         	<intent-filter>
         		<action android:name="com.google.android.c2dm.intent.RECEIVE"/>
@@ -36,14 +42,10 @@
         		<category android:name="net.djmacgyver.bgt"/>
         	</intent-filter>
         </receiver>
-        <service android:name=".GCMIntentService"></service>
-        <activity android:name=".activity.Admin"></activity>
-        <activity android:name=".activity.GCMAccountNotification"></activity>
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
-        <activity android:name="com.facebook.LoginActivity"></activity>
 
-        <meta-data android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
+
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
 
     </application>
 </manifest>

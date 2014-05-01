@@ -37,10 +37,6 @@ public class Admin extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.admin);
-        /*
-        TextView t = (TextView) findViewById(R.id.title);
-        t.setText(R.string.admin_commands);
-        */
 	}
 	
 	protected void fireCommand(final SocketCommand command) {

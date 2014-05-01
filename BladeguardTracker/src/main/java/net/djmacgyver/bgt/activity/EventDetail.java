@@ -121,11 +121,7 @@ public class EventDetail extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.eventdetail);
-        /*
-        TextView t = (TextView) findViewById(R.id.title);
-        t.setText(R.string.event);
-        */
-        
+
         if (savedInstanceState != null) event = savedInstanceState.getParcelable("event");
         
         CheckBox c = (CheckBox) findViewById(R.id.participateCheckbox);

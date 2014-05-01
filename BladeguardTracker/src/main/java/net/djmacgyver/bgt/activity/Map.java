@@ -27,7 +27,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
 import android.widget.TextView;
 
 import com.google.android.maps.MapActivity;
