@@ -5,14 +5,18 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.util.Log;
+
+import android.support.v4.app.NotificationCompat.Builder;
 
 import net.djmacgyver.bgt.activity.MainActivity;
 
-public class GCMIntentService extends IntentService {
-	public static String gcmId;
-	
-	public GCMIntentService() {
-		super(gcmId);
+public class GcmIntentService extends IntentService {
+    private static final String TAG = "GcmIntentService";
+    private static final int WEATHER_NOTIFICATION = 1;
+
+	public GcmIntentService() {
+		super("GcmIntentService");
 	}
 
     /*
@@ -31,29 +35,58 @@ public class GCMIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-		if (!intent.hasExtra("title") || !intent.hasExtra("weather")) return;
-		
-		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		Notification n;
-		PendingIntent i = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(this, MainActivity.class), 0);
-		
-		// somehow, GCM seems to convert the server int to a string
-		int weather = Integer.parseInt(intent.getExtras().getString("weather"));
-		String message = getResources().getString(R.string.bladenight) + ": ";
-		if (weather != 0) {
-			message += getResources().getString(R.string.yes_rolling);
-			n = new Notification(R.drawable.ampel_gruen, message, System.currentTimeMillis());
-			n.setLatestEventInfo(getApplicationContext(), intent.getExtras().getString("title"), message, i);
-		} else {
-			message += getResources().getString(R.string.no_cancelled);
-			n = new Notification(R.drawable.ampel_rot, message, System.currentTimeMillis());
-			n.setLatestEventInfo(getApplicationContext(), intent.getExtras().getString("title"), message, i);
-		}
-		
+        if (intent.hasExtra("type")) {
+            String type = intent.getStringExtra("type");
+            Log.d(TAG, "received message of type '" + type + "'");
+            if (type.equals("weather")) {
+                buildWeatherNotification(intent);
+            } else if (type.equals("test")) {
+                /*
+                // this should not get into production. production versions should silently
+                // ignore test messages
+                Intent i = new Intent();
+                i.putExtra("title", "Blade Night test");
+                i.putExtra("weather", "0");
+                buildWeatherNotification(i);
+                */
+            } else {
+                Log.w(TAG, "unable to handle message of type '" + type + "'");
+            }
+        }
+	}
+
+    private void buildWeatherNotification(Intent intent) {
+        if (!intent.hasExtra("title") || !intent.hasExtra("weather")) return;
+
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification n;
+        PendingIntent i = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(this, MainActivity.class), 0);
+
+        // somehow, GCM seems to convert the server int to a string
+        int weather = Integer.parseInt(intent.getStringExtra("weather"));
+        String message = getResources().getString(R.string.bladenight) + ": ";
+        String title = intent.getStringExtra("title");
+        Builder b = new Builder(getApplicationContext());
+        if (weather != 0) {
+            message += getResources().getString(R.string.yes_rolling);
+            b.setSmallIcon(R.drawable.ampel_gruen);
+        } else {
+            message += getResources().getString(R.string.no_cancelled);
+            b.setSmallIcon(R.drawable.ampel_rot);
+        }
+
+        b.setTicker(message)
+                .setContentText(message)
+                .setContentIntent(i)
+                .setContentTitle(title)
+                .setWhen(System.currentTimeMillis());
+        n = b.build();
+
 		n.defaults |= Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
 		n.flags |= Notification.FLAG_AUTO_CANCEL;
-		nm.notify(1, n);
-	}
+
+        nm.notify(WEATHER_NOTIFICATION, n);
+    }
 
     /*
 	@Override

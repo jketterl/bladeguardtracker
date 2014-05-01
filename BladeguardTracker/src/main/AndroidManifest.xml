@@ -31,11 +31,11 @@
         <service android:name=".gps.GPSTrackingService" />
         <service android:name=".socket.SocketService" />
         <service android:name=".control.ControlService" />
-        <service android:name=".GCMIntentService" />
+        <service android:name=".GcmIntentService" />
         <uses-library android:required="true" android:name="com.google.android.maps" />
 
         <receiver android:name=".alarm.AlarmReceiver" android:process=":remote" />
-        <receiver android:name=".GCMBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND">
+        <receiver android:name=".GcmBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND">
         	<intent-filter>
         		<action android:name="com.google.android.c2dm.intent.RECEIVE"/>
         		<action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
