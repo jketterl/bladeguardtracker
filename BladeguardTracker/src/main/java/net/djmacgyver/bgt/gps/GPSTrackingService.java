@@ -121,7 +121,7 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		// it is possible that the connection has been closed before we were able so send the "quit" message.
 		try {
 			conn.sendCommand(new QuitCommand(boundEvent));
-		} catch (NullPointerException e) {}
+		} catch (NullPointerException ignored) {}
 		
 		this.setPosition(-1);
 		this.setDistanceToEnd(-1);
@@ -261,33 +261,27 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	}
 
 	protected void firePositionLost() {
-		Iterator<GPSTrackingListener> i = listeners.iterator();
-		while (i.hasNext()) i.next().onPositionLost();
+        for (GPSTrackingListener listener : listeners) listener.onPositionLost();
 	}
 
 	protected void firePositionLock(int position) {
-		Iterator<GPSTrackingListener> i = listeners.iterator();
-		while (i.hasNext()) i.next().onPositionLock(position);
+        for (GPSTrackingListener listener : listeners) listener.onPositionLock(position);
 	}
 	
 	protected void fireDistanceToEnd(double distance) {
-		Iterator<GPSTrackingListener> i = listeners.iterator();
-		while (i.hasNext()) i.next().onDistanceToEnd(distance);
+        for (GPSTrackingListener listener : listeners) listener.onDistanceToEnd(distance);
 	}
 
 	protected void fireDistanceToFront(double distance) {
-		Iterator<GPSTrackingListener> i = listeners.iterator();
-		while (i.hasNext()) i.next().onDistanceToFront(distance);
+        for (GPSTrackingListener listener : listeners) listener.onDistanceToFront(distance);
 	}
 	
 	protected void fireDistanceToEndLost() {
-		Iterator<GPSTrackingListener> i = listeners.iterator();
-		while (i.hasNext()) i.next().onDistanceToEndLost();
+        for (GPSTrackingListener listener : listeners) listener.onDistanceToEndLost();
 	}
 
 	protected void fireDistanceToFrontLost() {
-		Iterator<GPSTrackingListener> i = listeners.iterator();
-		while (i.hasNext()) i.next().onDistanceToFrontLost();
+        for (GPSTrackingListener listener : listeners) listener.onDistanceToFrontLost();
 	}
 
 	private void sendGpsUnavailable() {
@@ -309,13 +303,11 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 	}
 	
 	private void fireTrackingEnabled() {
-		Iterator<GPSTrackingListener> i = listeners.iterator();
-		while (i.hasNext()) i.next().trackingEnabled();
+        for (GPSTrackingListener listener : listeners) listener.trackingEnabled();
 	}
 	
 	private void fireTrackingDisabled() {
-		Iterator<GPSTrackingListener> i = listeners.iterator();
-		while (i.hasNext()) i.next().trackingDisabled();
+        for (GPSTrackingListener listener : listeners) listener.trackingDisabled();
 	}
 	
 	public void bindEvent(Event event) {

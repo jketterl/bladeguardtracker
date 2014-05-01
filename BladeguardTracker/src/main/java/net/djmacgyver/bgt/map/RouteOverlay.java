@@ -25,12 +25,12 @@ public class RouteOverlay extends Overlay {
 		// zoom in to the route
 		if (points.length == 0) return;
 		int minLat = 90000000, maxLat = -90000000, minLon = 180000000, maxLon = -180000000;
-		for (int i = 0; i < points.length; i++) {
-			minLat = Math.min(minLat, points[i].getLatitudeE6());
-			maxLat = Math.max(maxLat, points[i].getLatitudeE6());
-			minLon = Math.min(minLon, points[i].getLongitudeE6());
-			maxLon = Math.max(maxLon, points[i].getLongitudeE6());
-		}
+        for (GeoPoint point : points) {
+            minLat = Math.min(minLat, point.getLatitudeE6());
+            maxLat = Math.max(maxLat, point.getLatitudeE6());
+            minLon = Math.min(minLon, point.getLongitudeE6());
+            maxLon = Math.max(maxLon, point.getLongitudeE6());
+        }
 		view.getController().zoomToSpan(maxLat - minLat, maxLon - minLon);
 		view.getController().setCenter(new GeoPoint((maxLat + minLat) / 2, (maxLon + minLon) / 2));
 	}

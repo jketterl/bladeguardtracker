@@ -12,6 +12,6 @@ public class UpdateEventCommand extends SocketCommand {
 		this.data = data;
 		try {
 			data.put("eventId", event.getId());
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 }

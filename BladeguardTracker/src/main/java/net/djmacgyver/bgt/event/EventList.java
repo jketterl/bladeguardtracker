@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+
 public class EventList extends ServerList {
 	public EventList(Context context) {
 		super(context);
@@ -40,7 +42,8 @@ public class EventList extends ServerList {
 		try {
 			event = new Event(getData().getJSONObject(arg0));
 			text.setText(event.getTitle());
-			map.setText(event.getStart().toLocaleString() + " " + event.getMapName());
+            DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getContext());
+			map.setText(dateFormat.format(event.getStart()) + " " + event.getMapName());
 			if (event.hasWeatherDecision()) {
 				if (event.getWeatherDecision()) {
 					weatherIcon.setImageResource(R.drawable.ampel_gruen);

@@ -38,8 +38,7 @@ public class UserOverlayItem extends OverlayItem {
 	}
 	
 	private void firePointUpdated(GeoPoint newPoint) {
-		Iterator<UserOverlayItemListener> i = listeners.iterator();
-		while (i.hasNext()) i.next().pointUpdated(newPoint);
+        for (UserOverlayItemListener listener : listeners) listener.pointUpdated(newPoint);
 	}
 	
 	public void addListener(UserOverlayItemListener l) {

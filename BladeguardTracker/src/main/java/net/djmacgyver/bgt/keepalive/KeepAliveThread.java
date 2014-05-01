@@ -16,7 +16,7 @@ public class KeepAliveThread extends Thread {
 			try {
 				sleep(interval * 1000);
 				target.keepAlive(this);
-			} catch (InterruptedException e) {}
+			} catch (InterruptedException ignored) {}
 		}
 	}
 	

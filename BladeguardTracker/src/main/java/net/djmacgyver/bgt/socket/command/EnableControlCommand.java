@@ -13,6 +13,6 @@ public class EnableControlCommand extends SocketCommand {
 		try {
 			data = new JSONObject();
 			data.put("eventId", event.getId());
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 }

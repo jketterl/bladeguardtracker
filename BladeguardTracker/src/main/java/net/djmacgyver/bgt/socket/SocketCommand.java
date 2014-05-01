@@ -1,7 +1,6 @@
 package net.djmacgyver.bgt.socket;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,8 +78,7 @@ abstract public class SocketCommand {
 	}
 	
 	private void runCallbacks() {
-		Iterator<SocketCommandCallback> i = callbacks.iterator();
-		while (i.hasNext()) i.next().run(this);
+        for (SocketCommandCallback callback : callbacks) callback.run(this);
 		callbacks = null;
 	}
 	

@@ -11,7 +11,7 @@ public class AuthenticationCommand extends AbstractAuthCommand {
 			data = new JSONObject();
 			data.put("user", user);
 			data.put("pass", pass);
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 
 }

@@ -13,7 +13,7 @@ public class DisableControlCommand extends SocketCommand{
 		try {
 			data = new JSONObject();
 			data.put("eventId", event.getId());
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 
 }

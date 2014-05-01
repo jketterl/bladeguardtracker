@@ -19,6 +19,6 @@ abstract public class SubscriptionCommand extends SocketCommand {
 			JSONArray cats = new JSONArray();
 			for (String cat : categories) cats.put(cat);
 			data.put("category", cats);
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 }

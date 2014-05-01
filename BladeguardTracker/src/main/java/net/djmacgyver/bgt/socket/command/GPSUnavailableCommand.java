@@ -13,6 +13,6 @@ public class GPSUnavailableCommand extends SocketCommand {
 		data = new JSONObject();
 		try {
 			data.put("eventId", event.getId());
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 }

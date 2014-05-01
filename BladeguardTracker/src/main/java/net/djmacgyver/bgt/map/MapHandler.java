@@ -74,7 +74,7 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 				speed = stats.getDouble("bladeNightSpeed");
 				DecimalFormat df = new DecimalFormat("0.#");
 				text = df.format(speed * 3.6) + " km/h";
-			} catch (NumberFormatException e) {}
+			} catch (NumberFormatException ignored) {}
 		}
 		map.getSpeedTextView().setText(text);
 		updateTimeToEnd();

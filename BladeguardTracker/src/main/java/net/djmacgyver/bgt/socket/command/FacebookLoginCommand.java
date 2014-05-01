@@ -10,6 +10,6 @@ public class FacebookLoginCommand extends AbstractAuthCommand {
 		data = new JSONObject();
 		try {
 			this.data.put("accessToken", accessToken);
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 }

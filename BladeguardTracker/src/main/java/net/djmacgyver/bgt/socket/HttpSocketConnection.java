@@ -7,7 +7,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import javax.net.ssl.TrustManager;
@@ -47,7 +46,7 @@ public class HttpSocketConnection {
 	private int requestCount = 0;
 	private SparseArray<SocketCommand> requests = new SparseArray<SocketCommand>();
 	private LinkedList<SocketCommand> queue;
-	private ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
+	private final ArrayList<HttpSocketListener> listeners = new ArrayList<HttpSocketListener>();
 	//private ArrayList<String> subscribed = new ArrayList<String>();
 	private HashMap <Event, ArrayList<String>> subscribed = new HashMap<Event, ArrayList<String>>();
 	private AbstractAuthCommand authentication;
@@ -116,7 +115,7 @@ public class HttpSocketConnection {
 						if (queue == null) try {
 							// if the disconnect succeeds it should call onDisconnect()
 							socket.disconnect();
-						} catch (Exception e) {}
+						} catch (Exception ignored) {}
 						// we can never be sure whether onDisconnect() is called, so to be sure we call it at least 
 						// once here.
 						// onDisconnect() is protected against double execution using valid
@@ -307,7 +306,7 @@ public class HttpSocketConnection {
 			handshake.put("build", info.versionCode);
 			json.put("handshake", handshake);
 			getSocket().send(json.toString());
-		} catch (JSONException e) {
+		} catch (JSONException ignored) {
 		} catch (NameNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -398,22 +397,19 @@ public class HttpSocketConnection {
 	
 	protected void sendUpdate(JSONObject update) {
 		synchronized (listeners) {
-			Iterator<HttpSocketListener> i = listeners.iterator();
-			while (i.hasNext()) i.next().receiveUpdate(update);
+            for (HttpSocketListener listener : listeners) listener.receiveUpdate(update);
 		}
 	}
 	
 	private void sendCommand(String command, JSONObject data) {
 		synchronized (listeners) {
-			Iterator<HttpSocketListener> i = listeners.iterator();
-			while (i.hasNext()) i.next().receiveCommand(command, data);
+            for (HttpSocketListener listener : listeners) listener.receiveCommand(command, data);
 		}
 	}
 	
 	protected void fireStateChange(int newState) {
 		synchronized (listeners) {
-			Iterator<HttpSocketListener> i = listeners.iterator();
-			while (i.hasNext()) i.next().receiveStateChange(newState);
+            for (HttpSocketListener listener : listeners) listener.receiveStateChange(newState);
 		}
 	}
 	
@@ -435,13 +431,11 @@ public class HttpSocketConnection {
 
 	private void sendSubscriptions() {
 		// re-subscribe to all categories (in case of a re-connect)
-		Iterator<Event> i = subscribed.keySet().iterator();
-		while (i.hasNext()) {
-			Event event = i.next();
-			ArrayList<String> eventSubscriptions = getEventSubscriptions(event);
-			String[] sub = eventSubscriptions.toArray(new String[eventSubscriptions.size()]);
-			sendCommand(new SubscribeUpdatesCommand(event, sub));
-		}
+        for (Event event : subscribed.keySet()) {
+            ArrayList<String> eventSubscriptions = getEventSubscriptions(event);
+            String[] sub = eventSubscriptions.toArray(new String[eventSubscriptions.size()]);
+            sendCommand(new SubscribeUpdatesCommand(event, sub));
+        }
 	}
 	
 	private void setState(int newState)	{

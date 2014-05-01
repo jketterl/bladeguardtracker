@@ -12,6 +12,6 @@ public class RegistrationUpdateCommand extends SocketCommand {
 		try {
 			data = new JSONObject();
 			data.put("regId", regId);
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 }

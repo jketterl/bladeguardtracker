@@ -120,7 +120,7 @@ public class Event implements Parcelable {
 	}
 	
 	public boolean getWeatherDecision() {
-		return weather.booleanValue();
+		return weather;
 	}
 
 	public String getMapName() {

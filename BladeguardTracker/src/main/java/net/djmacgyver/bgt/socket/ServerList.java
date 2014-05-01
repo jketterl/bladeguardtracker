@@ -1,7 +1,6 @@
 package net.djmacgyver.bgt.socket;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -132,8 +131,7 @@ public abstract class ServerList implements ListAdapter {
 	private Handler h = new Handler(){
 		@Override
 		public void handleMessage(Message msg) {
-			Iterator<DataSetObserver> i = observers.iterator();
-			while (i.hasNext()) i.next().onChanged();
+            for (DataSetObserver observer : observers) observer.onChanged();
 		}
 	};
 	

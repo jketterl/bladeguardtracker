@@ -22,7 +22,7 @@ public class LogCommand extends SocketCommand {
 			data.put("lon", location.getLongitude());
 			if (location.hasSpeed()) data.put("speed", location.getSpeed());
 			data.put("eventId", event.getId());
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class LogCommand extends SocketCommand {
 			if (result.has("locked") && result.getBoolean("locked")) {
 				return result.getInt("index");
 			}
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 		return -1;
 	}
 	
@@ -49,7 +49,7 @@ public class LogCommand extends SocketCommand {
 		try {
 			JSONObject result = resultArray.getJSONObject(0);
 			if (result.has("distanceToFront")) return result.getDouble("distanceToFront");
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 		return -1;
 	}
 	
@@ -57,7 +57,7 @@ public class LogCommand extends SocketCommand {
 		try {
 			JSONObject result = resultArray.getJSONObject(0);
 			if (result.has("distanceToEnd")) return result.getDouble("distanceToEnd");
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 		return -1;
 	}
 	

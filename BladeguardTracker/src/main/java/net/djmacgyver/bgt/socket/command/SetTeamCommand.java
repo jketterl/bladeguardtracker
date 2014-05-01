@@ -12,7 +12,7 @@ public class SetTeamCommand extends SocketCommand {
 		try {
 			data = new JSONObject();
 			data.put("id", teamId);
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 
 }

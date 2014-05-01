@@ -138,7 +138,7 @@ public class ControlService extends Service implements HttpSocketListener {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		event = (Event) intent.getExtras().getParcelable("event");
+		event = intent.getExtras().getParcelable("event");
 		bindService(new Intent(getApplicationContext(), SocketService.class), conn, Context.BIND_AUTO_CREATE);
 		return START_STICKY;
 	}

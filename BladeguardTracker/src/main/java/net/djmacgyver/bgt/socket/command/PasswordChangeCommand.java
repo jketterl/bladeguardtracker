@@ -11,6 +11,6 @@ public class PasswordChangeCommand extends SocketCommand {
 		data = new JSONObject();
 		try {
 			data.put("pass", newPassword);
-		} catch (JSONException e) {}
+		} catch (JSONException ignored) {}
 	}
 }
