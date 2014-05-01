@@ -1,6 +1,7 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.dialog.ConnectingDialog;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
 import net.djmacgyver.bgt.session.Session;
@@ -12,8 +13,6 @@ import net.djmacgyver.bgt.socket.command.RegistrationUpdateCommand;
 
 import org.json.JSONObject;
 
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +22,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.StrictMode;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -36,7 +36,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import java.io.IOException;
 
 public class MainActivity extends ActionBarActivity {
-	public static final int DIALOG_CONNECTING = 1;
+    public static final String DIALOG_CONNECTING = "dialog_connecting";
 	private HttpSocketConnection socket;
 	private SocketService sockService;
 	private EventList events;
@@ -46,9 +46,9 @@ public class MainActivity extends ActionBarActivity {
 		public void handleMessage(Message msg) {
 			int state = (Integer) msg.obj;
 			if (state == HttpSocketConnection.STATE_CONNECTED) {
-				removeDialog(DIALOG_CONNECTING);
+                dismissConnectDialog();
 			} else {
-				showDialog(DIALOG_CONNECTING);
+                showConnectDialog();
 			}
 		}
 	};
@@ -155,20 +155,9 @@ public class MainActivity extends ActionBarActivity {
 		}
 	}
 
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		switch (id) {
-			case DIALOG_CONNECTING:
-				ProgressDialog d = new ProgressDialog(this);
-				d.setTitle(R.string.connect_progress);
-				return d;
-		}
-		return super.onCreateDialog(id);
-	}
-	
 	private void onConnect() {
 		socket.addListener(listener);
-		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) removeDialog(Map.DIALOG_CONNECTING);
+		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) dismissConnectDialog();
 	}
 
 	@Override
@@ -182,7 +171,7 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	protected void onResume() {
         events.refresh();
-		showDialog(DIALOG_CONNECTING);
+        showConnectDialog();
         bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
 		super.onResume();
 	}
@@ -192,4 +181,14 @@ public class MainActivity extends ActionBarActivity {
 		menu.setGroupVisible(R.id.adminGroup, Session.hasUser() && Session.getUser().isAdmin());
 		return super.onPrepareOptionsMenu(menu);
 	}
+
+    private void showConnectDialog() {
+        ConnectingDialog d = new ConnectingDialog();
+        d.show(getSupportFragmentManager(), DIALOG_CONNECTING);
+    }
+
+    private void dismissConnectDialog() {
+        FragmentManager fm = getSupportFragmentManager();
+        ((ConnectingDialog) fm.findFragmentByTag(DIALOG_CONNECTING)).dismiss();
+    }
 }

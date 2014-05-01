@@ -85,4 +85,5 @@
     <string name="app_request">Invite your Friends!</string>
     <string name="join_me">Ride with me!</string>
     <string name="change">change...</string>
+    <string name="pleasewait">please wait&#8230;</string>
 </resources>
