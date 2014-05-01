@@ -126,8 +126,8 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 		}
 		
 		this.map.getRoute().setPoints(geoPoints);
-		
-		this.map.getTitleTextView().setText(map.getString("name"));
+
+		this.map.setMapName(map.getString("name"));
 	}
 
 	private void parseUserRemovals(JSONObject data) throws JSONException {

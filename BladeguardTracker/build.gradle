@@ -1,0 +1,30 @@
+apply plugin: 'android'
+
+android {
+    compileSdkVersion "Google Inc.:Google APIs:19"
+    buildToolsVersion '19.0.3'
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 19
+    }
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+    productFlavors {
+    }
+    signingConfigs {
+    }
+}
+
+dependencies {
+    compile 'com.google.android.gms:play-services:4.3.23+'
+    compile 'com.android.support:appcompat-v7:18.0.+'
+    compile project(':facebook')
+}
+buildscript {
+    repositories {
+}
+}

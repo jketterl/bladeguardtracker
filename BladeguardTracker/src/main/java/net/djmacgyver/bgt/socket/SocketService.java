@@ -7,7 +7,9 @@ import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 
 public class SocketService extends Service implements KeepAliveTarget {
 	// necessary for interaction with service clients

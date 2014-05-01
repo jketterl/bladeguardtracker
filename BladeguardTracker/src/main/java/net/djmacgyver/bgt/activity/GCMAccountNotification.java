@@ -17,11 +17,11 @@ public class GCMAccountNotification extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.gcmaccountnotification);
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
+        /*
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.app_name);
+        */
         
 		final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(GCMAccountNotification.this);
 		CheckBox dontShowAgain = (CheckBox) findViewById(R.id.dontShowAgain);

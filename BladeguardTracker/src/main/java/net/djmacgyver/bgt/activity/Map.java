@@ -162,10 +162,10 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	public TextView getTimeToEndView() {
 		return (TextView) findViewById(R.id.timeToEnd);
 	}
-	
-	public TextView getTitleTextView() {
-		return (TextView) findViewById(R.id.title);
-	}
+
+    public void setMapName(String name) {
+        // TODO: show the map name on the actionbar
+    }
 	
 	private KeepAliveThread getRefresher()
 	{
@@ -177,11 +177,11 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.map);
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
+        /*
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.map_name);
+        */
     	
         if (savedInstanceState != null) event = savedInstanceState.getParcelable("event");
 

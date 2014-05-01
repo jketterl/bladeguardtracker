@@ -1,0 +1,9 @@
+.gradle
+gradle
+gradlew
+gradlew.bat
+.idea
+local.properties
+facebook
+*.iml
+build

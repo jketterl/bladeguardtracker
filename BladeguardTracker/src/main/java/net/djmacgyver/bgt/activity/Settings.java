@@ -72,13 +72,13 @@ public class Settings extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-        
+
         setContentView(R.layout.settings);
 
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
+        /*
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.settings);
+        */
 
         uiHelper = new UiLifecycleHelper(this, callback);
         uiHelper.onCreate(savedInstanceState);

@@ -120,11 +120,11 @@ public class EventDetail extends Activity {
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.eventdetail);
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
+        /*
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.event);
+        */
         
         if (savedInstanceState != null) event = savedInstanceState.getParcelable("event");
         

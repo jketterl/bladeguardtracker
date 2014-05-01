@@ -87,12 +87,12 @@ public class Signup extends PreferenceActivity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         super.onCreate(savedInstanceState);
-        
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
+
+        /*
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.new_user);
+        */
         addPreferencesFromResource(R.xml.signup);
 
         Preference signup = findPreference("signup");

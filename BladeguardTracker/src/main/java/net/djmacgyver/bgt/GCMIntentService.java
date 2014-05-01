@@ -1,32 +1,21 @@
 package net.djmacgyver.bgt;
 
-import net.djmacgyver.bgt.activity.GCMAccountNotification;
-import net.djmacgyver.bgt.activity.MainActivity;
-import net.djmacgyver.bgt.socket.SocketCommand;
-import net.djmacgyver.bgt.socket.SocketService;
-import net.djmacgyver.bgt.socket.command.RegistrationDeleteCommand;
-import net.djmacgyver.bgt.socket.command.RegistrationUpdateCommand;
+import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.os.IBinder;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
-import com.google.android.gcm.GCMBaseIntentService;
+import net.djmacgyver.bgt.activity.MainActivity;
 
-public class GCMIntentService extends GCMBaseIntentService {
+public class GCMIntentService extends IntentService {
 	public static String gcmId;
 	
 	public GCMIntentService() {
 		super(gcmId);
 	}
 
+    /*
 	@Override
 	protected void onError(Context context, String message) {
 		if (message.equals("ACCOUNT_MISSING")) {
@@ -38,9 +27,10 @@ public class GCMIntentService extends GCMBaseIntentService {
 			context.startActivity(i);
 		}
 	}
+	*/
 
-	@Override
-	protected void onMessage(Context context, Intent intent) {
+    @Override
+    protected void onHandleIntent(Intent intent) {
 		if (!intent.hasExtra("title") || !intent.hasExtra("weather")) return;
 		
 		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -65,6 +55,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		nm.notify(1, n);
 	}
 
+    /*
 	@Override
 	protected void onRegistered(Context arg0, final String regId) {
 		ServiceConnection conn = new ServiceConnection() {
@@ -102,5 +93,5 @@ public class GCMIntentService extends GCMBaseIntentService {
 		bindService(new Intent(this, SocketService.class), conn, BIND_AUTO_CREATE);
 		Log.v("GCM registration", "registered (id=\"" + regId + "\"");
 	}
-
+    */
 }

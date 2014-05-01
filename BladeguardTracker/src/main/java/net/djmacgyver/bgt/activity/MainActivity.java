@@ -1,6 +1,5 @@
 package net.djmacgyver.bgt.activity;
 
-import net.djmacgyver.bgt.GCMIntentService;
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
@@ -13,7 +12,6 @@ import net.djmacgyver.bgt.socket.command.RegistrationUpdateCommand;
 
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -24,6 +22,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.StrictMode;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,9 +33,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.gcm.GCMRegistrar;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-public class MainActivity extends Activity {
+import java.io.IOException;
+
+public class MainActivity extends ActionBarActivity {
 	public static final int DIALOG_CONNECTING = 1;
 	private HttpSocketConnection socket;
 	private SocketService sockService;
@@ -86,13 +88,13 @@ public class MainActivity extends Activity {
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+        StrictMode.setThreadPolicy(policy);
+
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.main);
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.header);
-        TextView t = (TextView) findViewById(R.id.title);
-        t.setText(R.string.app_name);
-        
+
         events = new EventList(this);
         ListView eventList = (ListView) findViewById(R.id.upcomingEvents);
         eventList.setAdapter(events);
@@ -108,30 +110,28 @@ public class MainActivity extends Activity {
 				startActivity(i);
 			}
 		});
-        
-        GCMIntentService.gcmId = getResources().getString(R.string.gcm_id);
-		GCMRegistrar.checkDevice(this);
-		GCMRegistrar.checkManifest(this);
-		final String regId = GCMRegistrar.getRegistrationId(this);
-		if (regId.equals("")) {
-			GCMRegistrar.register(this, GCMIntentService.gcmId);
-		} else {
-			ServiceConnection conn = new ServiceConnection() {
-				@Override
-				public void onServiceDisconnected(ComponentName name) {
-				}
-				
-				@Override
-				public void onServiceConnected(ComponentName name, IBinder service) {
-					SocketService s = ((SocketService.LocalBinder) service).getService();
-					SocketCommand c = new RegistrationUpdateCommand(regId);
-					s.getSharedConnection().sendCommand(c);
-					unbindService(this);
-				}
-			};
-			bindService(new Intent(this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
-			Log.v("GCM registration", "Already registered (id=\"" + regId + "\"");
-		}
+
+        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+        try {
+            final String regId = gcm.register(getResources().getString(R.string.gcm_id));
+            ServiceConnection conn = new ServiceConnection() {
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                }
+
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    SocketService s = ((SocketService.LocalBinder) service).getService();
+                    SocketCommand c = new RegistrationUpdateCommand(regId);
+                    s.getSharedConnection().sendCommand(c);
+                    unbindService(this);
+                }
+            };
+            bindService(new Intent(this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
+            Log.v("GCM registration", "Already registered (id=\"" + regId + "\"");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 	@Override
@@ -187,12 +187,6 @@ public class MainActivity extends Activity {
 		showDialog(DIALOG_CONNECTING);
         bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
 		super.onResume();
-	}
-
-	@Override
-	protected void onDestroy() {
-		GCMRegistrar.onDestroy(this);
-		super.onDestroy();
 	}
 
 	@Override
