@@ -2,9 +2,5 @@
 <resources>
     <style name="net.djmacgyver.bgt.style" parent="@style/Theme.AppCompat.Light">
         <item name="android:windowTitleSize">48dip</item>
-    	<item name="android:windowTitleBackgroundStyle">@style/net.djmacgyver.bgt.header.style</item>
-    </style>
-    <style name="net.djmacgyver.bgt.header.style" parent="@style/Theme.AppCompat.Light">
-    	<item name="android:background">@drawable/header_background</item>
     </style>
 </resources>
