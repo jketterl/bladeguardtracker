@@ -4,7 +4,6 @@ import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
-import net.djmacgyver.bgt.socket.command.BridgeCommand;
 
 import org.json.JSONException;
 
@@ -20,11 +19,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
-import android.widget.Button;
-import android.widget.TextView;
 
 public class Admin extends Activity {
 	public static final int DIALOG_PERFORMING_COMMAND = 1;
@@ -47,22 +41,6 @@ public class Admin extends Activity {
         TextView t = (TextView) findViewById(R.id.title);
         t.setText(R.string.admin_commands);
         */
-
-        Button disableButton = (Button) findViewById(R.id.disableButton);
-        disableButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				fireCommand(new BridgeCommand(false));
-			}
-		});
-        
-        Button enableButton = (Button) findViewById(R.id.enableButton);
-        enableButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				fireCommand(new BridgeCommand(true));
-			}
-		});
 	}
 	
 	protected void fireCommand(final SocketCommand command) {
