@@ -163,7 +163,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	}
 
     public void setMapName(String name) {
-        // TODO: show the map name on the actionbar
+        getActionBar().setTitle(name);
     }
 	
 	private KeepAliveThread getRefresher()
