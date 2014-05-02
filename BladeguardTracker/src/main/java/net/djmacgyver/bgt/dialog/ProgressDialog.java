@@ -9,13 +9,21 @@ import android.widget.TextView;
 
 import net.djmacgyver.bgt.R;
 
-public class ConnectingDialog extends DialogFragment {
-    public ConnectingDialog() {}
+public class ProgressDialog extends DialogFragment {
+    private int message;
+
+    public ProgressDialog() {
+        this(R.string.connect_progress);
+    }
+
+    public ProgressDialog(int message) {
+        this.message = message;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        getDialog().setTitle(R.string.connect_progress);
-        View v = inflater.inflate(R.layout.connectingdialog, container, false);
+        getDialog().setTitle(message);
+        View v = inflater.inflate(R.layout.progressdialog, container, false);
         TextView t = (TextView) v.findViewById(R.id.message);
         t.setText(R.string.pleasewait);
         return v;

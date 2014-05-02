@@ -86,4 +86,5 @@
     <string name="join_me">Ride with me!</string>
     <string name="change">change...</string>
     <string name="pleasewait">please wait&#8230;</string>
+    <string name="servererror">Server error</string>
 </resources>

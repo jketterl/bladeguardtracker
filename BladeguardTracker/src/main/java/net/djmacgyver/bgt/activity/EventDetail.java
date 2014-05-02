@@ -2,7 +2,6 @@ package net.djmacgyver.bgt.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,6 +25,7 @@ import android.widget.TextView;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.control.ControlService;
+import net.djmacgyver.bgt.dialog.ProgressDialog;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.ParticipationStore;
 import net.djmacgyver.bgt.session.Session;
@@ -45,9 +45,9 @@ public class EventDetail extends FragmentActivity {
 	private Event event;
 
     private static final String DIALOG_CONFIRM = "dialog_confirm";
-	public static final int DIALOG_PERFORMING_COMMAND = 2;
-	public static final int DIALOG_ERROR = 3;
-	private  static final String DIALOG_WEATHER_DECISION = "dialog_weather";
+	private static final String DIALOG_PERFORMING_COMMAND = "dialog_performing";
+	private static final String DIALOG_ERROR = "dialog_error";
+	private static final String DIALOG_WEATHER_DECISION = "dialog_weather";
 
 	private class SingleCommandConnection implements ServiceConnection {
 		private SocketCommand command;
@@ -62,7 +62,8 @@ public class EventDetail extends FragmentActivity {
 			command.addCallback(new SocketCommandCallback() {
 				@Override
 				public void run(SocketCommand command) {
-					dismissDialog(DIALOG_PERFORMING_COMMAND);
+                    DialogFragment d = (DialogFragment) getSupportFragmentManager().findFragmentByTag(DIALOG_PERFORMING_COMMAND);
+                    d.dismiss();
 					if (!command.wasSuccessful()) {
 						String message = "unknown error";
 						try {
@@ -86,9 +87,8 @@ public class EventDetail extends FragmentActivity {
 	private Handler h = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			Bundle b = new Bundle();
-			b.putString("message", (String) msg.obj);
-			showDialog(DIALOG_ERROR, b);
+            ErrorDialog d = new ErrorDialog((String) msg.obj);
+            d.show(getSupportFragmentManager(), DIALOG_ERROR);
 		}
 	};
 
@@ -131,7 +131,8 @@ public class EventDetail extends FragmentActivity {
                      new Thread(){
                          @Override
                          public void run() {
-                             showDialog(DIALOG_PERFORMING_COMMAND);
+                             ProgressDialog d = new ProgressDialog(R.string.command_executing);
+                             d.show(getSupportFragmentManager(), DIALOG_PERFORMING_COMMAND);
                              bindService(
                                      new Intent(EventDetail.this, SocketService.class),
                                      new SingleCommandConnection(provider.buildCommand()),
@@ -185,6 +186,28 @@ public class EventDetail extends FragmentActivity {
              });
             return b.create();
 
+        }
+    }
+
+    private class ErrorDialog extends DialogFragment {
+        private String message;
+
+        public ErrorDialog(String message) {
+            this.message = message;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
+            b.setTitle(R.string.servererror)
+             .setMessage(getResources().getString(R.string.command_error) + ":\n\n" + message)
+             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                 @Override
+                 public void onClick(DialogInterface arg0, int arg1) {
+                     arg0.dismiss();
+                 }
+             });
+            return b.create();
         }
     }
 	
@@ -307,37 +330,5 @@ public class EventDetail extends FragmentActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putParcelable("event", event);
-	}
-
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		AlertDialog.Builder b = new AlertDialog.Builder(this);
-		switch (id) {
-			case DIALOG_PERFORMING_COMMAND:
-				Dialog d = new ProgressDialog(this);
-				d.setTitle(R.string.command_executing);
-				return d;
-			case DIALOG_ERROR:
-				b.setMessage(R.string.command_error)
-				 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						arg0.dismiss();
-					}
-				});
-				return b.create();
-		}
-		return super.onCreateDialog(id);
-	}
-
-	@Override
-	protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
-		switch (id) {
-			case DIALOG_ERROR:
-				AlertDialog a = (AlertDialog) dialog;
-				a.setMessage(getResources().getString(R.string.command_error) + ":\n\n" + args.getString("message"));
-				break;
-		}
-		super.onPrepareDialog(id, dialog, args);
 	}
 }

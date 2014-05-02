@@ -1,7 +1,7 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.dialog.ConnectingDialog;
+import net.djmacgyver.bgt.dialog.ProgressDialog;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
 import net.djmacgyver.bgt.session.Session;
@@ -183,12 +183,12 @@ public class MainActivity extends ActionBarActivity {
 	}
 
     private void showConnectDialog() {
-        ConnectingDialog d = new ConnectingDialog();
+        ProgressDialog d = new ProgressDialog();
         d.show(getSupportFragmentManager(), DIALOG_CONNECTING);
     }
 
     private void dismissConnectDialog() {
         FragmentManager fm = getSupportFragmentManager();
-        ((ConnectingDialog) fm.findFragmentByTag(DIALOG_CONNECTING)).dismiss();
+        ((ProgressDialog) fm.findFragmentByTag(DIALOG_CONNECTING)).dismiss();
     }
 }

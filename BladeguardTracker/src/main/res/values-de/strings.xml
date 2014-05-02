@@ -82,4 +82,5 @@
     <string name="join_me">Fahre mit mir zusammen!</string>
     <string name="change">wechseln&#8230;</string>
     <string name="pleasewait">Bitte warten&#8230;</string>
+    <string name="servererror">Serverfehler</string>
 </resources>
