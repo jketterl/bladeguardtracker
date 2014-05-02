@@ -39,6 +39,7 @@ import net.djmacgyver.bgt.socket.command.UpdateEventCommand;
 import net.djmacgyver.bgt.user.User;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class EventDetail extends FragmentActivity {
 	private Event event;
@@ -46,7 +47,7 @@ public class EventDetail extends FragmentActivity {
     private static final String DIALOG_CONFIRM = "dialog_confirm";
 	public static final int DIALOG_PERFORMING_COMMAND = 2;
 	public static final int DIALOG_ERROR = 3;
-	public static final int DIALOG_WEATHER_DECISION = 4;
+	private  static final String DIALOG_WEATHER_DECISION = "dialog_weather";
 
 	private class SingleCommandConnection implements ServiceConnection {
 		private SocketCommand command;
@@ -123,8 +124,6 @@ public class EventDetail extends FragmentActivity {
             AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
 
             b.setTitle(R.string.are_you_sure)
-             // seems like we have to set some message & listener here... otherwise the corresponding
-             // dialog components will not be shown, even if we configure them lateer on...
              .setMessage(message)
              .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                  @Override
@@ -149,6 +148,43 @@ public class EventDetail extends FragmentActivity {
                  }
              });
             return b.create();
+        }
+    }
+
+    private class WeatherDialog extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
+            CharSequence[] items = {
+                getResources().getString(R.string.no_cancelled),
+                getResources().getString(R.string.yes_rolling)
+            };
+            b.setTitle(R.string.weather_decision)
+             .setItems(items, new DialogInterface.OnClickListener() {
+                 @Override
+                 public void onClick(DialogInterface dialog, final int which) {
+                     ConfirmDialog d = new ConfirmDialog(R.string.update_weather, new CommandProvider() {
+                         @Override
+                         public SocketCommand buildCommand() {
+                             try {
+                                 JSONObject data = new JSONObject();
+                                 data.put("weather", which);
+                                 return new UpdateEventCommand(event, data);
+                             } catch (JSONException ignored) {}
+                             return null;
+                         }
+                     });
+                     d.show(getSupportFragmentManager(), DIALOG_CONFIRM);
+                 }
+             })
+             .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                 @Override
+                 public void onClick(DialogInterface dialog, int which) {
+                     dialog.dismiss();
+                 }
+             });
+            return b.create();
+
         }
     }
 	
@@ -213,7 +249,8 @@ public class EventDetail extends FragmentActivity {
         weatherButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				showDialog(DIALOG_WEATHER_DECISION);
+                WeatherDialog d = new WeatherDialog();
+                d.show(getSupportFragmentManager(), DIALOG_WEATHER_DECISION);
 			}
 		});
     }
@@ -286,30 +323,6 @@ public class EventDetail extends FragmentActivity {
 					@Override
 					public void onClick(DialogInterface arg0, int arg1) {
 						arg0.dismiss();
-					}
-				});
-				return b.create();
-			case DIALOG_WEATHER_DECISION:
-				CharSequence[] items = {
-					getResources().getString(R.string.no_cancelled),
-					getResources().getString(R.string.yes_rolling)
-				};
-				System.out.println(items);
-				b.setTitle(R.string.weather_decision)
-				 .setItems(items, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Bundle b = new Bundle();
-						b.putInt("message", R.string.update_weather);
-						b.putString("command", UpdateEventCommand.class.getCanonicalName());
-						b.putInt("weather", which);
-						//showDialog(DIALOG_CONFIRM, b);
-					}
-				})
-				 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
 					}
 				});
 				return b.create();
