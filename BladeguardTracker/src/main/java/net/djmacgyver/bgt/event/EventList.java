@@ -46,7 +46,7 @@ public class EventList extends ServerList {
 		try {
 			event = new Event(getData().getJSONObject(arg0));
 			text.setText(event.getTitle());
-            DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getContext());
+            DateFormat dateFormat = DateFormat.getDateTimeInstance();
 			map.setText(dateFormat.format(event.getStart()) + " " + event.getMapName());
 			if (event.hasWeatherDecision()) {
 				if (event.getWeatherDecision()) {

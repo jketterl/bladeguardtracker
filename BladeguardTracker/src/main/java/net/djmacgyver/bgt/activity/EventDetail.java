@@ -41,6 +41,8 @@ import net.djmacgyver.bgt.user.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+
 public class EventDetail extends FragmentActivity {
 	private Event event;
 
@@ -297,7 +299,8 @@ public class EventDetail extends FragmentActivity {
         title.setText(event.getTitle());
         
         TextView start = (TextView) findViewById(R.id.startView);
-        start.setText(event.getStart().toLocaleString());
+        DateFormat df = DateFormat.getDateTimeInstance();
+        start.setText(df.format(event.getStart()));
         
         TextView weatherView = (TextView) findViewById(R.id.weatherView);
         if (event.hasWeatherDecision()) {
