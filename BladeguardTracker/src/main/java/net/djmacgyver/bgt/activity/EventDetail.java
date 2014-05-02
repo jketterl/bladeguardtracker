@@ -1,7 +1,28 @@
 package net.djmacgyver.bgt.activity;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Date;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.control.ControlService;
@@ -18,41 +39,15 @@ import net.djmacgyver.bgt.socket.command.UpdateEventCommand;
 import net.djmacgyver.bgt.user.User;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.preference.PreferenceManager;
-import android.util.TypedValue;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-public class EventDetail extends Activity {
+public class EventDetail extends FragmentActivity {
 	private Event event;
-	
-	public static final int DIALOG_CONFIRM = 1;
+
+    private static final String DIALOG_CONFIRM = "dialog_confirm";
 	public static final int DIALOG_PERFORMING_COMMAND = 2;
 	public static final int DIALOG_ERROR = 3;
 	public static final int DIALOG_WEATHER_DECISION = 4;
-	
+
 	private class SingleCommandConnection implements ServiceConnection {
 		private SocketCommand command;
 		
@@ -95,25 +90,67 @@ public class EventDetail extends Activity {
 			showDialog(DIALOG_ERROR, b);
 		}
 	};
+
+    private interface CommandProvider {
+        public SocketCommand buildCommand();
+    }
 	
-	private class EventBoundOnClickListener implements View.OnClickListener {
-		private Class <? extends SocketCommand> command;
+	abstract private class EventBoundOnClickListener implements View.OnClickListener, CommandProvider {
 		private int message;
 		
-		private EventBoundOnClickListener(Class <? extends SocketCommand> command, int message) {
-			this.command = command;
+		private EventBoundOnClickListener(int message) {
 			this.message = message;
 		}
 		
 		@Override
 		public void onClick(View v) {
-			Bundle b = new Bundle();
-			b.putString("command", command.getCanonicalName());
-			b.putInt("message", message);
-			showDialog(DIALOG_CONFIRM, b);
+            ConfirmDialog d = new ConfirmDialog(message, this);
+            d.show(getSupportFragmentManager(), DIALOG_CONFIRM);
 		}
-		
 	}
+
+    private class ConfirmDialog extends DialogFragment {
+        private final int message;
+        private CommandProvider provider;
+
+        public ConfirmDialog(int message, CommandProvider p) {
+            this.message = message;
+            provider = p;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
+
+            b.setTitle(R.string.are_you_sure)
+             // seems like we have to set some message & listener here... otherwise the corresponding
+             // dialog components will not be shown, even if we configure them lateer on...
+             .setMessage(message)
+             .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                 @Override
+                 public void onClick(DialogInterface arg0, int arg1) {
+                     new Thread(){
+                         @Override
+                         public void run() {
+                             showDialog(DIALOG_PERFORMING_COMMAND);
+                             bindService(
+                                     new Intent(EventDetail.this, SocketService.class),
+                                     new SingleCommandConnection(provider.buildCommand()),
+                                     Context.BIND_AUTO_CREATE
+                             );
+                         }
+                     }.run();
+                 }
+             })
+             .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                 @Override
+                 public void onClick(DialogInterface arg0, int arg1) {
+                     arg0.dismiss();
+                 }
+             });
+            return b.create();
+        }
+    }
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,13 +176,28 @@ public class EventDetail extends Activity {
 		});
         
         Button start = (Button) findViewById(R.id.startButton);
-        start.setOnClickListener(new EventBoundOnClickListener(StartEventCommand.class, R.string.activating_trackers));
+        start.setOnClickListener(new EventBoundOnClickListener(R.string.activating_trackers){
+            @Override
+            public SocketCommand buildCommand() {
+                return new StartEventCommand(event);
+            }
+        });
         
         Button pause = (Button) findViewById(R.id.pauseButton);
-        pause.setOnClickListener(new EventBoundOnClickListener(PauseEventCommand.class, R.string.deactivating_trackers));
+        pause.setOnClickListener(new EventBoundOnClickListener(R.string.deactivating_trackers){
+            @Override
+            public SocketCommand buildCommand() {
+                return new PauseEventCommand(event);
+            }
+        });
         
         Button shutdown = (Button) findViewById(R.id.shutdownButton);
-        shutdown.setOnClickListener(new EventBoundOnClickListener(ShutdownEventCommand.class, R.string.terminating_event));
+        shutdown.setOnClickListener(new EventBoundOnClickListener(R.string.terminating_event){
+            @Override
+            public SocketCommand buildCommand() {
+                return new ShutdownEventCommand(event);
+            }
+        });
 
         Button mapButton = (Button) findViewById(R.id.mapButton);
         mapButton.setOnClickListener(new OnClickListener() {
@@ -205,9 +257,10 @@ public class EventDetail extends Activity {
         	weatherView.setText(R.string.undecided);
         	weatherView.setCompoundDrawables(null, null, null, null);
         }
-        
+
+        ParticipationStore store = new ParticipationStore(this);
         CheckBox c = (CheckBox) findViewById(R.id.participateCheckbox);
-		c.setChecked(isParticipating());
+		c.setChecked(store.doesParticipate(event));
 		
 		TextView mapView = (TextView) findViewById(R.id.mapView);
 		mapView.setText(event.getMapName());
@@ -223,23 +276,6 @@ public class EventDetail extends Activity {
 	protected Dialog onCreateDialog(int id) {
 		AlertDialog.Builder b = new AlertDialog.Builder(this);
 		switch (id) {
-			case DIALOG_CONFIRM:
-				b.setTitle(R.string.are_you_sure)
-				// seems like we have to set some message & listener here... otherwise the corresponding
-				// dialog components will not be shown, even if we configure them lateer on...
-				 .setMessage(R.string.are_you_sure)
-				 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-					}
-				})
-				 .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						dismissDialog(DIALOG_CONFIRM);
-					}
-				});
-				return b.create();
 			case DIALOG_PERFORMING_COMMAND:
 				Dialog d = new ProgressDialog(this);
 				d.setTitle(R.string.command_executing);
@@ -267,7 +303,7 @@ public class EventDetail extends Activity {
 						b.putInt("message", R.string.update_weather);
 						b.putString("command", UpdateEventCommand.class.getCanonicalName());
 						b.putInt("weather", which);
-						showDialog(DIALOG_CONFIRM, b);
+						//showDialog(DIALOG_CONFIRM, b);
 					}
 				})
 				 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -284,82 +320,11 @@ public class EventDetail extends Activity {
 	@Override
 	protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
 		switch (id) {
-			case DIALOG_CONFIRM:
-				AlertDialog d = (AlertDialog) dialog;
-				d.setMessage(getResources().getString(args.getInt("message")));
-			
-				final SocketCommand command;
-				try {
-					Class<?> commandClass = getClassLoader().loadClass(args.getString("command"));
-					if (args.containsKey("weather")) {
-						JSONObject data = new JSONObject();
-						try {
-							data.put("weather", args.getInt("weather"));
-						} catch (JSONException e) {}
-						command = (SocketCommand) commandClass.getConstructor(new Class[]{Event.class, JSONObject.class}).newInstance(new Object[]{event, data});
-					} else {
-						command = (SocketCommand) commandClass.getConstructor(new Class[]{Event.class}).newInstance(new Object[]{event});
-					}
-					d.setButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface arg0, int arg1) {
-							new Thread(){
-								@Override
-								public void run() {
-									showDialog(DIALOG_PERFORMING_COMMAND);
-									bindService(
-											new Intent(EventDetail.this, SocketService.class),
-											new SingleCommandConnection(command),
-											Context.BIND_AUTO_CREATE
-									);
-								}
-							}.run();
-						}
-					});
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchMethodException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				break;
 			case DIALOG_ERROR:
 				AlertDialog a = (AlertDialog) dialog;
 				a.setMessage(getResources().getString(R.string.command_error) + ":\n\n" + args.getString("message"));
 				break;
 		}
 		super.onPrepareDialog(id, dialog, args);
-	}
-	
-	private boolean isParticipating() {
-        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(EventDetail.this);
-    	JSONObject participating;
-        try {
-        	participating = new JSONObject(p.getString("participating", "{}"));
-        } catch (JSONException e) {
-        	participating = new JSONObject();
-        }
-    	String id = Integer.toString(event.getId());
-    	try {
-			return participating.has(id) && participating.getBoolean(id);
-		} catch (JSONException e) {
-			return false;
-		} 
 	}
 }
