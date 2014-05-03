@@ -5,6 +5,7 @@ import net.djmacgyver.bgt.dialog.ProgressDialog;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
 import net.djmacgyver.bgt.session.Session;
+import net.djmacgyver.bgt.socket.CommandExecutor;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketCommand;
@@ -17,6 +18,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -36,6 +38,8 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import java.io.IOException;
 
 public class MainActivity extends ActionBarActivity {
+    private static final String TAG = "MainActivity";
+
     public static final String DIALOG_CONNECTING = "dialog_connecting";
 	private HttpSocketConnection socket;
 	private SocketService sockService;
@@ -109,27 +113,26 @@ public class MainActivity extends ActionBarActivity {
 			}
 		});
 
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        try {
-            final String regId = gcm.register(getResources().getString(R.string.gcm_id));
-            ServiceConnection conn = new ServiceConnection() {
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
+        new AsyncTask<Object, Object, String>() {
+            @Override
+            protected String doInBackground(Object... objects) {
+                GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
+                try {
+                    return gcm.register(getResources().getString(R.string.gcm_id));
+                } catch (IOException e1) {
+                    Log.e(TAG, "gcm registration failed", e1);
+                    return null;
                 }
+            }
 
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    SocketService s = ((SocketService.LocalBinder) service).getService();
-                    SocketCommand c = new RegistrationUpdateCommand(regId);
-                    s.getSharedConnection().sendCommand(c);
-                    unbindService(this);
-                }
-            };
-            bindService(new Intent(this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
-            Log.v("GCM registration", "Already registered (id=\"" + regId + "\"");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            protected void onPostExecute(String regId) {
+                Log.d("MainActivity", "got registration id: " + regId);
+                if (regId == null) return;
+                SocketCommand c = new RegistrationUpdateCommand(regId);
+                new CommandExecutor(MainActivity.this).execute(c);
+            }
+        }.execute();
     }
 
 	@Override
