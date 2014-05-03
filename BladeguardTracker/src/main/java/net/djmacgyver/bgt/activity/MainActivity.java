@@ -189,6 +189,7 @@ public class MainActivity extends ActionBarActivity {
 
     private void dismissConnectDialog() {
         FragmentManager fm = getSupportFragmentManager();
-        ((ProgressDialog) fm.findFragmentByTag(DIALOG_CONNECTING)).dismiss();
+        ProgressDialog d = ((ProgressDialog) fm.findFragmentByTag(DIALOG_CONNECTING));
+        if (d != null) d.dismiss();
     }
 }

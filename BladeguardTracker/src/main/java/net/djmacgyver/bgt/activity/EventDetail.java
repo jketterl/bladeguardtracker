@@ -66,7 +66,7 @@ public class EventDetail extends FragmentActivity {
 				@Override
 				public void run(SocketCommand command) {
                     DialogFragment d = (DialogFragment) getSupportFragmentManager().findFragmentByTag(DIALOG_PERFORMING_COMMAND);
-                    d.dismiss();
+                    if (d != null) d.dismiss();
 					if (!command.wasSuccessful()) {
 						String message = "unknown error";
 						try {
