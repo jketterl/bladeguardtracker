@@ -1,7 +1,6 @@
 package net.djmacgyver.bgt.gps;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import net.djmacgyver.bgt.R;
 import net.djmacgyver.bgt.activity.MainActivity;
@@ -15,6 +14,7 @@ import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.GPSUnavailableCommand;
 import net.djmacgyver.bgt.socket.command.LogCommand;
 import net.djmacgyver.bgt.socket.command.QuitCommand;
+import android.support.v4.app.NotificationCompat.Builder;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -179,18 +179,17 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		conn = sockService.getSharedConnection(this);
 		
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		Notification notification = new Notification(
-				R.drawable.notification,
-				getResources().getString(R.string.tracker_activated),
-				System.currentTimeMillis()
-		);
-		Intent intent = new Intent(this, MainActivity.class);
-		notification.setLatestEventInfo(
-				getApplicationContext(),
-				getResources().getString(R.string.app_name),
-				getResources().getString(R.string.gps_ongoing),
-				PendingIntent.getActivity(this, 0, intent, 0)
-		);
+        Intent intent = new Intent(this, MainActivity.class);
+
+        Builder b = new Builder(this);
+        b.setSmallIcon(R.drawable.notification)
+         .setTicker(getResources().getString(R.string.tracker_activated))
+         .setWhen(System.currentTimeMillis())
+         .setContentTitle(getResources().getString(R.string.app_name))
+         .setContentText(getResources().getString(R.string.gps_ongoing))
+         .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
+
+        Notification notification = b.build();
 		notification.flags = Notification.FLAG_ONGOING_EVENT;
 		nm.notify(NOTIFICATION, notification);
 
@@ -314,10 +313,12 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		this.boundEvent = event;
 	}
 
+    @SuppressWarnings("unused")
 	public int getPosition() {
 		return position;
 	}
 
+    @SuppressWarnings("unused")
 	public double getDistanceToFront() {
 		return distanceToFront;
 	}
