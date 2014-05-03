@@ -2,17 +2,10 @@ package net.djmacgyver.bgt.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.TypedValue;
@@ -30,9 +23,9 @@ import net.djmacgyver.bgt.dialog.ProgressDialog;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.ParticipationStore;
 import net.djmacgyver.bgt.session.Session;
+import net.djmacgyver.bgt.socket.CommandExecutor;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketCommandCallback;
-import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.PauseEventCommand;
 import net.djmacgyver.bgt.socket.command.ShutdownEventCommand;
 import net.djmacgyver.bgt.socket.command.StartEventCommand;
@@ -51,49 +44,6 @@ public class EventDetail extends FragmentActivity {
 	private static final String DIALOG_PERFORMING_COMMAND = "dialog_performing";
 	private static final String DIALOG_ERROR = "dialog_error";
 	private static final String DIALOG_WEATHER_DECISION = "dialog_weather";
-
-	private class SingleCommandConnection implements ServiceConnection {
-		private SocketCommand command;
-		
-		private SingleCommandConnection(SocketCommand c) {
-			command = c;
-		}
-		
-		@Override
-		public void onServiceConnected(ComponentName arg0, IBinder arg1) {
-			SocketService s = ((SocketService.LocalBinder) arg1).getService();
-			command.addCallback(new SocketCommandCallback() {
-				@Override
-				public void run(SocketCommand command) {
-                    DialogFragment d = (DialogFragment) getSupportFragmentManager().findFragmentByTag(DIALOG_PERFORMING_COMMAND);
-                    if (d != null) d.dismiss();
-					if (!command.wasSuccessful()) {
-						String message = "unknown error";
-						try {
-							message = command.getResponseData().getJSONObject(0).getString("message");
-						} catch (JSONException ignored) {}
-						Message m = new Message();
-						m.obj = message;
-						h.sendMessage(m);
-					}
-				}
-			});
-			s.getSharedConnection().sendCommand(command);
-			unbindService(this);
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-		}
-	}
-	
-	private Handler h = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-            ErrorDialog d = new ErrorDialog((String) msg.obj);
-            d.show(getSupportFragmentManager(), DIALOG_ERROR);
-		}
-	};
 
     private interface CommandProvider {
         public SocketCommand buildCommand();
@@ -133,17 +83,24 @@ public class EventDetail extends FragmentActivity {
                  public void onClick(DialogInterface arg0, int arg1) {
                      ProgressDialog d = new ProgressDialog(R.string.command_executing);
                      d.show(getSupportFragmentManager(), DIALOG_PERFORMING_COMMAND);
-                     new AsyncTask<SocketCommand, Object, Object>() {
+
+                     SocketCommand c = provider.buildCommand();
+                     c.addCallback(new SocketCommandCallback() {
                          @Override
-                         protected Object doInBackground(SocketCommand... commands) {
-                             bindService(
-                                 new Intent(EventDetail.this, SocketService.class),
-                                 new SingleCommandConnection(commands[0]),
-                                 Context.BIND_AUTO_CREATE
-                             );
-                             return null;
+                         public void run(SocketCommand command) {
+                             DialogFragment d = (DialogFragment) getSupportFragmentManager().findFragmentByTag(DIALOG_PERFORMING_COMMAND);
+                             if (d != null) d.dismiss();
+                             if (!command.wasSuccessful()) {
+                                 String message = "unknown error";
+                                 try {
+                                     message = command.getResponseData().getJSONObject(0).getString("message");
+                                 } catch (JSONException ignored) {}
+                                 ErrorDialog ed = new ErrorDialog(message);
+                                 ed.show(getSupportFragmentManager(), DIALOG_ERROR);
+                             }
                          }
-                     }.execute(provider.buildCommand());
+                     });
+                     new CommandExecutor(EventDetail.this).execute(c);
                  }
              })
              .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
