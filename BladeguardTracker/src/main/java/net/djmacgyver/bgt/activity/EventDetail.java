@@ -2,9 +2,11 @@ package net.djmacgyver.bgt.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -44,6 +46,7 @@ public class EventDetail extends FragmentActivity {
 	private static final String DIALOG_PERFORMING_COMMAND = "dialog_performing";
 	private static final String DIALOG_ERROR = "dialog_error";
 	private static final String DIALOG_WEATHER_DECISION = "dialog_weather";
+    private static final String DIALOG_GPS_WARNING = "dialog_gps_warning";
 
     private interface CommandProvider {
         public SocketCommand buildCommand();
@@ -171,6 +174,15 @@ public class EventDetail extends FragmentActivity {
             return b.create();
         }
     }
+
+    private class GPSWarningDialog extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
+            b.setMessage("GPS Disabled :(");
+            return b.create();
+        }
+    }
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -186,9 +198,15 @@ public class EventDetail extends FragmentActivity {
                 ps.participate(event, isChecked);
 
                 if (isChecked) {
-                    Intent i = new Intent(EventDetail.this, ControlService.class);
-                    i.putExtra("event", event);
-                    startService(i);
+                    LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                        DialogFragment d = new GPSWarningDialog();
+                        d.show(getSupportFragmentManager(), DIALOG_GPS_WARNING);
+                    } else {
+                        Intent i = new Intent(EventDetail.this, ControlService.class);
+                        i.putExtra("event", event);
+                        startService(i);
+                    }
                 } else {
                     stopService(new Intent(EventDetail.this, ControlService.class));
                 }
