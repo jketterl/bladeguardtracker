@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -130,18 +131,19 @@ public class EventDetail extends FragmentActivity {
              .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                  @Override
                  public void onClick(DialogInterface arg0, int arg1) {
-                     new Thread(){
+                     ProgressDialog d = new ProgressDialog(R.string.command_executing);
+                     d.show(getSupportFragmentManager(), DIALOG_PERFORMING_COMMAND);
+                     new AsyncTask<SocketCommand, Object, Object>() {
                          @Override
-                         public void run() {
-                             ProgressDialog d = new ProgressDialog(R.string.command_executing);
-                             d.show(getSupportFragmentManager(), DIALOG_PERFORMING_COMMAND);
+                         protected Object doInBackground(SocketCommand... commands) {
                              bindService(
-                                     new Intent(EventDetail.this, SocketService.class),
-                                     new SingleCommandConnection(provider.buildCommand()),
-                                     Context.BIND_AUTO_CREATE
+                                 new Intent(EventDetail.this, SocketService.class),
+                                 new SingleCommandConnection(commands[0]),
+                                 Context.BIND_AUTO_CREATE
                              );
+                             return null;
                          }
-                     }.run();
+                     }.execute(provider.buildCommand());
                  }
              })
              .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
