@@ -179,7 +179,17 @@ public class EventDetail extends FragmentActivity {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
-            b.setMessage("GPS Disabled :(");
+            View v = getActivity().getLayoutInflater().inflate(R.layout.gpswarning, null);
+            Button lsb = (Button) v.findViewById(R.id.gotolocationsettings);
+            lsb.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    dismiss();
+                }
+            });
+            b.setTitle(R.string.gpswarning)
+             .setView(v);
             return b.create();
         }
     }

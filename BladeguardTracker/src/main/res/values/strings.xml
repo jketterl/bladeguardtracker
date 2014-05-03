@@ -87,4 +87,8 @@
     <string name="change">change...</string>
     <string name="pleasewait">please wait&#8230;</string>
     <string name="servererror">Server error</string>
+    <string name="gpswarning">GPS disabled</string>
+    <string name="gpsdisabled">Bladeguard Tracker uses your phone\'s location in order to calculate the progress of events you participate in as accurately as possible.\n\nYour GPS is currently disabled, which prevents the app from getting your exact location. Please update your location settings and enable your phone\'s GPS (\"High accuracy\" mode) before event start if you would like to support us with your precise location.</string>
+    <string name="gpsnote">Please note: Even though this app tries to reduce the use of GPS, it will still consume a considerable amount of battery during an event if enabled.</string>
+    <string name="gotolocationsettings">Go to location settings&#8230;</string>
 </resources>
