@@ -2,7 +2,6 @@ package net.djmacgyver.bgt.event;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -26,7 +25,6 @@ public class Event implements Parcelable {
 	private int id;
 	private String title;
 	private Date start;
-	private Date controlConnectionStartTime;
 	private Boolean weather = null;
 	private String mapName;
 	
@@ -99,17 +97,6 @@ public class Event implements Parcelable {
 		return start;
 	}
 	
-	public Date getControlConnectionStartTime() {
-		if (controlConnectionStartTime == null) {
-			// we want the control connection to be up 2 hours in advance, so adjust the start time accordingly
-			Calendar c = Calendar.getInstance();
-			c.setTime(getStart());
-			c.add(Calendar.HOUR, -2);
-			controlConnectionStartTime = c.getTime();
-		}
-		return controlConnectionStartTime;
-	}
-
 	@Override
 	public int describeContents() {
 		return hashCode();
