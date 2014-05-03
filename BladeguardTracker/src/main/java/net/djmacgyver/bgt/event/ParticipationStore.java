@@ -4,6 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import net.djmacgyver.bgt.socket.CommandExecutor;
+import net.djmacgyver.bgt.socket.command.LeaveEventCommand;
+import net.djmacgyver.bgt.socket.command.ParticipateEventCommand;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,12 +36,16 @@ public class ParticipationStore {
 
     public void participate(Event event, boolean value) {
         String id = Integer.toString(event.getId());
+        if (doesParticipate(event) == value) return;
         JSONObject participating = getParticipations();
         try {
+            CommandExecutor e = new CommandExecutor(context);
             if (value) {
                 participating.put(id, true);
+                e.execute(new ParticipateEventCommand(event));
             } else {
                 participating.remove(id);
+                e.execute(new LeaveEventCommand(event));
             }
         } catch (JSONException e) {
             e.printStackTrace();
