@@ -87,5 +87,5 @@
     <string name="gpsdisabled">Bladeguard Tracker benutzt den Standort Deines Smartphones, um den Fortschritt von Veranstaltungen, an denen Du teilnimmst, so genau wie möglich berechnen zu können.\n\nDein GPS ist momentan deaktiviert, was die App daran hindert, Deinen genauen Standort zu ermitteln. Bitte ändere vor dem Start Deine Standorteinstellungen und aktiviere Dein GPS (\"Hohe Genauigkeit\"), um uns mit Deinem genauen Standort zu unterstützen.</string>
     <string name="gpsnote">Bitte beachte: Obwohl diese App versucht, die Nutzung von GPS auf ein Minimum zu reduzieren, wird sie dennoch im Lauf einer Veranstaltung eine große Menge an Strom verbrauchen, wenn sie aktiviert ist.</string>
     <string name="gotolocationsettings">Standorteinstellungen aufrufen&#8230;</string>
-    <string name="tracker_gpswarning_text">Bladeguard Tracker benötigt Zugiff auf GPS!</string>
+    <string name="tracker_gpswarning_text">Bitte GPS einschalten!</string>
 </resources>

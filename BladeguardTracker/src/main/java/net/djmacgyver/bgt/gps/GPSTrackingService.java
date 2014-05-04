@@ -16,7 +16,10 @@ import net.djmacgyver.bgt.socket.command.GPSUnavailableCommand;
 import net.djmacgyver.bgt.socket.command.LogCommand;
 import net.djmacgyver.bgt.socket.command.QuitCommand;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -205,13 +208,20 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
         Intent intent = new Intent(this, Map.class);
         intent.putExtra("event", boundEvent);
 
+        Resources res = getResources();
+        int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
+        int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
+
+        Bitmap bitmap = BitmapFactory.decodeResource(res, R.drawable.ic_notification);
+        bitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
+
         Builder b = new Builder(this);
         b.setSmallIcon(R.drawable.notification)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
-                .setTicker(getResources().getString(R.string.tracker_activated))
+                .setLargeIcon(bitmap)
+                .setTicker(res.getString(R.string.tracker_activated))
                 .setWhen(System.currentTimeMillis())
-                .setContentTitle(getResources().getString(R.string.app_name))
-                .setContentText(getResources().getString(R.string.gps_ongoing))
+                .setContentTitle(res.getString(R.string.app_name))
+                .setContentText(res.getString(R.string.gps_ongoing))
                 .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
 
         Notification notification = b.build();
@@ -224,12 +234,26 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
         Intent intent = new Intent(this, EventDetail.class);
         intent.putExtra("event", boundEvent);
 
+        Resources res = getResources();
+        int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
+        int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
+
+        Bitmap bitmap = BitmapFactory.decodeResource(res, R.drawable.ic_notification);
+        bitmap = Bitmap.createScaledBitmap(bitmap, width, height, false).copy(Bitmap.Config.ARGB_8888, true);
+
+        Bitmap warning = BitmapFactory.decodeResource(res, R.drawable.ic_warning);
+        warning = Bitmap.createScaledBitmap(warning, width / 2, height / 2, false);
+
+        Canvas c = new Canvas(bitmap);
+        c.drawBitmap(warning, width / 2, height / 2, null);
+
         Builder b = new Builder(this);
-        b.setSmallIcon(R.drawable.notification)
-                .setTicker(getResources().getString(R.string.gpswarning))
+        b.setSmallIcon(R.drawable.stat_notify_error)
+                .setLargeIcon(bitmap)
+                .setTicker(res.getString(R.string.gpswarning))
                 .setWhen(System.currentTimeMillis())
-                .setContentTitle(getResources().getString(R.string.app_name))
-                .setContentText(getResources().getString(R.string.tracker_gpswarning_text))
+                .setContentTitle(res.getString(R.string.app_name))
+                .setContentText(res.getString(R.string.tracker_gpswarning_text))
                 .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
 
         Notification n = b.build();
