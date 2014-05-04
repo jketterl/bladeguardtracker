@@ -212,11 +212,10 @@ public class EventDetail extends FragmentActivity {
                     if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                         DialogFragment d = new GPSWarningDialog();
                         d.show(getSupportFragmentManager(), DIALOG_GPS_WARNING);
-                    } else {
-                        Intent i = new Intent(EventDetail.this, ControlService.class);
-                        i.putExtra("event", event);
-                        startService(i);
                     }
+                    Intent i = new Intent(EventDetail.this, ControlService.class);
+                    i.putExtra("event", event);
+                    startService(i);
                 } else {
                     stopService(new Intent(EventDetail.this, ControlService.class));
                 }

@@ -3,7 +3,8 @@ package net.djmacgyver.bgt.gps;
 import java.util.ArrayList;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.activity.MainActivity;
+import net.djmacgyver.bgt.activity.EventDetail;
+import net.djmacgyver.bgt.activity.Map;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
@@ -14,6 +15,8 @@ import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.GPSUnavailableCommand;
 import net.djmacgyver.bgt.socket.command.LogCommand;
 import net.djmacgyver.bgt.socket.command.QuitCommand;
+
+import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -30,8 +33,11 @@ import android.location.LocationProvider;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 public class GPSTrackingService extends Service implements LocationListener, KeepAliveTarget {
+    private static final String TAG = "GPSTrackingService";
+
 	private HttpSocketConnection conn;
 	private KeepAliveThread gpsReminder;
 	private boolean enabled = false;
@@ -83,12 +89,17 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 
 	@Override
 	public void onProviderDisabled(String provider) {
-		if (!provider.equals("gps")) return;
+        if (!provider.equals(LocationManager.GPS_PROVIDER)) return;
+        Log.w(TAG, "GPS disabled :(");
+        showWarningNotification();
 		sendGpsUnavailable();
 	}
 
 	@Override
 	public void onProviderEnabled(String provider) {
+        if (!provider.equals(LocationManager.GPS_PROVIDER)) return;
+        Log.d(TAG, "GPS enabled :)");
+        showTrackingNotification();
 	}
 
 	@Override
@@ -173,30 +184,64 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		enabled = true;
 		
 		bindEvent(event);
-		
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-		
-		conn = sockService.getSharedConnection(this);
-		
-		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = new Intent(this, MainActivity.class);
+
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Log.w(TAG, "GPS is disabled!");
+            showWarningNotification();
+        } else {
+            showTrackingNotification();
+        }
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+
+        conn = sockService.getSharedConnection(this);
+
+        getLocationReminder().start();
+
+        fireTrackingEnabled();
+	}
+
+    private void showTrackingNotification() {
+        Intent intent = new Intent(this, Map.class);
+        intent.putExtra("event", boundEvent);
 
         Builder b = new Builder(this);
         b.setSmallIcon(R.drawable.notification)
-         .setTicker(getResources().getString(R.string.tracker_activated))
-         .setWhen(System.currentTimeMillis())
-         .setContentTitle(getResources().getString(R.string.app_name))
-         .setContentText(getResources().getString(R.string.gps_ongoing))
-         .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
+                .setTicker(getResources().getString(R.string.tracker_activated))
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle(getResources().getString(R.string.app_name))
+                .setContentText(getResources().getString(R.string.gps_ongoing))
+                .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
 
         Notification notification = b.build();
-		notification.flags = Notification.FLAG_ONGOING_EVENT;
-		nm.notify(NOTIFICATION, notification);
+        notification.flags = Notification.FLAG_ONGOING_EVENT;
 
-		getLocationReminder().start();
-		
-		fireTrackingEnabled();
-	}
+        showNotification(notification);
+    }
+
+    private void showWarningNotification() {
+        Intent intent = new Intent(this, EventDetail.class);
+        intent.putExtra("event", boundEvent);
+
+        Builder b = new Builder(this);
+        b.setSmallIcon(R.drawable.notification)
+                .setTicker(getResources().getString(R.string.gpswarning))
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle(getResources().getString(R.string.app_name))
+                .setContentText(getResources().getString(R.string.tracker_gpswarning_text))
+                .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
+
+        Notification n = b.build();
+        n.flags = Notification.FLAG_ONGOING_EVENT;
+
+        showNotification(n);
+    }
+
+    private void showNotification(Notification notification) {
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notify(NOTIFICATION, notification);
+    }
 	
 	public boolean isEnabled() {
 		return enabled;
