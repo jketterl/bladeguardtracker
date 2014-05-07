@@ -4,9 +4,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +19,7 @@ import android.view.ViewGroup;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -33,6 +38,7 @@ import net.djmacgyver.bgt.event.update.Stats;
 import net.djmacgyver.bgt.gps.AbstractGPSTrackingListener;
 import net.djmacgyver.bgt.gps.GPSTrackingListener;
 import net.djmacgyver.bgt.gps.GPSTrackingService;
+import net.djmacgyver.bgt.user.Team;
 
 import java.util.List;
 
@@ -126,12 +132,22 @@ public class BladeMapFragment extends SupportMapFragment {
                         } else {
                             MarkerOptions o = new MarkerOptions();
                             o.position(m.getNewLocation())
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_common));
+                                    .anchor(.5f, .5f)
+                                    .icon(getIcon(m.getTeam(getContext())));
                             markers.put(userId, map.addMarker(o));
                         }
                     }
                 }
             });
+        }
+
+        private BitmapDescriptor getIcon(Team team) {
+            Drawable d = team.getPin();
+            Log.d(TAG, "width: " + d.getIntrinsicWidth() + "; height: " + d.getIntrinsicHeight());
+            Bitmap b = Bitmap.createBitmap(d.getIntrinsicWidth(), d.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(b);
+            d.draw(c);
+            return BitmapDescriptorFactory.fromBitmap(b);
         }
 
         @Override

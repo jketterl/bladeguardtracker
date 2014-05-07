@@ -48,7 +48,7 @@ public class Team {
 		Drawable d = context.getResources().getDrawable(R.drawable.pin_common).mutate();
 		float[] colors = teamColors[teamId - 1];
     	d.setColorFilter(new ColorMatrixColorFilter(new HSVManipulationMatrix(colors[0], colors[1], colors[2])));
-    	d.setBounds(d.getIntrinsicWidth() / -2, d.getIntrinsicWidth() / -2, d.getIntrinsicWidth() / 2, d.getIntrinsicHeight() / 2);
+        d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
     	
 		Team team = new Team(name, d);
 		teams[teamId - 1] = team;
@@ -59,7 +59,7 @@ public class Team {
 	{
 		if (anonymousTeam == null) {
 			Drawable d = context.getResources().getDrawable(R.drawable.pin).mutate();
-	    	d.setBounds(d.getIntrinsicWidth() / -2, d.getIntrinsicWidth() / -2, d.getIntrinsicWidth() / 2, d.getIntrinsicHeight() / 2);
+            d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
 	    	d.setAlpha(127);
 			anonymousTeam = new Team("anonymous", d);
 		}
