@@ -7,7 +7,7 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,12 +34,10 @@ import net.djmacgyver.bgt.gps.AbstractGPSTrackingListener;
 import net.djmacgyver.bgt.gps.GPSTrackingListener;
 import net.djmacgyver.bgt.gps.GPSTrackingService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class BladeMapFragment extends SupportMapFragment {
+    @SuppressWarnings("unused")
     private static final String TAG = "BladeMapFragment";
 
     private final Event event;
@@ -111,7 +109,7 @@ public class BladeMapFragment extends SupportMapFragment {
             buildTrack();
         }
 
-        private Map<Integer, Marker> markers = new HashMap<Integer, Marker>();
+        private SparseArray<Marker> markers = new SparseArray<Marker>();
 
         @Override
         public void onMovement(final List<Movement> movements) {
@@ -122,8 +120,9 @@ public class BladeMapFragment extends SupportMapFragment {
 
                     for (Movement m : movements) {
                         int userId = m.getUserId();
-                        if (markers.containsKey(userId)) {
-                            markers.get(userId).setPosition(m.getNewLocation());
+                        Marker marker = markers.get(userId);
+                        if (marker != null) {
+                            marker.setPosition(m.getNewLocation());
                         } else {
                             MarkerOptions o = new MarkerOptions();
                             o.position(m.getNewLocation())
@@ -140,12 +139,11 @@ public class BladeMapFragment extends SupportMapFragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    GoogleMap map = getMap();
-
                     for (Quit q : quits) {
                         int userId = q.getUserId();
-                        if (!markers.containsKey(userId)) continue;
-                        markers.get(userId).remove();
+                        Marker marker = markers.get(userId);
+                        if (marker == null) continue;
+                        marker.remove();
                         markers.remove(userId);
                     }
                 }
@@ -170,7 +168,7 @@ public class BladeMapFragment extends SupportMapFragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            localLine.remove();;
+                            localLine.remove();
                         }
                     });
                 }
