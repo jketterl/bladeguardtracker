@@ -102,8 +102,26 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/mapview"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal" />
+    <!--
+    <fragment
+        android:id="@+id/mapview"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_height="0dp"
+        android:name="net.djmacgyver.bgt.map.BladeMapFragment"
+        android:layout_gravity="center_horizontal" />
+    -->
+    <!--
 	<com.google.android.maps.MapView
 		android:layout_width="match_parent" android:id="@+id/mapview"
 		android:layout_weight="1" android:clickable="true"
 		android:layout_height="match_parent" android:apiKey="@string/maps_api_key" />
+		-->
 </LinearLayout>

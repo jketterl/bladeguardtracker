@@ -10,6 +10,11 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
 
+    <!-- needed by google maps -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@style/net.djmacgyver.bgt.style">
         <activity android:name=".activity.MainActivity"
                   android:label="@string/app_name"
@@ -23,13 +28,13 @@
                   android:label="@string/map_name"
                   android:parentActivityName=".activity.EventDetail">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value=".activity.EventDetail" />
+                       android:value="net.djmacgyver.bgt.activity.EventDetail" />
         </activity>
         <activity android:name=".activity.Settings"
                   android:label="@string/settings"
                   android:parentActivityName=".activity.MainActivity">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value=".activity.MainActivity" />
+                       android:value="net.djmacgyver.bgt.activity.MainActivity" />
         </activity>
         <activity android:name=".activity.Signup" android:label="@string/new_user" />
         <activity android:name=".activity.MapSelection" android:label="@string/map_selection" />
@@ -39,7 +44,7 @@
                   android:launchMode="singleTop"
                   android:parentActivityName=".activity.MainActivity">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value=".activity.EventDetail"/>
+                       android:value="net.djmacgyver.bgt.activity.EventDetail"/>
         </activity>
         <activity android:name=".activity.Admin" android:label="@string/admin_commands" />
         <activity android:name=".activity.GCMAccountNotification" android:label="@string/app_name" />
@@ -51,7 +56,6 @@
         <service android:name=".GcmIntentService" />
         <uses-library android:required="true" android:name="com.google.android.maps" />
 
-        <receiver android:name=".alarm.AlarmReceiver" android:process=":remote" />
         <receiver android:name=".GcmBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND">
         	<intent-filter>
         		<action android:name="com.google.android.c2dm.intent.RECEIVE"/>
@@ -63,6 +67,8 @@
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
 
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+
+        <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyCHJ-sFxvvg_QGmruzL2h8raAAplBRO55c"/>
 
     </application>
 </manifest>

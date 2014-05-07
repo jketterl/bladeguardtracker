@@ -9,7 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -39,7 +39,7 @@ import org.json.JSONObject;
 
 import java.text.DateFormat;
 
-public class EventDetail extends FragmentActivity {
+public class EventDetail extends ActionBarActivity {
 	private Event event;
 
     private static final String DIALOG_CONFIRM = "dialog_confirm";

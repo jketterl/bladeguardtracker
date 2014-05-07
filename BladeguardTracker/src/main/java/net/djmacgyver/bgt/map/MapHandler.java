@@ -34,7 +34,8 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 	public UserOverlay getUserOverlay() {
 		if (userOverlay == null) {
 			userOverlay = new UserOverlay(map.getResources().getDrawable(R.drawable.pin), map);
-			map.getMap().getOverlays().add(userOverlay);
+            // todo find fix
+			//map.getMap().getOverlays().add(userOverlay);
 		}
 		return userOverlay;
 	}
@@ -89,9 +90,9 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 		
 		if (stats.has("between")) {
 			JSONArray between = stats.getJSONArray("between");
-			map.getRoute().setBetween(between.getInt(0), between.getInt(1));
+            //map.getRoute().setBetween(between.getInt(0), between.getInt(1));
 		} else {
-			map.getRoute().setBetween(-1, -1);
+			//map.getRoute().setBetween(-1, -1);
 		}
 	}
 	
@@ -125,7 +126,7 @@ public class MapHandler extends Handler implements HttpSocketListener, GPSTracki
 			geoPoints[i] = gPoint;
 		}
 		
-		this.map.getRoute().setPoints(geoPoints);
+		//this.map.getRoute().setPoints(geoPoints);
 
 		this.map.setMapName(map.getString("name"));
 	}

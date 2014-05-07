@@ -82,7 +82,7 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> implements Use
 	private RelativeLayout getBubble() {
 		if (bubble == null) {
 			LayoutInflater inflater = map.getLayoutInflater();
-			bubble = (RelativeLayout) inflater.inflate(R.layout.bubble, map.getMap(), false);
+			bubble = (RelativeLayout) inflater.inflate(R.layout.bubble, null, false);
 			
 			ImageView bubbleClose = (ImageView) bubble.findViewById(R.id.balloon_overlay_close);
 			bubbleClose.setOnClickListener(new OnClickListener() {
@@ -97,7 +97,7 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> implements Use
 	}
 	
 	private void resetBubble() {
-		map.getMap().removeView(getBubble());
+		//map.getMap().removeView(getBubble());
 		getBubble().setVisibility(View.GONE);
 		if (bubbleListener != null) {
 			bubbleUser.removeListener(bubbleListener);
@@ -131,10 +131,10 @@ public class UserOverlay extends ItemizedOverlay<UserOverlayItem> implements Use
 
 		getBubble().setLayoutParams(params);
 
-		map.getMap().addView(getBubble());
+		//map.getMap().addView(getBubble());
 		// Measure the bubble so it can be placed on the map
-		map.getMap().measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-							 MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+		//map.getMap().measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+		//					 MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 		
 		final Handler h = new Handler() {
 			@Override

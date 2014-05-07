@@ -5,6 +5,7 @@ import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.gps.GPSTrackingService;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
+import net.djmacgyver.bgt.map.BladeMapFragment;
 import net.djmacgyver.bgt.map.MapHandler;
 import net.djmacgyver.bgt.map.RouteOverlay;
 import net.djmacgyver.bgt.session.Session;
@@ -25,21 +26,27 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBarActivity;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
-import com.google.android.maps.MapActivity;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 
-public class Map extends MapActivity implements KeepAliveTarget {
-	private MyLocationOverlay myLoc;
-	private KeepAliveThread refresher;
-	private RouteOverlay route;
-	private GPSTrackingService service;
+public class Map extends ActionBarActivity implements KeepAliveTarget {
+    private static final String TAG = "Map";
+
+	//private RouteOverlay route;
+	//private GPSTrackingService service;
 	private boolean bound = false;
-	private MapView map;
 	private MapHandler handler = new MapHandler(this);
 	private Handler stateHandler = new Handler(){
 		@Override
@@ -77,30 +84,7 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	};
 	
 	public static final int DIALOG_CONNECTING = 1;
-	
-	// GPSListener Service connection
-    private ServiceConnection conn = new ServiceConnection() {
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			service = null;
-			handler.setGPSTrackingService(null);
-			if (!hasLocationOverlay()) return;
-	    	getMap().getOverlays().remove(getLocationOverlay());
-	    	getLocationOverlay().disableMyLocation();
-	    	setLocationOverlay(null);
-		}
-		
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder binder) {
-			service = ((GPSTrackingService.LocalBinder) binder).getService();
-			handler.setGPSTrackingService(service);
-			if (!service.isEnabled()) return;
-			setLocationOverlay(new MyLocationOverlay(getApplicationContext(), getMap()));
-			getLocationOverlay().enableMyLocation();
-	    	getMap().getOverlays().add(getLocationOverlay());
-		}
-	};
-	
+
 	private HttpSocketConnection socket;
 	private SocketService sockService;
 	
@@ -119,32 +103,15 @@ public class Map extends MapActivity implements KeepAliveTarget {
 		}
 	};
 	private Event event;
-	
-	public MapView getMap() {
-		if (map == null) {
-			map = (MapView) findViewById(R.id.mapview);
-		}
-		return map;
-	}
-	
+
+    /*
 	public RouteOverlay getRoute() {
 		if (route == null) {
 			route = new RouteOverlay(getMap());
 		}
 		return route;
 	}
-	
-	private MyLocationOverlay getLocationOverlay() {
-		return myLoc;
-	}
-	
-	private void setLocationOverlay(MyLocationOverlay myLoc) {
-		this.myLoc = myLoc;
-	}
-	
-	private boolean hasLocationOverlay() {
-		return myLoc != null;
-	}
+	*/
 	
 	public TextView getLengthTextView() {
 		return (TextView) findViewById(R.id.bladeNightLength);
@@ -163,44 +130,46 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	}
 
     public void setMapName(String name) {
-        getActionBar().setTitle(name);
+        getSupportActionBar().setTitle(name);
     }
 	
-	private KeepAliveThread getRefresher()
-	{
-		if (refresher == null) {
-			refresher = new KeepAliveThread(this, 5);
-		}
-		return refresher;
-	}
-	
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map);
-        /*
-        TextView t = (TextView) findViewById(R.id.title);
-        t.setText(R.string.map_name);
-        */
-    	
-        if (savedInstanceState != null) event = savedInstanceState.getParcelable("event");
+        if (savedInstanceState != null) {
+            event = savedInstanceState.getParcelable("event");
+        } else {
+            event = getIntent().getExtras().getParcelable("event");
+        }
+        Log.d(TAG, "working on event: " + event.getId());
 
+        BladeMapFragment bmf = new BladeMapFragment(event);
+        getSupportFragmentManager().beginTransaction().replace(R.id.mapview, bmf).commit();
+
+        /*
         getMap().setBuiltInZoomControls(true);
     	
     	getMap().getOverlays().add(getRoute());
+    	*/
 
-        bindService(new Intent(this, GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
+        //bindService(new Intent(this, GPSTrackingService.class), conn, Context.BIND_AUTO_CREATE);
         bound = true;
     }
+
+
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		if (bound) {
-			unbindService(conn);
+			//unbindService(conn);
 			bound = false;
 		}
 	}
 
+    /*
+    todo find out where to put these
 	@Override
 	protected boolean isRouteDisplayed() {
 		return true;
@@ -210,26 +179,27 @@ public class Map extends MapActivity implements KeepAliveTarget {
 	protected boolean isLocationDisplayed() {
 		return true;
 	}
+	*/
 
 	@Override
 	protected void onResume() {
+        Log.d(TAG, "onResume()");
 		super.onResume();
-        event = getIntent().getExtras().getParcelable("event");
 		showDialog(DIALOG_CONNECTING);
         bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
-    	getRefresher().start();
-    	if (service != null && hasLocationOverlay() && service.isEnabled()) {
-    		getLocationOverlay().enableMyLocation();
+        /*
+    	if (service != null  && service.isEnabled()) {
+            getMap().setMyLocationEnabled(true);
     	}
+    	*/
+        Log.d(TAG, "onResume() finised");
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (hasLocationOverlay()) getLocationOverlay().disableMyLocation();
-		getRefresher().terminate();
-		this.refresher = null;
-		
+        //getMap().setMyLocationEnabled(false);
+
 		if (socket != null) {
 			handler.disable();
 			socket.removeListener(listener);
@@ -240,12 +210,15 @@ public class Map extends MapActivity implements KeepAliveTarget {
 
 	@Override
 	public void keepAlive(KeepAliveThread source) {
+        /*
+    	todo see if this is still necessary
 		if (source != getRefresher()) return;
 		runOnUiThread(new Runnable() {
 			public void run() {
 				getMap().invalidate();
 			}
 		});
+    	*/
 	}
 
 	@Override
