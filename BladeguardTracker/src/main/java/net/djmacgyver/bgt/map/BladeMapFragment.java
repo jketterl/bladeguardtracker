@@ -178,8 +178,6 @@ public class BladeMapFragment extends SupportMapFragment {
             }
             final List<LatLng> points = currentMap.getPoints(currentStats);
 
-            Log.d(TAG, "now between " + currentStats.getStart() + " and " + currentStats.getEnd());
-
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
