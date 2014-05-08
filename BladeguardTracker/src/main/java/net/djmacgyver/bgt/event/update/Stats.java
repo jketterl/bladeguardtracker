@@ -14,13 +14,13 @@ public class Stats extends Update {
     private int start = -1;
     private int end = -1;
 
-    public Stats(JSONArray data) {
+    public Stats(JSONObject data) throws UpdateException {
+        super(data);
         try {
-            JSONObject so = data.getJSONObject(0);
-            if (so.has(KEY_SPEED)) speed = so.getDouble(KEY_SPEED);
-            if (so.has(KEY_LENGTH)) length = so.getDouble(KEY_LENGTH);
-            if (so.has(KEY_BETWEEN)) {
-                JSONArray between = so.getJSONArray(KEY_BETWEEN);
+            if (data.has(KEY_SPEED)) speed = data.getDouble(KEY_SPEED);
+            if (data.has(KEY_LENGTH)) length = data.getDouble(KEY_LENGTH);
+            if (data.has(KEY_BETWEEN)) {
+                JSONArray between = data.getJSONArray(KEY_BETWEEN);
                 start = between.getInt(0);
                 end = between.getInt(1);
             }

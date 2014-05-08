@@ -1,5 +1,26 @@
 package net.djmacgyver.bgt.event;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import net.djmacgyver.bgt.event.update.EventMap;
+import net.djmacgyver.bgt.event.update.Movement;
+import net.djmacgyver.bgt.event.update.Quit;
+import net.djmacgyver.bgt.event.update.Stats;
+import net.djmacgyver.bgt.event.update.Update;
+import net.djmacgyver.bgt.socket.HttpSocketConnection;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.StartEventCommand;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,35 +30,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import net.djmacgyver.bgt.event.update.EventMap;
-import net.djmacgyver.bgt.event.update.Movement;
-import net.djmacgyver.bgt.event.update.Quit;
-import net.djmacgyver.bgt.event.update.Stats;
-import net.djmacgyver.bgt.socket.HttpSocketConnection;
-import net.djmacgyver.bgt.socket.HttpSocketListener;
-import net.djmacgyver.bgt.socket.SocketCommand;
-import net.djmacgyver.bgt.socket.SocketService;
-import net.djmacgyver.bgt.socket.command.StartEventCommand;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.util.Log;
-
 public class Event implements Parcelable {
     public static final String MOVEMENTS = "movements";
     public static final String MAP = "map";
     public static final String QUIT = "quit";
     public static final String STATS = "stats";
 
+    @SuppressWarnings("unused")
     private final static String TAG = "Event";
 
 	private int id;
@@ -153,59 +152,51 @@ public class Event implements Parcelable {
 
     private Map<EventListener, LocalSocketServiceConnection> connections = new HashMap<EventListener, LocalSocketServiceConnection>();
 
-    private class UpdateParser implements HttpSocketListener {
-        @Override
-        public void receiveUpdate(JSONObject data) {
-            try {
-                if (data.has(MAP)) fireMapEvent(data.getJSONArray(MAP));
-                if (data.has(MOVEMENTS)) fireMovement(data.getJSONArray(MOVEMENTS));
-                if (data.has(QUIT)) fireQuit(data.getJSONArray(QUIT));
-                if (data.has(STATS)) fireStats(data.getJSONArray(STATS));
-            } catch (JSONException e) {
-                Log.e(TAG, "error parsing event data", e);
+    public void receiveUpdate(List<Update> updates) {
+        List<Movement> movements = new LinkedList<Movement>();
+        List<Quit> quits = new LinkedList<Quit>();
+
+        for (Update u : updates) {
+            if (u instanceof EventMap) {
+                fireEventMap((EventMap) u);
+            } else if (u instanceof Movement) {
+                movements.add((Movement) u);
+            } else if (u instanceof Quit) {
+                quits.add((Quit) u);
+            } else if (u instanceof Stats) {
+                fireStats((Stats) u);
             }
         }
 
-        @Override
-        public void receiveCommand(String command, JSONObject data) {}
+        fireMovements(movements);
+        fireQuits(quits);
+    }
 
-        @Override
-        public void receiveStateChange(int newState) {}
-
-        private void fireMapEvent(JSONArray map){
-            synchronized (listeners) {
-                if (!listeners.containsKey(MAP)) return;
-                for (EventListener l : listeners.get(MAP)) l.onMap(new EventMap(map));
-            }
+    private void fireStats(Stats stats) {
+        synchronized (listeners) {
+            if (!listeners.containsKey(STATS)) return;
+            for (EventListener l : listeners.get(STATS)) l.onStats(stats);
         }
+    }
 
-        private void fireMovement(JSONArray movementJson) throws JSONException {
-            List<Movement> ml = new LinkedList<Movement>();
-            for (int i = 0; i < movementJson.length(); i++) {
-                ml.add(new Movement(movementJson.getJSONObject(i)));
-            }
-            synchronized (listeners) {
-                if (!listeners.containsKey(MOVEMENTS)) return;
-                for (EventListener l : listeners.get(MOVEMENTS)) l.onMovement(ml);
-            }
+    private void fireQuits(List<Quit> quits) {
+        synchronized (listeners) {
+            if (!listeners.containsKey(QUIT)) return;
+            for (EventListener l : listeners.get(QUIT)) l.onQuit(quits);
         }
+    }
 
-        private void fireQuit(JSONArray quitJson) throws JSONException{
-            List<Quit> ql = new LinkedList<Quit>();
-            for (int i = 0; i < quitJson.length(); i++) {
-                ql.add(new Quit(quitJson.getJSONObject(i)));
-            }
-            synchronized (listeners) {
-                if (!listeners.containsKey(QUIT)) return;
-                for (EventListener l : listeners.get(QUIT)) l.onQuit(ql);
-            }
+    private void fireEventMap(EventMap e) {
+        synchronized (listeners) {
+            if (!listeners.containsKey(MAP)) return;
+            for (EventListener l : listeners.get(MAP)) l.onMap(e);
         }
+    }
 
-        private void fireStats(JSONArray statsJson) {
-            synchronized (listeners) {
-                if (!listeners.containsKey(STATS)) return;
-                for (EventListener l : listeners.get(STATS)) l.onStats(new Stats(statsJson));
-            }
+    private void fireMovements(List<Movement> m) {
+        synchronized (listeners) {
+            if (!listeners.containsKey(MOVEMENTS)) return;
+            for (EventListener l : listeners.get(MOVEMENTS)) l.onMovement(m);
         }
     }
 
@@ -220,9 +211,10 @@ public class Event implements Parcelable {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            socket = ((SocketService.LocalBinder) iBinder).getService().getSharedConnection(Event.this);
+            SocketService s = ((SocketService.LocalBinder) iBinder).getService();
+            s.registerEvent(Event.this);
+            socket = s.getSharedConnection(Event.this);
             socket.subscribeUpdates(Event.this, types);
-            socket.addListener(new UpdateParser());
         }
 
         @Override

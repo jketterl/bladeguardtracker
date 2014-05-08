@@ -1,7 +1,6 @@
 package net.djmacgyver.bgt.event.update;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -15,8 +14,8 @@ public class Movement extends Update {
     private int userId;
     private String team;
 
-    public Movement(JSONObject data) {
-        Log.d("Movement", data.toString());
+    public Movement(JSONObject data) throws UpdateException {
+        super(data);
         try {
             JSONObject location = data.getJSONObject("location");
             newLocation = new LatLng(location.getDouble("lat"), location.getDouble("lon"));

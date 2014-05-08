@@ -2,6 +2,8 @@ package net.djmacgyver.bgt.socket;
 
 import java.util.Vector;
 
+import net.djmacgyver.bgt.event.Event;
+import net.djmacgyver.bgt.event.update.UpdateParser;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
 import android.app.Service;
@@ -28,8 +30,9 @@ public class SocketService extends Service implements KeepAliveTarget {
 	private HttpSocketConnection sharedConn;
 	private Vector<Object> stakes = new Vector<Object>();
 	private KeepAliveThread socketTimeout;
-	
-	// public service methods
+    private UpdateParser parser = new UpdateParser();
+
+    // public service methods
 	public HttpSocketConnection getSharedConnection(Object stake) {
 		addStake(stake);
 		return getSharedConnection();
@@ -56,6 +59,7 @@ public class SocketService extends Service implements KeepAliveTarget {
 		if (sharedConn == null) {
 			System.out.println("starting new connection!");
 			sharedConn = new HttpSocketConnection(getApplicationContext());
+            sharedConn.addListener(parser);
 			sharedConn.connect();
 		}
 		return sharedConn;
@@ -79,6 +83,7 @@ public class SocketService extends Service implements KeepAliveTarget {
 	private void disconnect() {
 		if (sharedConn == null) return;
 		sharedConn.disconnect();
+        sharedConn.removeListener(parser);
 		sharedConn = null;
 		getSocketTimeout().terminate();
 		socketTimeout = null;
@@ -89,4 +94,12 @@ public class SocketService extends Service implements KeepAliveTarget {
 		disconnect();
 		super.onDestroy();
 	}
+
+    public void registerEvent(Event e) {
+        parser.registerEvent(e);
+    }
+
+    public void removeEvent(Event e) {
+        parser.removeEvent(e);
+    }
 }

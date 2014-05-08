@@ -1,7 +1,5 @@
 package net.djmacgyver.bgt.event.update;
 
-import android.util.Log;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -16,12 +14,14 @@ public class EventMap extends Update {
     private List<LatLng> points;
     private LatLngBounds bounds;
 
-    public EventMap(JSONArray data) {
+    public EventMap(JSONObject data) throws UpdateException {
+        super(data);
+
         points = new LinkedList<LatLng>();
         LatLngBounds.Builder b = new LatLngBounds.Builder();
 
         try {
-            JSONArray p = data.getJSONObject(0).getJSONArray("points");
+            JSONArray p = data.getJSONArray("points");
 
             for (int i = 0; i < p.length(); i++) {
                 JSONObject o = p.getJSONObject(i);
