@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 public class Stats extends Update {
     private static final String KEY_SPEED = "bladeNightSpeed";
-    private static final String KEY_LENGTH = "bladeNigthLength";
+    private static final String KEY_LENGTH = "bladeNightLength";
     private static final String KEY_BETWEEN = "between";
 
     private double speed = -1;

@@ -12,6 +12,7 @@ import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.RegistrationUpdateCommand;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.ComponentName;
@@ -104,12 +105,16 @@ public class MainActivity extends ActionBarActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				// get the event the user clicked on
-				Event event = new Event((JSONObject) events.getItem(position));
-				
-				Intent i = new Intent(MainActivity.this, EventDetail.class);
-				i.putExtra("event", event);
-				startActivity(i);
+                try {
+                    // get the event the user clicked on
+                    Event event = new Event((JSONObject) events.getItem(position));
+
+                    Intent i = new Intent(MainActivity.this, EventDetail.class);
+                    i.putExtra("event", event);
+                    startActivity(i);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 			}
 		});
 

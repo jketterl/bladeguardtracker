@@ -1,8 +1,12 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.event.AbstractEventListener;
 import net.djmacgyver.bgt.event.Event;
+import net.djmacgyver.bgt.event.EventListener;
+import net.djmacgyver.bgt.event.update.EventMap;
 import net.djmacgyver.bgt.map.BladeMapFragment;
+import net.djmacgyver.bgt.map.InfoFragment;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
@@ -22,12 +26,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 public class Map extends ActionBarActivity {
+    @SuppressWarnings("unused")
     private static final String TAG = "Map";
 
 	private Handler stateHandler = new Handler(){
@@ -38,9 +41,6 @@ public class Map extends ActionBarActivity {
 				removeDialog(DIALOG_CONNECTING);
 			} else {
 				showDialog(DIALOG_CONNECTING);
-				getLengthTextView().setText("n/a");
-				getSpeedTextView().setText("n/a");
-				getCycleTimeTextView().setText("n/a");
 			}
 		}
 	};
@@ -84,25 +84,21 @@ public class Map extends ActionBarActivity {
 	};
 	private Event event;
 
-	public TextView getLengthTextView() {
-		return (TextView) findViewById(R.id.bladeNightLength);
-	}
-	
-	public TextView getSpeedTextView() {
-		return (TextView) findViewById(R.id.bladeNightSpeed);
-	}
-	
-	public TextView getCycleTimeTextView() {
-		return (TextView) findViewById(R.id.bladeNightCycleTime);
-	}
-	
-	public TextView getTimeToEndView() {
-		return (TextView) findViewById(R.id.timeToEnd);
-	}
-
     public void setMapName(String name) {
         getSupportActionBar().setTitle(name);
     }
+
+    private EventListener nameUpdater = new AbstractEventListener(this) {
+        @Override
+        public void onMap(final EventMap map) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setMapName(map.getName());
+                }
+            });
+        }
+    };
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,19 +109,41 @@ public class Map extends ActionBarActivity {
         } else {
             event = getIntent().getExtras().getParcelable("event");
         }
-        Log.d(TAG, "working on event: " + event.getId());
 
-        BladeMapFragment bmf = new BladeMapFragment(event);
-        getSupportFragmentManager().beginTransaction().replace(R.id.mapview, bmf).commit();
+        event.subscribeUpdates(nameUpdater, Event.MAP);
+
+        BladeMapFragment bmf = new BladeMapFragment();
+        Bundle b = new Bundle();
+        b.putParcelable("event", event);
+        bmf.setArguments(b);
+
+        InfoFragment infobox = new InfoFragment();
+        b = new Bundle();
+        b.putParcelable("event", event);
+        infobox.setArguments(b);
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.infobox, infobox)
+                .replace(R.id.mapview, bmf)
+                .commit();
     }
 
-	@Override
+    @Override
+    protected void onDestroy() {
+        event.unsubscribeUpdates(nameUpdater);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable("event", event);
+    }
+
+    @Override
 	protected void onResume() {
-        Log.d(TAG, "onResume()");
 		super.onResume();
 		showDialog(DIALOG_CONNECTING);
         bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
-        Log.d(TAG, "onResume() finised");
 	}
 
 	@Override
@@ -174,9 +192,5 @@ public class Map extends ActionBarActivity {
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	public Event getEvent() {
-		return event;
 	}
 }

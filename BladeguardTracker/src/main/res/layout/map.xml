@@ -3,105 +3,10 @@
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <LinearLayout
-                style="@style/box"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical" >
-
-                <TextView
-                    style="@style/boxHeadline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/track_length" />
-
-                <TextView
-                    android:id="@+id/bladeNightLength"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/linearLayout2"
-                style="@style/box"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:id="@+id/textView1"
-                    style="@style/boxHeadline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/average_speed" />
-
-                <TextView
-                    android:id="@+id/bladeNightSpeed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/linearLayout3"
-                style="@style/box"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:id="@+id/textView2"
-                    style="@style/boxHeadline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/cycle_time" />
-
-                <TextView
-                    android:id="@+id/bladeNightCycleTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/LinearLayout01"
-                style="@style/box"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:id="@+id/TextView02"
-                    style="@style/boxHeadline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/time_to_end" />
-
-                <TextView
-                    android:id="@+id/timeToEnd"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
+        android:id="@+id/infobox" />
 
     <FrameLayout
         android:id="@+id/mapview"
@@ -109,19 +14,4 @@
         android:layout_weight="1"
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal" />
-    <!--
-    <fragment
-        android:id="@+id/mapview"
-        android:layout_width="match_parent"
-        android:layout_weight="1"
-        android:layout_height="0dp"
-        android:name="net.djmacgyver.bgt.map.BladeMapFragment"
-        android:layout_gravity="center_horizontal" />
-    -->
-    <!--
-	<com.google.android.maps.MapView
-		android:layout_width="match_parent" android:id="@+id/mapview"
-		android:layout_weight="1" android:clickable="true"
-		android:layout_height="match_parent" android:apiKey="@string/maps_api_key" />
-		-->
 </LinearLayout>

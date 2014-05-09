@@ -96,10 +96,12 @@ public class SocketService extends Service implements KeepAliveTarget {
 	}
 
     public void registerEvent(Event e) {
+        addStake(e);
         parser.registerEvent(e);
     }
 
     public void removeEvent(Event e) {
         parser.removeEvent(e);
+        removeStake(e);
     }
 }

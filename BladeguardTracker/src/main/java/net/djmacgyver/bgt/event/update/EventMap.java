@@ -13,6 +13,7 @@ import java.util.List;
 public class EventMap extends Update {
     private List<LatLng> points;
     private LatLngBounds bounds;
+    private String name;
 
     public EventMap(JSONObject data) throws UpdateException {
         super(data);
@@ -21,6 +22,8 @@ public class EventMap extends Update {
         LatLngBounds.Builder b = new LatLngBounds.Builder();
 
         try {
+            name = data.getString("name");
+
             JSONArray p = data.getJSONArray("points");
 
             for (int i = 0; i < p.length(); i++) {
@@ -55,5 +58,9 @@ public class EventMap extends Update {
 
     public LatLngBounds getBounds() {
         return bounds;
+    }
+
+    public String getName() {
+        return name;
     }
 }

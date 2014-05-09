@@ -46,11 +46,7 @@ public class BladeMapFragment extends SupportMapFragment {
     @SuppressWarnings("unused")
     private static final String TAG = "BladeMapFragment";
 
-    private final Event event;
-
-    public BladeMapFragment(Event event) {
-        this.event = event;
-    }
+    private Event event;
 
     // GPSListener Service connection
     private ServiceConnection gpsServiceConnection = new ServiceConnection() {
@@ -84,13 +80,13 @@ public class BladeMapFragment extends SupportMapFragment {
     };
 
     private EventListener eventListener = new AbstractEventListener() {
+        private EventMap currentMap;
+        private Polyline currentMapLine;
+
         @Override
         public Context getContext() {
             return getActivity();
         }
-
-        private EventMap currentMap;
-        private Polyline currentMapLine;
 
         @Override
         public void onMap(final EventMap map) {
@@ -213,6 +209,8 @@ public class BladeMapFragment extends SupportMapFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        event = getArguments().getParcelable("event");
+
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         Intent gi = new Intent(getActivity(), GPSTrackingService.class);

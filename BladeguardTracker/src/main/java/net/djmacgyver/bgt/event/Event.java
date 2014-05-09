@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import net.djmacgyver.bgt.event.update.EventMap;
 import net.djmacgyver.bgt.event.update.Movement;
@@ -23,6 +24,7 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -57,32 +59,36 @@ public class Event implements Parcelable {
 		}
 	};
 	
-	public Event(JSONObject obj) {
-		try {
-			id = obj.getInt("id");
-			title = obj.getString("title");
-			// parse the event start time
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-			format.setTimeZone(TimeZone.getTimeZone("GMT"));
-			start = format.parse(obj.getString("start"));
-			if (obj.has("weather") && !obj.isNull("weather")) {
-				weather = obj.getInt("weather") != 0;
-			} else {
-				weather = null;
-			}
-			mapName = obj.getString("mapName");
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public Event(JSONObject obj) throws JSONException {
+        id = obj.getInt("id");
+
+        EventState state = EventState.getState(id);
+        listeners = state.listeners;
+
+        title = obj.getString("title");
+        // parse the event start time
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        format.setTimeZone(TimeZone.getTimeZone("GMT"));
+        try {
+            start = format.parse(obj.getString("start"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if (obj.has("weather") && !obj.isNull("weather")) {
+            weather = obj.getInt("weather") != 0;
+        } else {
+            weather = null;
+        }
+        mapName = obj.getString("mapName");
 	}
 	
 	public Event(Parcel source) {
 		id = source.readInt();
-		start = new Date(source.readLong());
+
+        EventState state = EventState.getState(id);
+        listeners = state.listeners;
+
+        start = new Date(source.readLong());
 		title = source.readString();
 		if (source.readInt() != 0) {
 			weather = source.readInt() != 0;
@@ -148,7 +154,7 @@ public class Event implements Parcelable {
 		return command;
 	}
 
-    private final Map<String, List<EventListener>> listeners = new HashMap<String, List<EventListener>>();
+    private final Map<String, List<EventListener>> listeners;
 
     private Map<EventListener, LocalSocketServiceConnection> connections = new HashMap<EventListener, LocalSocketServiceConnection>();
 
@@ -188,6 +194,7 @@ public class Event implements Parcelable {
 
     private void fireEventMap(EventMap e) {
         synchronized (listeners) {
+            Log.d(TAG, "dispatching map event to " + listeners.size() + " listeners");
             if (!listeners.containsKey(MAP)) return;
             for (EventListener l : listeners.get(MAP)) l.onMap(e);
         }
@@ -201,9 +208,9 @@ public class Event implements Parcelable {
     }
 
     private class LocalSocketServiceConnection implements ServiceConnection {
-        private final String[] types;
+        private final List<String> types;
 
-        public LocalSocketServiceConnection(String[] types) {
+        public LocalSocketServiceConnection(List<String> types) {
             this.types = types;
         }
 
@@ -214,7 +221,9 @@ public class Event implements Parcelable {
             SocketService s = ((SocketService.LocalBinder) iBinder).getService();
             s.registerEvent(Event.this);
             socket = s.getSharedConnection(Event.this);
-            socket.subscribeUpdates(Event.this, types);
+
+            if (types.isEmpty()) return;
+            socket.subscribeUpdates(Event.this, types.toArray(new String[types.size()]));
         }
 
         @Override
@@ -222,6 +231,8 @@ public class Event implements Parcelable {
     }
 
     public void subscribeUpdates(EventListener listener, String... types) {
+        List<String> toSubscribe = new ArrayList<String>();
+
         synchronized (listeners) {
             for (String type : types) {
                 List<EventListener> tl;
@@ -230,12 +241,13 @@ public class Event implements Parcelable {
                 } else {
                     tl = new LinkedList<EventListener>();
                     listeners.put(type, tl);
+                    toSubscribe.add(type);
                 }
                 tl.add(listener);
             }
         }
 
-        LocalSocketServiceConnection connection = new LocalSocketServiceConnection(types);
+        LocalSocketServiceConnection connection = new LocalSocketServiceConnection(toSubscribe);
         Context c = listener.getContext();
         c.bindService(new Intent(c, SocketService.class), connection, Context.BIND_AUTO_CREATE);
         connections.put(listener, connection);
