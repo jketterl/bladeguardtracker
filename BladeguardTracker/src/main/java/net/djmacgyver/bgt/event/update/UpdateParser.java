@@ -95,6 +95,7 @@ public class UpdateParser implements HttpSocketListener {
         for (int i = 0; i < sorted.size(); i++) {
             int eventId = sorted.keyAt(i);
             Event e = events.get(eventId);
+            if (e == null) continue;
             e.receiveUpdate(sorted.get(eventId));
         }
     }

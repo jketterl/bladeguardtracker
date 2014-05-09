@@ -110,8 +110,6 @@ public class Map extends ActionBarActivity {
             event = getIntent().getExtras().getParcelable("event");
         }
 
-        event.subscribeUpdates(nameUpdater, Event.MAP);
-
         BladeMapFragment bmf = new BladeMapFragment();
         Bundle b = new Bundle();
         b.putParcelable("event", event);
@@ -128,11 +126,6 @@ public class Map extends ActionBarActivity {
                 .commit();
     }
 
-    @Override
-    protected void onDestroy() {
-        event.unsubscribeUpdates(nameUpdater);
-        super.onDestroy();
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -142,20 +135,23 @@ public class Map extends ActionBarActivity {
     @Override
 	protected void onResume() {
 		super.onResume();
-		showDialog(DIALOG_CONNECTING);
+        event.subscribeUpdates(nameUpdater, Event.MAP);
+        showDialog(DIALOG_CONNECTING);
         bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
 	protected void onPause() {
-		super.onPause();
+        event.unsubscribeUpdates(nameUpdater);
 
 		if (socket != null) {
 			socket.removeListener(listener);
 			sockService.removeStake(this);
 			unbindService(sconn);
-		}
-	}
+        }
+
+        super.onPause();
+    }
 
 	@Override
 	protected Dialog onCreateDialog(int id) {

@@ -68,14 +68,18 @@ public class InfoFragment extends Fragment {
         speed = (TextView) v.findViewById(R.id.bladeNightSpeed);
         time = (TextView) v.findViewById(R.id.bladeNightCycleTime);
 
-        event.subscribeUpdates(updater, Event.STATS);
-
         return v;
     }
 
     @Override
-    public void onDestroyView() {
+    public void onPause() {
         event.unsubscribeUpdates(updater);
-        super.onDestroyView();
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        event.subscribeUpdates(updater, Event.STATS);
     }
 }

@@ -216,16 +216,25 @@ public class BladeMapFragment extends SupportMapFragment {
         Intent gi = new Intent(getActivity(), GPSTrackingService.class);
         getActivity().bindService(gi, gpsServiceConnection, Context.BIND_AUTO_CREATE);
 
-        event.subscribeUpdates(eventListener, Event.MOVEMENTS, Event.MAP, Event.STATS, Event.QUIT);
-
         return v;
     }
 
     @Override
     public void onDestroyView() {
-        event.unsubscribeUpdates(eventListener);
         gpsServiceConnection.onServiceDisconnected(null);
         getActivity().unbindService(gpsServiceConnection);
         super.onDestroyView();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        event.subscribeUpdates(eventListener, Event.MOVEMENTS, Event.MAP, Event.STATS, Event.QUIT);
+    }
+
+    @Override
+    public void onPause() {
+        event.unsubscribeUpdates(eventListener);
+        super.onPause();
     }
 }

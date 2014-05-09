@@ -214,16 +214,25 @@ public class Event implements Parcelable {
             this.types = types;
         }
 
-        HttpSocketConnection socket;
+        private HttpSocketConnection socket;
+        private SocketService service;
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            SocketService s = ((SocketService.LocalBinder) iBinder).getService();
-            s.registerEvent(Event.this);
-            socket = s.getSharedConnection(Event.this);
+            service  = ((SocketService.LocalBinder) iBinder).getService();
+            service.registerEvent(Event.this);
+            socket = service.getSharedConnection(Event.this);
 
             if (types.isEmpty()) return;
             socket.subscribeUpdates(Event.this, types.toArray(new String[types.size()]));
+        }
+
+        private void unsubscribe(List<String> types) {
+            socket.unSubscribeUpdates(Event.this, types.toArray(new String[types.size()]));
+        }
+
+        private void unregister() {
+            service.removeEvent(Event.this);
         }
 
         @Override
@@ -268,6 +277,10 @@ public class Event implements Parcelable {
         }
 
         if (!connections.containsKey(listener)) return;
-        listener.getContext().unbindService(connections.get(listener));
+        LocalSocketServiceConnection conn = connections.get(listener);
+        conn.unsubscribe(toRemove);
+        if (listeners.size() == 0) conn.unregister();
+
+        listener.getContext().unbindService(conn);
     }
 }
