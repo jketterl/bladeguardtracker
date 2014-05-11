@@ -1,6 +1,7 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
+import net.djmacgyver.bgt.dialog.ProgressDialog;
 import net.djmacgyver.bgt.event.AbstractEventListener;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventListener;
@@ -15,8 +16,6 @@ import net.djmacgyver.bgt.user.User;
 
 import org.json.JSONObject;
 
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +24,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,14 +33,16 @@ public class Map extends ActionBarActivity {
     @SuppressWarnings("unused")
     private static final String TAG = "Map";
 
-	private Handler stateHandler = new Handler(){
+    public static final String DIALOG_CONNECTING = "dialog_connecting";
+
+    private Handler stateHandler = new Handler(){
 		@Override
 		public void handleMessage(Message msg) {
 			int state = (Integer) msg.obj;
 			if (state == HttpSocketConnection.STATE_CONNECTED) {
-				removeDialog(DIALOG_CONNECTING);
+                dismissConnectingDialog();
 			} else {
-				showDialog(DIALOG_CONNECTING);
+                showConnectingDialog();
 			}
 		}
 	};
@@ -63,8 +65,6 @@ public class Map extends ActionBarActivity {
 		}
 	};
 	
-	public static final int DIALOG_CONNECTING = 1;
-
 	private HttpSocketConnection socket;
 	private SocketService sockService;
 	
@@ -136,9 +136,19 @@ public class Map extends ActionBarActivity {
 	protected void onResume() {
 		super.onResume();
         event.subscribeUpdates(nameUpdater, Event.MAP);
-        showDialog(DIALOG_CONNECTING);
+        showConnectingDialog();
         bindService(new Intent(this, SocketService.class), sconn, Context.BIND_AUTO_CREATE);
 	}
+
+    private void showConnectingDialog() {
+        DialogFragment connecting = new ProgressDialog(R.string.connect_progress);
+        connecting.show(getSupportFragmentManager(), DIALOG_CONNECTING);
+    }
+
+    private void dismissConnectingDialog() {
+        DialogFragment connecting = (DialogFragment) getSupportFragmentManager().findFragmentByTag(DIALOG_CONNECTING);
+        if (connecting != null) connecting.dismiss();
+    }
 
 	@Override
 	protected void onPause() {
@@ -153,21 +163,9 @@ public class Map extends ActionBarActivity {
         super.onPause();
     }
 
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		switch (id) {
-			case DIALOG_CONNECTING:
-				Dialog d = new ProgressDialog(this);
-				d.setCancelable(false);
-				d.setTitle(R.string.connect_progress);
-				return d;
-		}
-		return super.onCreateDialog(id);
-	}
-	
 	public void onConnect() {
 		socket.addListener(listener);
-		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) removeDialog(Map.DIALOG_CONNECTING);
+		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) dismissConnectingDialog();
 	}
 	
 	@Override
