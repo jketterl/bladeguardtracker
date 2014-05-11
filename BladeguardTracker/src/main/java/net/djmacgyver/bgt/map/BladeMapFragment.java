@@ -205,6 +205,29 @@ public class BladeMapFragment extends SupportMapFragment {
                 }
             });
         }
+
+        @Override
+        public void onReset() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (currentMapLine != null) {
+                        currentMapLine.remove();
+                        currentMapLine = null;
+                    }
+                    for (int i = 0; i < markers.size(); i++) {
+                        Marker m = markers.valueAt(i);
+                        m.remove();
+                    }
+                    markers.clear();
+                    if (currentTrackLine != null) {
+                        currentTrackLine.remove();
+                        currentTrackLine = null;
+                    }
+                    currentStats = null;
+                }
+            });
+        }
     };
 
     @Override

@@ -19,4 +19,6 @@ public interface EventListener {
     public void onQuit(List<Quit> quits);
 
     public void onStats(Stats stats);
+
+    public void onReset();
 }

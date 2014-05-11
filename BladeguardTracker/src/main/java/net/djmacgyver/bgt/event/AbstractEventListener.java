@@ -36,4 +36,7 @@ abstract public class AbstractEventListener implements EventListener {
 
     @Override
     public void onStats(Stats stats) {}
+
+    @Override
+    public void onReset() {}
 }

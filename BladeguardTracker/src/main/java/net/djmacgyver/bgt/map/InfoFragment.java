@@ -38,6 +38,20 @@ public class InfoFragment extends Fragment {
 
     private EventListener updater = new AbstractEventListener() {
         @Override
+        public void onReset() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    lengthView.setText(NOT_AVAILABLE);
+                    speedView.setText(NOT_AVAILABLE);
+                    timeView.setText(NOT_AVAILABLE);
+                }
+            });
+            speed = -1;
+            updateDistaneToEnd();
+        }
+
+        @Override
         public void onStats(final Stats stats) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override

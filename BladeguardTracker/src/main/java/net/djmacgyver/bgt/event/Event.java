@@ -14,6 +14,7 @@ import net.djmacgyver.bgt.event.update.Movement;
 import net.djmacgyver.bgt.event.update.Quit;
 import net.djmacgyver.bgt.event.update.Stats;
 import net.djmacgyver.bgt.event.update.Update;
+import net.djmacgyver.bgt.socket.AbstractHttpSocketListener;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketService;
@@ -207,6 +208,14 @@ public class Event implements Parcelable {
         }
     }
 
+    private void fireReset() {
+        synchronized (listeners) {
+            List<EventListener> allListeners = new ArrayList<EventListener>();
+            for (List<EventListener> ll : listeners.values()) allListeners.addAll(ll);
+            for (EventListener l : allListeners) l.onReset();
+        }
+    }
+
     private class LocalSocketServiceConnection implements ServiceConnection {
         private final List<String> types;
 
@@ -225,6 +234,12 @@ public class Event implements Parcelable {
 
             if (types.isEmpty()) return;
             socket.subscribeUpdates(Event.this, types.toArray(new String[types.size()]));
+            socket.addListener(new AbstractHttpSocketListener() {
+                @Override
+                public void receiveStateChange(int newState) {
+                    if (newState == HttpSocketConnection.STATE_DISCONNECTED) fireReset();
+                }
+            });
         }
 
         private void unsubscribe(List<String> types) {
