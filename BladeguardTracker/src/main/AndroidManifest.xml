@@ -37,7 +37,6 @@
                        android:value="net.djmacgyver.bgt.activity.MainActivity" />
         </activity>
         <activity android:name=".activity.Signup" android:label="@string/new_user" />
-        <activity android:name=".activity.MapSelection" android:label="@string/map_selection" />
         <activity android:name=".activity.TeamSelection" android:label="@string/teamselection" />
         <activity android:name=".activity.EventDetail"
                   android:label="@string/event"

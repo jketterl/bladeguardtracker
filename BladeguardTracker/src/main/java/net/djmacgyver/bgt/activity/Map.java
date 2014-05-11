@@ -8,16 +8,24 @@ import net.djmacgyver.bgt.event.EventListener;
 import net.djmacgyver.bgt.event.update.EventMap;
 import net.djmacgyver.bgt.map.BladeMapFragment;
 import net.djmacgyver.bgt.map.InfoFragment;
+import net.djmacgyver.bgt.map.RouteSelectionDialog;
 import net.djmacgyver.bgt.session.Session;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
+import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
+import net.djmacgyver.bgt.socket.command.UpdateEventCommand;
 import net.djmacgyver.bgt.user.User;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -29,11 +37,14 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class Map extends ActionBarActivity {
+public class Map extends ActionBarActivity implements RouteSelectionDialog.OnRouteSelectedListener {
     @SuppressWarnings("unused")
     private static final String TAG = "Map";
 
-    public static final String DIALOG_CONNECTING = "dialog_connecting";
+    private static final String DIALOG_CONNECTING = "dialog_connecting";
+    private static final String DIALOG_ROUTE_SELECTION = "dialog_routeselection";
+    private static final String DIALOG_CONFIRM = "dialog_confirm";
+    private static final String DIALOG_SWITCHING = "dialog_switching";
 
     private Handler stateHandler = new Handler(){
 		@Override
@@ -180,11 +191,61 @@ public class Map extends ActionBarActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.mapselection:
-				Intent i = new Intent(getApplicationContext(), MapSelection.class);
-				i.putExtra("event", event);
-				startActivity(i);
-				return true;
+                DialogFragment f = new RouteSelectionDialog();
+                f.show(getSupportFragmentManager(), DIALOG_ROUTE_SELECTION);
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
+    private abstract class ConfirmDialog extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder b = new AlertDialog.Builder(Map.this);
+            b.setTitle(R.string.are_you_sure)
+                    .setMessage(R.string.map_will_be_reset)
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            perform();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dismiss();
+                        }
+                    });
+            return b.create();
+        }
+
+        protected abstract void perform();
+    }
+
+    @Override
+    public void onRouteSelected(final int id) {
+        DialogFragment confirm = new ConfirmDialog() {
+            @Override
+            protected void perform() {
+                final DialogFragment switching = new ProgressDialog(R.string.switching_map);
+                switching.show(getSupportFragmentManager(), DIALOG_SWITCHING);
+
+                try {
+                    JSONObject data = new JSONObject();
+                    data.put("map", id);
+                    SocketCommand command = new UpdateEventCommand(event, data);
+
+                    command.addCallback(new SocketCommandCallback() {
+                        @Override
+                        public void run(SocketCommand command) {
+                            switching.dismiss();
+                        }
+                    });
+
+                    socket.sendCommand(command);
+                } catch (JSONException ignored) {}
+            }
+        };
+        confirm.show(getSupportFragmentManager(), DIALOG_CONFIRM);
+    }
 }
