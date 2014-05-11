@@ -5,10 +5,12 @@ import net.djmacgyver.bgt.dialog.ProgressDialog;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.event.EventList;
 import net.djmacgyver.bgt.session.Session;
+import net.djmacgyver.bgt.socket.AbstractHttpSocketListener;
 import net.djmacgyver.bgt.socket.CommandExecutor;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketCommand;
+import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.RegistrationUpdateCommand;
 
@@ -57,17 +59,7 @@ public class MainActivity extends ActionBarActivity {
 			}
 		}
 	};
-	private HttpSocketListener listener = new HttpSocketListener() {
-		@Override
-		public void receiveUpdate(JSONObject data) {
-			// NOOP
-		}
-
-		@Override
-		public void receiveCommand(String command, JSONObject data) {
-			// NOOP
-		}
-
+	private HttpSocketListener listener = new AbstractHttpSocketListener() {
 		@Override
 		public void receiveStateChange(int newState) {
 			Message msg = new Message();
@@ -143,7 +135,7 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
@@ -165,6 +157,12 @@ public class MainActivity extends ActionBarActivity {
 
 	private void onConnect() {
 		socket.addListener(listener);
+        socket.addAuthCallback(new SocketCommandCallback() {
+            @Override
+            public void run(SocketCommand command) {
+                supportInvalidateOptionsMenu();
+            }
+        });
 		if (socket.getState() == HttpSocketConnection.STATE_CONNECTED) dismissConnectDialog();
 	}
 

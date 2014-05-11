@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/config" android:titleCondensed="@string/settings" android:title="@string/settings"></item>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bgt="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/config"
+        android:titleCondensed="@string/settings"
+        android:title="@string/settings"
+        android:icon="@drawable/ic_menu_preferences"
+        bgt:showAsAction="ifRoom"/>
     
-    <group android:id="@+id/adminGroup" android:visible="false"><item android:id="@+id/admin" android:title="@string/admin_panel" android:titleCondensed="@string/admin_panel"></item>
+    <group android:id="@+id/adminGroup" android:visible="false">
+        <item android:id="@+id/admin"
+            android:title="@string/admin_panel"
+            android:titleCondensed="@string/admin_panel" />
     </group>
     
 </menu>
