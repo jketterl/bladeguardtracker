@@ -92,4 +92,5 @@
     <string name="gpsnote">Please note: Even though this app tries to reduce the use of GPS, it will still consume a considerable amount of battery during an event if enabled.</string>
     <string name="gotolocationsettings">Go to location settings&#8230;</string>
     <string name="tracker_gpswarning_text">Please enable your GPS!</string>
+    <string name="team_change_running">Changing team&#8230;</string>
 </resources>

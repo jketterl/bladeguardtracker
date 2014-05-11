@@ -88,4 +88,5 @@
     <string name="gpsnote">Bitte beachte: Obwohl diese App versucht, die Nutzung von GPS auf ein Minimum zu reduzieren, wird sie dennoch im Lauf einer Veranstaltung eine große Menge an Strom verbrauchen, wenn sie aktiviert ist.</string>
     <string name="gotolocationsettings">Standorteinstellungen aufrufen&#8230;</string>
     <string name="tracker_gpswarning_text">Bitte GPS einschalten!</string>
+    <string name="team_change_running">Wechsle Team&#8230;</string>
 </resources>

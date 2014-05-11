@@ -57,6 +57,7 @@ public class Settings extends ActionBarActivity implements TeamSelectionDialog.O
 	private static final String DIALOG_PASSWORDCHANGE_FAILED = "dialog_passwordchange_failed";
 	private static final String DIALOG_PASSWORDCHANGE_RUNNING = "dialog_passwordchange_running";
     private static final String DIALOG_TEAM_SELECTION = "dialog_teamselection";
+    private static final String DIALOG_TEAM_CHANGE_RUNNING = "dialog_teamchange_running";
 
     private SessionState facebookState;
 
@@ -388,6 +389,11 @@ public class Settings extends ActionBarActivity implements TeamSelectionDialog.O
         if (f != null) f.dismiss();
     }
 
+    private void showTeamChangeRunningDialog() {
+        DialogFragment f = new ProgressDialog(R.string.team_change_running);
+        f.show(getSupportFragmentManager(), DIALOG_TEAM_CHANGE_RUNNING);
+    }
+
     private void showPasswordChangeDialog() {
         DialogFragment f = new PasswordChangeDialog() {
             @Override
@@ -492,18 +498,23 @@ public class Settings extends ActionBarActivity implements TeamSelectionDialog.O
 
     @Override
     public void onTeamSelected(int teamId) {
+        showTeamChangeRunningDialog();
+
         SetTeamCommand command = new SetTeamCommand(teamId);
         command.addCallback(new SocketCommandCallback() {
             @Override
             public void run(final SocketCommand command) {
-                if (command.wasSuccessful()) runOnUiThread(new Runnable() {
+                runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        TextView team = (TextView) findViewById(R.id.teamView);
-                        try {
-                            team.setText(command.getResponseData().getJSONObject(0).getString("name"));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        dismissDialog(DIALOG_TEAM_CHANGE_RUNNING);
+                        if (command.wasSuccessful()) {
+                            TextView team = (TextView) findViewById(R.id.teamView);
+                            try {
+                                team.setText(command.getResponseData().getJSONObject(0).getString("name"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 });
