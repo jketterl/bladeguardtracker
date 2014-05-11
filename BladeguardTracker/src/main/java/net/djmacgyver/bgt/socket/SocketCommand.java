@@ -13,7 +13,7 @@ abstract public class SocketCommand {
 	private int requestId;
 	private JSONArray responseData;
 	private boolean result = false;
-	
+
 	public SocketCommand(String command, JSONObject data, SocketCommandCallback callback) {
 		this(command, data);
 		addCallback(callback);
@@ -73,9 +73,9 @@ abstract public class SocketCommand {
 	}
 	
 	protected void updateResult(boolean success) {
-		result = success;
-		runCallbacks();
-	}
+        result = success;
+        runCallbacks();
+    }
 	
 	private void runCallbacks() {
         for (SocketCommandCallback callback : callbacks) callback.run(this);
@@ -86,7 +86,7 @@ abstract public class SocketCommand {
 	{
 		return result;
 	}
-	
+
 	public JSONArray getResponseData()
 	{
 		return responseData;
@@ -99,4 +99,8 @@ abstract public class SocketCommand {
 			callback.run(this);
 		}
 	}
+
+    public void cancel() {
+        updateResult(false);
+    }
 }

@@ -23,8 +23,8 @@ abstract public class AbstractAuthCommand extends SocketCommand {
 		}
 		super.updateResult(success);
 	}
-	
-	public User getUser() {
+
+    public User getUser() {
 		return user;
 	}
 }

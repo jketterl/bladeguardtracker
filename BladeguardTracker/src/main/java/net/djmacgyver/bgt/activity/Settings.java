@@ -1,20 +1,19 @@
 package net.djmacgyver.bgt.activity;
 
 import net.djmacgyver.bgt.R;
-import net.djmacgyver.bgt.socket.HttpSocketConnection;
+import net.djmacgyver.bgt.socket.CommandExecutor;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
 import net.djmacgyver.bgt.socket.command.AbstractAuthCommand;
 import net.djmacgyver.bgt.socket.command.AuthenticationCommand;
-import net.djmacgyver.bgt.socket.command.FacebookLoginCommand;
 import net.djmacgyver.bgt.socket.command.PasswordChangeCommand;
 import net.djmacgyver.bgt.socket.command.SetTeamCommand;
+import net.djmacgyver.bgt.team.TeamSelectionDialog;
 import net.djmacgyver.bgt.user.User;
 
 import org.json.JSONException;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -28,9 +27,11 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -47,20 +48,26 @@ import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.WebDialog;
 import com.facebook.widget.WebDialog.OnCompleteListener;
 
-public class Settings extends ActionBarActivity {
+public class Settings extends ActionBarActivity implements TeamSelectionDialog.OnTeamSelectedListener {
+    private static final String TAG = "Settings";
+
 	public static final int DIALOG_LOGGING_IN = 1;
 	public static final int DIALOG_CREDENTIALS_WRONG = 2;
 	public static final int DIALOG_PASSWORDCHANGE = 3;
 	public static final int DIALOG_PASSWORDCHANGE_FAILED = 4;
 	public static final int DIALOG_PASSWORDCHANGE_RUNNING = 5;
 	
-	public static final int REQUEST_TEAM_SELECTION = 1;
-	
-	private Session.StatusCallback callback = new Session.StatusCallback() {
+    private static final String DIALOG_TEAM_SELECTION = "dialog_teamselection";
+
+    private SessionState facebookState;
+
+    private Session.StatusCallback callback = new Session.StatusCallback() {
 	    @Override
 	    public void call(Session session, SessionState state, Exception exception) {
+            Log.d(TAG, "facebook indicates state: " + state);
 	    	authentication = null;
-	    	updateUI();
+            facebookState = state;
+            updateUI();
 	    }
 	};
 	
@@ -136,7 +143,8 @@ public class Settings extends ActionBarActivity {
 				testLogin(new SocketCommandCallback() {
 					@Override
 					public void run(SocketCommand command) {
-						startActivityForResult(new Intent(Settings.this, TeamSelection.class), REQUEST_TEAM_SELECTION);
+                        DialogFragment teamSelection = new TeamSelectionDialog();
+                        teamSelection.show(getSupportFragmentManager(), DIALOG_TEAM_SELECTION);
 					}
 				});
 			}
@@ -232,22 +240,25 @@ public class Settings extends ActionBarActivity {
         	anonymousInfo.setVisibility(View.GONE);
         	loginOptions.setVisibility(View.VISIBLE);
         	
-        	if (authentication != null) {
-        		if (authentication instanceof AuthenticationCommand) {
-		            logout.setVisibility(View.VISIBLE);
-			        regularLogin.setVisibility(View.GONE);
-			        facebook.setVisibility(View.GONE);
-			        facebookOptions.setVisibility(View.GONE);
-        		} else if (authentication instanceof FacebookLoginCommand) {
-    		        regularLogin.setVisibility(View.GONE);
-    		        logout.setVisibility(View.GONE);
-    		        facebook.setVisibility(View.VISIBLE);
-    		        facebookOptions.setVisibility(View.VISIBLE);
-        		}
+        	if (authentication != null && authentication instanceof AuthenticationCommand ) {
+                logout.setVisibility(View.VISIBLE);
+                regularLogin.setVisibility(View.GONE);
+                facebook.setVisibility(View.GONE);
+                facebookOptions.setVisibility(View.GONE);
 		        profile.setVisibility(View.VISIBLE);
         		User user = authentication.getUser();
         		if (user != null) team.setText(user.getTeamName());
-        	} else {
+        	} else if (facebookState != null && facebookState.isOpened()) {
+                regularLogin.setVisibility(View.GONE);
+                logout.setVisibility(View.GONE);
+                facebook.setVisibility(View.VISIBLE);
+                facebookOptions.setVisibility(View.VISIBLE);
+                profile.setVisibility(View.VISIBLE);
+                if (authentication != null) {
+                    User user = authentication.getUser();
+                    if (user != null) team.setText(user.getTeamName());
+                }
+            } else {
 	            logout.setVisibility(View.GONE);
 		        regularLogin.setVisibility(View.VISIBLE);
 		        facebook.setVisibility(View.VISIBLE);
@@ -270,8 +281,9 @@ public class Settings extends ActionBarActivity {
 			@Override
 			public void run(SocketCommand command) {
 				if (command == null || command.wasSuccessful()) {
-					Settings.super.onBackPressed();
+                    finish();
 				} else {
+                    Log.w(TAG, "login failed: " + command.getResponseData());
 					runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -307,7 +319,7 @@ public class Settings extends ActionBarActivity {
 		storeSettings();
 		
 		if (authentication != null) {
-			if (callback != null) authentication.addCallback(callback);
+            if (callback != null) authentication.addCallback(callback);
 			return;
 		}
 
@@ -327,16 +339,15 @@ public class Settings extends ActionBarActivity {
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				SocketService s = ((SocketService.LocalBinder) service).getService();
-				final ServiceConnection conn = this;
-				
+
 				SocketCommandCallback c = new SocketCommandCallback() {
 					@Override
 					public void run(final SocketCommand command) {
-						unbindService(conn);
 						dismissDialog(DIALOG_LOGGING_IN);
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
+                                Log.d(TAG, "got authentication: " + command);
 								if (command != null && command.wasSuccessful()) authentication = (AbstractAuthCommand) command;
 								updateUI();
 								//setLoggedIn(command.wasSuccessful());
@@ -347,6 +358,7 @@ public class Settings extends ActionBarActivity {
 				};
 				
 				s.getSharedConnection().addAuthCallback(c);
+                unbindService(this);
 			}
 		};
 		bindService(new Intent(this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
@@ -424,7 +436,7 @@ public class Settings extends ActionBarActivity {
 											String message = "unknown error";
 											try {
 												message = command.getResponseData().getJSONObject(0).getString("message");
-											} catch (JSONException e) {}
+											} catch (JSONException ignored) {}
 											b.putString("message", message);
 											runOnUiThread(new Runnable() {
 												@Override
@@ -505,43 +517,6 @@ public class Settings extends ActionBarActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    super.onActivityResult(requestCode, resultCode, data);
 	    uiHelper.onActivityResult(requestCode, resultCode, data);
-	    
-	    
-	    if (requestCode == REQUEST_TEAM_SELECTION && resultCode == Activity.RESULT_OK) {
-	    	final long teamId = data.getLongExtra("teamId", -1);
-	    	if (teamId != -1) {
-			    final ServiceConnection conn = new ServiceConnection() {
-					@Override
-					public void onServiceDisconnected(ComponentName name) {}
-					
-					@Override
-					public void onServiceConnected(ComponentName name, IBinder service) {
-						SetTeamCommand command = new SetTeamCommand((int) teamId);
-						command.addCallback(new SocketCommandCallback() {
-							@Override
-							public void run(final SocketCommand command) {
-								if (command.wasSuccessful()) runOnUiThread(new Runnable() {
-									@Override
-									public void run() {
-										TextView team = (TextView) findViewById(R.id.teamView);
-										try {
-											team.setText(command.getResponseData().getJSONObject(0).getString("name"));
-										} catch (JSONException e) {
-											e.printStackTrace();
-										}
-									}
-								});
-							}
-						});
-						HttpSocketConnection socket = ((SocketService.LocalBinder) service).getService().getSharedConnection();
-						socket.sendCommand(command);
-						unbindService(this);
-					}
-				};
-				
-				bindService(new Intent(Settings.this, SocketService.class), conn, Context.BIND_AUTO_CREATE);
-	    	}
-	    }
 	}
 
 	@Override
@@ -573,4 +548,28 @@ public class Settings extends ActionBarActivity {
 		}
 		super.onPrepareDialog(id, dialog, args);
 	}
+
+    @Override
+    public void onTeamSelected(int teamId) {
+        SetTeamCommand command = new SetTeamCommand(teamId);
+        command.addCallback(new SocketCommandCallback() {
+            @Override
+            public void run(final SocketCommand command) {
+                if (command.wasSuccessful()) runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView team = (TextView) findViewById(R.id.teamView);
+                        try {
+                            team.setText(command.getResponseData().getJSONObject(0).getString("name"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+
+        CommandExecutor e = new CommandExecutor(this);
+        e.execute(command);
+    }
 }

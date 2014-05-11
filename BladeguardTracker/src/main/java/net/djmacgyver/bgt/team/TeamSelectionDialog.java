@@ -1,4 +1,4 @@
-package net.djmacgyver.bgt.map;
+package net.djmacgyver.bgt.team;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,12 +11,12 @@ import android.widget.ListView;
 
 import net.djmacgyver.bgt.R;
 
-public class RouteSelectionDialog extends DialogFragment {
+public class TeamSelectionDialog extends DialogFragment {
 
-    private OnRouteSelectedListener target;
+    private OnTeamSelectedListener target;
 
-    public interface OnRouteSelectedListener {
-        public void onRouteSelected(int id);
+    public interface OnTeamSelectedListener {
+        public void onTeamSelected(int id);
     }
 
     @Override
@@ -25,18 +25,18 @@ public class RouteSelectionDialog extends DialogFragment {
 
         View v = getActivity().getLayoutInflater().inflate(R.layout.fullscreenlist, null);
 
-        MapList list = new MapList(getActivity(), true);
-        ListView routeList = (ListView) v.findViewById(R.id.list);
-        routeList.setAdapter(list);
-        routeList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ListView listView = (ListView) v.findViewById(R.id.list);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 dismiss();
-                target.onRouteSelected((int) id);
+                target.onTeamSelected((int) id);
             }
         });
 
-        b.setTitle(R.string.map_selection)
+        listView.setAdapter(new TeamList(getActivity(), true));
+
+        b.setTitle(R.string.teamselection)
                 .setView(v);
 
         return b.create();
@@ -44,7 +44,7 @@ public class RouteSelectionDialog extends DialogFragment {
 
     @Override
     public void onAttach(Activity activity) {
-        target = (OnRouteSelectedListener) activity;
+        target = (OnTeamSelectedListener) activity;
         super.onAttach(activity);
     }
 }

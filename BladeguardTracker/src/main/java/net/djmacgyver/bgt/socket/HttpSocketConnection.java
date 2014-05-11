@@ -249,7 +249,7 @@ public class HttpSocketConnection {
 		// outstanding requests will not be answered; update them as false
 		for (int i = 0; i < requests.size(); i++) {
 			SocketCommand c = requests.get(requests.keyAt(i));
-			c.updateResult(false);
+            c.cancel();
 		}
 		requests.clear();
 	}
