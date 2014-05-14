@@ -45,6 +45,7 @@ import com.facebook.FacebookOperationCanceledException;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
+import com.facebook.widget.LoginButton;
 import com.facebook.widget.WebDialog;
 import com.facebook.widget.WebDialog.OnCompleteListener;
 
@@ -216,6 +217,9 @@ public class Settings extends ActionBarActivity implements TeamSelectionDialog.O
 				requestDialog.show();
 			}
 		});
+
+        LoginButton facebookButton = (LoginButton) findViewById(R.id.facebookButton);
+        facebookButton.setPublishPermissions("publish_actions");
         
         Session.openActiveSession(this, false, callback);
 	}
