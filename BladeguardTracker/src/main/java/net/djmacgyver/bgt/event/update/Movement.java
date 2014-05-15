@@ -13,6 +13,7 @@ public class Movement extends Update {
     private LatLng newLocation;
     private int userId;
     private String team;
+    private String userName;
 
     public Movement(JSONObject data) throws UpdateException {
         super(data);
@@ -23,6 +24,7 @@ public class Movement extends Update {
             JSONObject user = data.getJSONObject("user");
             userId = user.getInt("id");
             team = user.getString("team");
+            userName = user.getString("name");
         } catch (JSONException ignored) {}
     }
 
@@ -34,7 +36,15 @@ public class Movement extends Update {
         return userId;
     }
 
+    public String getTeamName() {
+        return team;
+    }
+
     public Team getTeam(Context c) {
         return Team.getTeam(team, c);
+    }
+
+    public String getUserName() {
+        return userName;
     }
 }

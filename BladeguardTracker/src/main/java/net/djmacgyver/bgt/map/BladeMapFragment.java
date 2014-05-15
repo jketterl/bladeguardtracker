@@ -15,6 +15,7 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -48,6 +49,29 @@ public class BladeMapFragment extends SupportMapFragment {
 
     private Event event;
 
+    private class MarkerCombo {
+        private Marker marker;
+        private Movement movement;
+
+        public MarkerCombo(Marker ma, Movement mo) {
+            marker = ma;
+            movement = mo;
+        }
+
+        public Marker getMarker() {
+            return marker;
+        }
+
+        public Movement getMovement() {
+            return movement;
+        }
+
+        public void setMovement(Movement mo) {
+            movement = mo;
+            marker.setPosition(mo.getNewLocation());
+        }
+    }
+
     // GPSListener Service connection
     private ServiceConnection gpsServiceConnection = new ServiceConnection() {
         GPSTrackingService service;
@@ -78,6 +102,8 @@ public class BladeMapFragment extends SupportMapFragment {
             getMap().setMyLocationEnabled(true);
         }
     };
+
+    private final SparseArray<MarkerCombo> markers = new SparseArray<MarkerCombo>();
 
     private EventListener eventListener = new AbstractEventListener() {
         private EventMap currentMap;
@@ -111,8 +137,6 @@ public class BladeMapFragment extends SupportMapFragment {
             buildTrack();
         }
 
-        private SparseArray<Marker> markers = new SparseArray<Marker>();
-
         @Override
         public void onMovement(final List<Movement> movements) {
             getActivity().runOnUiThread(new Runnable() {
@@ -122,15 +146,15 @@ public class BladeMapFragment extends SupportMapFragment {
 
                     for (Movement m : movements) {
                         int userId = m.getUserId();
-                        Marker marker = markers.get(userId);
-                        if (marker != null) {
-                            marker.setPosition(m.getNewLocation());
+                        MarkerCombo mc = markers.get(userId);
+                        if (mc != null) {
+                            mc.setMovement(m);
                         } else {
                             MarkerOptions o = new MarkerOptions();
                             o.position(m.getNewLocation())
                                     .anchor(.5f, .5f)
                                     .icon(getIcon(m.getTeam(getContext())));
-                            markers.put(userId, map.addMarker(o));
+                            markers.put(userId, new MarkerCombo(map.addMarker(o), m));
                         }
                     }
                 }
@@ -153,9 +177,9 @@ public class BladeMapFragment extends SupportMapFragment {
                 public void run() {
                     for (Quit q : quits) {
                         int userId = q.getUserId();
-                        Marker marker = markers.get(userId);
-                        if (marker == null) continue;
-                        marker.remove();
+                        MarkerCombo mc = markers.get(userId);
+                        if (mc == null) continue;
+                        mc.getMarker().remove();
                         markers.remove(userId);
                     }
                 }
@@ -216,8 +240,8 @@ public class BladeMapFragment extends SupportMapFragment {
                         currentMapLine = null;
                     }
                     for (int i = 0; i < markers.size(); i++) {
-                        Marker m = markers.valueAt(i);
-                        m.remove();
+                        MarkerCombo m = markers.valueAt(i);
+                        m.getMarker().remove();
                     }
                     markers.clear();
                     if (currentTrackLine != null) {
@@ -231,7 +255,7 @@ public class BladeMapFragment extends SupportMapFragment {
     };
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         event = getArguments().getParcelable("event");
 
         View v = super.onCreateView(inflater, container, savedInstanceState);
@@ -239,7 +263,61 @@ public class BladeMapFragment extends SupportMapFragment {
         Intent gi = new Intent(getActivity(), GPSTrackingService.class);
         getActivity().bindService(gi, gpsServiceConnection, Context.BIND_AUTO_CREATE);
 
+        final View bubble = inflater.inflate(R.layout.bubble, null);
+        final InfoWindowHandler h = new InfoWindowHandler(bubble);
+        GoogleMap map = getMap();
+        map.setInfoWindowAdapter(h);
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                h.hideWindow();
+            }
+        });
+
         return v;
+    }
+
+    private class InfoWindowHandler implements GoogleMap.InfoWindowAdapter {
+        private final View bubble;
+        private Marker current;
+        private TextView usernameView;
+        private TextView commentView;
+
+        public InfoWindowHandler(View bubble) {
+            this.bubble = bubble;
+            usernameView = (TextView) bubble.findViewById(R.id.username);
+            commentView = (TextView) bubble.findViewById(R.id.comment);
+        }
+
+        private Movement findMovement(Marker marker) {
+            for (int i = 0; i < markers.size(); i++) {
+                MarkerCombo mc = markers.valueAt(i);
+                if (mc.getMarker().equals(marker)) return mc.getMovement();
+            }
+            return null;
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            current = marker;
+            Movement mo = findMovement(marker);
+            if (mo != null) {
+                usernameView.setText(mo.getUserName());
+                commentView.setText(mo.getTeamName());
+            }
+            return bubble;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            return null;
+        }
+
+        public void hideWindow() {
+            if (current == null) return;
+            current.hideInfoWindow();
+            current = null;
+        }
     }
 
     @Override
