@@ -105,10 +105,11 @@ public class BladeMapFragment extends SupportMapFragment {
 
     private final SparseArray<MarkerCombo> markers = new SparseArray<MarkerCombo>();
 
+    private Marker startMarker;
+
     private EventListener eventListener = new AbstractEventListener() {
         private EventMap currentMap;
         private Polyline currentMapLine;
-        private Marker startMarker;
 
         @Override
         public Context getContext() {
@@ -125,7 +126,9 @@ public class BladeMapFragment extends SupportMapFragment {
                     .width(getActivity().getResources().getDimensionPixelSize(R.dimen.mapStrokeWidth))
                     .zIndex(2);
 
-            final MarkerOptions start = new MarkerOptions().position(map.getStart());
+            final MarkerOptions start = new MarkerOptions().position(map.getStart())
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.start))
+                    .anchor(.5f, .5f);
 
             getActivity().runOnUiThread(new Runnable() {
                 @Override
@@ -310,6 +313,10 @@ public class BladeMapFragment extends SupportMapFragment {
         @Override
         public View getInfoWindow(Marker marker) {
             current = marker;
+            if (marker.equals(startMarker)) {
+                usernameView.setText(R.string.starting_point);
+                commentView.setText("");
+            }
             Movement mo = findMovement(marker);
             if (mo != null) {
                 usernameView.setText(mo.getUserName());

@@ -93,4 +93,5 @@
     <string name="gotolocationsettings">Go to location settings&#8230;</string>
     <string name="tracker_gpswarning_text">Please enable your GPS!</string>
     <string name="team_change_running">Changing team&#8230;</string>
+    <string name="starting_point">Starting point</string>
 </resources>
