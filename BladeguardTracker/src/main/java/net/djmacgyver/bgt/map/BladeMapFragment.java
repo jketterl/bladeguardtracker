@@ -108,6 +108,7 @@ public class BladeMapFragment extends SupportMapFragment {
     private EventListener eventListener = new AbstractEventListener() {
         private EventMap currentMap;
         private Polyline currentMapLine;
+        private Marker startMarker;
 
         @Override
         public Context getContext() {
@@ -124,6 +125,8 @@ public class BladeMapFragment extends SupportMapFragment {
                     .width(getActivity().getResources().getDimensionPixelSize(R.dimen.mapStrokeWidth))
                     .zIndex(2);
 
+            final MarkerOptions start = new MarkerOptions().position(map.getStart());
+
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -131,6 +134,9 @@ public class BladeMapFragment extends SupportMapFragment {
                     if (currentMapLine != null) currentMapLine.remove();
                     currentMapLine = gmap.addPolyline(o);
                     gmap.moveCamera(CameraUpdateFactory.newLatLngBounds(map.getBounds(), 10));
+
+                    if (startMarker != null) startMarker.remove();
+                    startMarker = gmap.addMarker(start);
                 }
             });
 
@@ -249,6 +255,10 @@ public class BladeMapFragment extends SupportMapFragment {
                         currentTrackLine = null;
                     }
                     currentStats = null;
+                    if (startMarker != null) {
+                        startMarker.remove();
+                        startMarker = null;
+                    }
                 }
             });
         }

@@ -37,6 +37,10 @@ public class EventMap extends Update {
         } catch (JSONException ignored) {}
     }
 
+    public LatLng getStart() {
+        return points.get(0);
+    }
+
     public List<LatLng> getPoints() {
         return points;
     }
