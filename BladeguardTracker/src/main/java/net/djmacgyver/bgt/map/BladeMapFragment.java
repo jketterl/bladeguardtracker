@@ -263,7 +263,7 @@ public class BladeMapFragment extends SupportMapFragment {
         Intent gi = new Intent(getActivity(), GPSTrackingService.class);
         getActivity().bindService(gi, gpsServiceConnection, Context.BIND_AUTO_CREATE);
 
-        final View bubble = inflater.inflate(R.layout.bubble, null);
+        final View bubble = inflater.inflate(R.layout.bubble, container, false);
         final InfoWindowHandler h = new InfoWindowHandler(bubble);
         GoogleMap map = getMap();
         map.setInfoWindowAdapter(h);
