@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -17,11 +18,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -136,7 +139,7 @@ public class BladeMapFragment extends SupportMapFragment {
                     GoogleMap gmap = getMap();
                     if (currentMapLine != null) currentMapLine.remove();
                     currentMapLine = gmap.addPolyline(o);
-                    gmap.moveCamera(CameraUpdateFactory.newLatLngBounds(map.getBounds(), 10));
+                    gmap.moveCamera(CameraUpdateFactory.newLatLngBounds(map.getBounds(), 50));
 
                     if (startMarker != null) startMarker.remove();
                     startMarker = gmap.addMarker(start);
@@ -287,7 +290,31 @@ public class BladeMapFragment extends SupportMapFragment {
             }
         });
 
+        // restore camera state
+        SharedPreferences pref = getActivity().getSharedPreferences("camera", Context.MODE_PRIVATE);
+        CameraUpdate u = CameraUpdateFactory.newLatLngZoom(
+                new LatLng(
+                        pref.getFloat("lat", 0),
+                        pref.getFloat("lon", 0)
+                ),
+                pref.getFloat("zoom", 0)
+        );
+        map.moveCamera(u);
+
         return v;
+    }
+
+    @Override
+    public void onDestroy() {
+        // save camera state
+        CameraPosition p = getMap().getCameraPosition();
+        getActivity().getSharedPreferences("camera", Context.MODE_PRIVATE).edit()
+                .putFloat("lat", (float) p.target.latitude)
+                .putFloat("lon", (float) p.target.longitude)
+                .putFloat("zoom", p.zoom)
+                .commit();
+
+        super.onDestroy();
     }
 
     private class InfoWindowHandler implements GoogleMap.InfoWindowAdapter {
