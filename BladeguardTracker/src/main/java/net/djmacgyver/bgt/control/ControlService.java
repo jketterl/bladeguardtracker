@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.Binder;
 import android.os.IBinder;
@@ -27,6 +28,7 @@ import android.util.Log;
 
 public class ControlService extends Service implements HttpSocketListener {
     private static final String TAG = "ControlService";
+    private static final String PREFS_EVENT_ID = "eventId";
 
 	private HttpSocketConnection socket;
 	private Event event;
@@ -146,29 +148,43 @@ public class ControlService extends Service implements HttpSocketListener {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-        final EventList list = new EventList(getApplicationContext(), true);
-        if (intent.hasExtra("event")) {
-            startOnEvent(intent.<Event>getParcelableExtra("event"));
+        if (intent == null) {
+            Log.w(TAG, "restarting without intent; loading previous event");
+            SharedPreferences prefs = getSharedPreferences("ControlService", MODE_PRIVATE);
+            startOnEvent(prefs.getInt(PREFS_EVENT_ID, -1));
         } else {
-            final int eventId = intent.getIntExtra("eventId", -1);
-            list.registerDataSetObserver(new DataSetObserver() {
-                @Override
-                public void onChanged() {
-                    try {
-                        startOnEvent(list.findById(eventId));
-                    } catch (EventNotFoundException e) {
-                        Log.e(TAG, "could not start control service for event id " + eventId + ": event not found");
-                        stopSelf();
-                    }
-                }
-            });
+            if (intent.hasExtra("event")) {
+                startOnEvent(intent.<Event>getParcelableExtra("event"));
+            } else {
+                startOnEvent(intent.getIntExtra("eventId", -1));
+            }
         }
 
         return START_STICKY;
 	}
 
+    private void startOnEvent(final int eventId) {
+        final EventList list = new EventList(getApplicationContext(), true);
+        list.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                try {
+                    startOnEvent(list.findById(eventId));
+                } catch (EventNotFoundException e) {
+                    Log.e(TAG, "could not start control service for event id " + eventId + ": event not found");
+                    stopSelf();
+                }
+            }
+        });
+
+    }
+
     private void startOnEvent(Event event) {
         this.event = event;
+
+        SharedPreferences prefs = getSharedPreferences("ControlService", MODE_PRIVATE);
+        prefs.edit().putInt(PREFS_EVENT_ID, event.getId()).commit();
+
         ParticipationStore store = new ParticipationStore(getApplicationContext());
         if (store.doesParticipate(event)) {
             bindService(new Intent(getApplicationContext(), SocketService.class), conn, Context.BIND_AUTO_CREATE);
