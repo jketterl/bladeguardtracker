@@ -184,6 +184,7 @@ public class MainActivity extends ActionBarActivity {
 	}
 
     private void showConnectDialog() {
+        dismissConnectDialog();
         ProgressDialog d = new ProgressDialog();
         d.show(getSupportFragmentManager(), DIALOG_CONNECTING);
     }

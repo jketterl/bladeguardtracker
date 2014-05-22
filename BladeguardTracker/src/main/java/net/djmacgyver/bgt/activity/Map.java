@@ -10,6 +10,7 @@ import net.djmacgyver.bgt.map.BladeMapFragment;
 import net.djmacgyver.bgt.map.InfoFragment;
 import net.djmacgyver.bgt.map.RouteSelectionDialog;
 import net.djmacgyver.bgt.session.Session;
+import net.djmacgyver.bgt.socket.AbstractHttpSocketListener;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
 import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketCommand;
@@ -29,9 +30,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -46,33 +45,19 @@ public class Map extends ActionBarActivity implements RouteSelectionDialog.OnRou
     private static final String DIALOG_CONFIRM = "dialog_confirm";
     private static final String DIALOG_SWITCHING = "dialog_switching";
 
-    private Handler stateHandler = new Handler(){
+	private HttpSocketListener listener = new AbstractHttpSocketListener() {
 		@Override
-		public void handleMessage(Message msg) {
-			int state = (Integer) msg.obj;
-			if (state == HttpSocketConnection.STATE_CONNECTED) {
-                dismissConnectingDialog();
-			} else {
-                showConnectingDialog();
-			}
-		}
-	};
-	private HttpSocketListener listener = new HttpSocketListener() {
-		@Override
-		public void receiveUpdate(JSONObject data) {
-			Message msg = new Message();
-			msg.obj = data;
-		}
-
-		@Override
-		public void receiveCommand(String command, JSONObject data) {
-		}
-
-		@Override
-		public void receiveStateChange(int newState) {
-			Message msg = new Message();
-			msg.obj = newState;
-			stateHandler.sendMessage(msg);
+		public void receiveStateChange(final int newState) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (newState == HttpSocketConnection.STATE_CONNECTED) {
+                        dismissConnectingDialog();
+                    } else {
+                        showConnectingDialog();
+                    }
+                }
+            });
 		}
 	};
 	
@@ -152,6 +137,7 @@ public class Map extends ActionBarActivity implements RouteSelectionDialog.OnRou
 	}
 
     private void showConnectingDialog() {
+        dismissConnectingDialog();
         DialogFragment connecting = new ProgressDialog(R.string.connect_progress);
         connecting.show(getSupportFragmentManager(), DIALOG_CONNECTING);
     }
