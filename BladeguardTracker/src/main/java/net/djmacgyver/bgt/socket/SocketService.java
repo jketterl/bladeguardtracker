@@ -10,6 +10,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.StrictMode;
 
 public class SocketService extends Service implements KeepAliveTarget {
 	// necessary for interaction with service clients
@@ -20,8 +21,16 @@ public class SocketService extends Service implements KeepAliveTarget {
 			return SocketService.this;
 		}
 	}
-	
-	@Override
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+    }
+
+    @Override
 	public IBinder onBind(Intent arg0) {
 		return binder;
 	}
