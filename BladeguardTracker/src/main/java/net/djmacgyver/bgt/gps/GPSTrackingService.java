@@ -8,7 +8,9 @@ import net.djmacgyver.bgt.activity.Map;
 import net.djmacgyver.bgt.event.Event;
 import net.djmacgyver.bgt.keepalive.KeepAliveTarget;
 import net.djmacgyver.bgt.keepalive.KeepAliveThread;
+import net.djmacgyver.bgt.socket.AbstractHttpSocketListener;
 import net.djmacgyver.bgt.socket.HttpSocketConnection;
+import net.djmacgyver.bgt.socket.HttpSocketListener;
 import net.djmacgyver.bgt.socket.SocketCommand;
 import net.djmacgyver.bgt.socket.SocketCommandCallback;
 import net.djmacgyver.bgt.socket.SocketService;
@@ -69,6 +71,13 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 			sockService = ((SocketService.LocalBinder) service).getService();
 		}
 	};
+
+    private HttpSocketListener socketListener = new AbstractHttpSocketListener() {
+        @Override
+        public void receiveStateChange(int newState) {
+            showNotification();
+        }
+    };
 	
 	@Override
 	public void onCreate() {
@@ -140,6 +149,8 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		this.setPosition(-1);
 		this.setDistanceToEnd(-1);
 		this.setDistanceToFront(-1);
+
+        conn.removeListener(socketListener);
 		
 		sockService.removeStake(this);
 		conn = null;
@@ -182,22 +193,31 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		}
 	}
 
+    private void showNotification() {
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            showWarningNotification();
+        } else {
+            if (conn.getState() == HttpSocketConnection.STATE_CONNECTED) {
+                showTrackingNotification();
+            } else {
+                showDisconnectedNotification();
+            }
+        }
+    }
+
 	public void enable(Event event) {
 		if (enabled) return;
 		enabled = true;
 		
 		bindEvent(event);
 
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            Log.w(TAG, "GPS is disabled!");
-            showWarningNotification();
-        } else {
-            showTrackingNotification();
-        }
-
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
 
         conn = sockService.getSharedConnection(this);
+
+        showNotification();
+
+        conn.addListener(socketListener);
 
         getLocationReminder().start();
 
@@ -231,6 +251,14 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
     }
 
     private void showWarningNotification() {
+        showNotificationWithOverlay(R.drawable.ic_warning, R.string.gpswarning, R.string.tracker_gpswarning_text);
+    }
+
+    private void showDisconnectedNotification() {
+        showNotificationWithOverlay(R.drawable.ic_disconnected, R.string.connect_progress, R.string.connection_lost);
+    }
+
+    private void showNotificationWithOverlay(int overlay, int tickerText, int contentText) {
         Intent intent = new Intent(this, EventDetail.class);
         intent.putExtra("event", boundEvent);
 
@@ -241,7 +269,7 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
         Bitmap bitmap = BitmapFactory.decodeResource(res, R.drawable.ic_notification);
         bitmap = Bitmap.createScaledBitmap(bitmap, width, height, false).copy(Bitmap.Config.ARGB_8888, true);
 
-        Bitmap warning = BitmapFactory.decodeResource(res, R.drawable.ic_warning);
+        Bitmap warning = BitmapFactory.decodeResource(res, overlay);
         warning = Bitmap.createScaledBitmap(warning, width / 2, height / 2, false);
 
         Canvas c = new Canvas(bitmap);
@@ -250,10 +278,10 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
         Builder b = new Builder(this);
         b.setSmallIcon(R.drawable.stat_notify_error)
                 .setLargeIcon(bitmap)
-                .setTicker(res.getString(R.string.gpswarning))
+                .setTicker(res.getString(tickerText))
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle(res.getString(R.string.app_name))
-                .setContentText(res.getString(R.string.tracker_gpswarning_text))
+                .setContentText(res.getString(contentText))
                 .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
 
         Notification n = b.build();
@@ -392,6 +420,7 @@ public class GPSTrackingService extends Service implements LocationListener, Kee
 		return distanceToFront;
 	}
 
+    @SuppressWarnings("unused")
 	public double getDistanceToEnd() {
 		return distanceToEnd;
 	}

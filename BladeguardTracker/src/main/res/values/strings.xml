@@ -94,4 +94,5 @@
     <string name="tracker_gpswarning_text">Please enable your GPS!</string>
     <string name="team_change_running">Changing team&#8230;</string>
     <string name="starting_point">Starting point</string>
+    <string name="connection_lost">Connection to server lost, reconnecting&#8230;</string>
 </resources>
