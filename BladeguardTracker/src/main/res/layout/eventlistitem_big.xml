@@ -3,7 +3,9 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:baselineAligned="false"
+    android:background="@drawable/box">
 
 	<LinearLayout
 	    android:id="@+id/texts"
@@ -20,10 +22,10 @@
 		    android:lines="1"
 		    android:padding="10dip"
 		    android:text="Event title"
-		    android:textAppearance="?android:attr/textAppearanceMedium"
+		    android:textAppearance="?android:attr/textAppearanceLarge"
 		    android:textColor="#000000" />
 
-		<TextView
+        <TextView
 		    android:id="@+id/map"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
@@ -34,7 +36,15 @@
 		    android:text="Event map"
 		    android:textAppearance="?android:attr/textAppearanceSmall" />
 
-	</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Starttime"
+            android:id="@+id/startTime"
+            android:paddingLeft="10dip"
+            android:paddingBottom="10dip" />
+
+    </LinearLayout>
 
 	<LinearLayout
 	    android:id="@+id/weatherLayout"
@@ -43,7 +53,7 @@
 	    android:layout_weight="0"
 	    android:gravity="center|right"
 	    android:minWidth="72dip"
-	    android:orientation="vertical">
+	    android:orientation="vertical" >
 
 		<ImageView
 		    android:id="@+id/weatherIcon"
