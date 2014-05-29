@@ -7,3 +7,4 @@ local.properties
 facebook
 *.iml
 build
+.DS_Store
