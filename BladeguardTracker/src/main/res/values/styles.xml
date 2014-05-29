@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <style name="box">
-        <item name="android:background">@drawable/box</item>
+        <item name="android:background">@drawable/shadow</item>
         <item name="android:gravity">center_horizontal</item>
     </style>
     <style name="boxHeadline" parent="android:Widget.TextView">
