@@ -91,4 +91,5 @@
     <string name="team_change_running">Wechsle Team&#8230;</string>
     <string name="starting_point">Startplatz</string>
     <string name="connection_lost">Verbindung zum Server wird wiederhergestellt&#8230;</string>
+    <string name="forecast">Wettervorhersage: %1$d°C bis %2$d°C %3$s</string>
 </resources>

@@ -95,4 +95,5 @@
     <string name="team_change_running">Changing team&#8230;</string>
     <string name="starting_point">Starting point</string>
     <string name="connection_lost">Connection to server lost, reconnecting&#8230;</string>
+    <string name="forecast">Weather forecast: %1$d°C to %2$d°C %3$s</string>
 </resources>

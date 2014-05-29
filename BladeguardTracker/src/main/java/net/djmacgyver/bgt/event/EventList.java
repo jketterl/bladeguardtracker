@@ -1,6 +1,7 @@
 package net.djmacgyver.bgt.event;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -56,6 +57,7 @@ public class EventList extends ServerList {
         try {
             return new Event(getData().getJSONObject(index));
         } catch (JSONException e) {
+            Log.w("EventList", "failed parsing event json", e);
             return null;
         }
     }

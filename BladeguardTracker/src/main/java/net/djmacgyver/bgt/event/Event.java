@@ -47,6 +47,7 @@ public class Event implements Parcelable {
 	private Date start;
 	private Boolean weather = null;
 	private String mapName;
+    private Prognosis prognosis;
 	
 	public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
 		@Override
@@ -81,6 +82,9 @@ public class Event implements Parcelable {
             weather = null;
         }
         mapName = obj.getString("mapName");
+
+        JSONObject p = obj.optJSONObject("prognosis");
+        if (p != null) prognosis = new Prognosis(p);
 	}
 	
 	public Event(Parcel source) {
@@ -214,6 +218,14 @@ public class Event implements Parcelable {
             for (List<EventListener> ll : listeners.values()) allListeners.addAll(ll);
             for (EventListener l : allListeners) l.onReset();
         }
+    }
+
+    public boolean hasPrognosis() {
+        return prognosis != null;
+    }
+
+    public Prognosis getPrognosis() {
+        return prognosis;
     }
 
     private class LocalSocketServiceConnection implements ServiceConnection {

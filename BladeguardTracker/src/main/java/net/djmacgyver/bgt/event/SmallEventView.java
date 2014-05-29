@@ -13,10 +13,10 @@ import net.djmacgyver.bgt.R;
 import java.text.DateFormat;
 
 public class SmallEventView extends LinearLayout {
-    private TextView text;
-    private TextView map;
-    private ImageView weatherIcon;
-    private LinearLayout weatherLayout;
+    protected TextView text;
+    protected TextView map;
+    protected ImageView weatherIcon;
+    protected LinearLayout weatherLayout;
 
     protected View root;
 
@@ -44,6 +44,10 @@ public class SmallEventView extends LinearLayout {
     public void setEvent(Event event) {
         text.setText(getTitleText(event));
         map.setText(getMapText(event));
+        updateWeatherIcon(event);
+    }
+
+    protected void updateWeatherIcon(Event event) {
         int weatherDrawable = getWeatherDrawable(event);
         if (weatherDrawable > 0) {
             weatherLayout.setVisibility(View.VISIBLE);
